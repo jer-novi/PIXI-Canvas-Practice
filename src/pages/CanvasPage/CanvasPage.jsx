@@ -60,27 +60,30 @@ function CanvasContent() {
     const titleStyle = new PIXI.TextStyle({
         fill: 'white',
         fontSize: 48,
-        fontFamily: 'Arial',
+        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
+
         fontWeight: 'bold',
     });
 
     const authorStyle = new PIXI.TextStyle({
         fill: '#cccccc',
         fontSize: 24,
-        fontFamily: 'Arial',
+        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
+
         fontStyle: 'italic',
     });
 
     const lineStyle = new PIXI.TextStyle({
         fill: 'white',
         fontSize: 32,
-        fontFamily: 'Arial',
+        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
+
         lineHeight: 44, // Extra ruimte tussen de regels
     });
 
     if (!currentPoem) {
         return (
-            <Text
+            <pixiText
                 text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
                 anchor={{ x: 0.5, y: 0.5 }}
                 x={width / 2}
@@ -95,22 +98,22 @@ function CanvasContent() {
 
     return (
         // We groeperen alles in een <pixiContainer> om het makkelijk te verplaatsen
-        <Container x={width / 2} y={height / 4}>
-            <Text
+        <pixiContainer  x={width / 2} y={height / 4}>
+            <pixiText
                 text={currentPoem.title}
                 anchor={{ x: 0.5, y: 0 }}
-                    y={0}
-                    style={titleStyle}
+                y={0}
+                style={titleStyle}
             />
 
-            <Text
+            <pixiText
                 text={currentPoem.author}
                 anchor={{ x: 0.5, y: 0 }}
                 y={60} // Iets onder de titel
                 style={authorStyle}
             />
             {currentPoem.lines.map((line, index) => (
-            <Text
+                <pixiText
                 key={index}
                 text={line}
                 anchor={{ x: 0.5, y: 0 }}
@@ -118,7 +121,7 @@ function CanvasContent() {
                 style={lineStyle}
             />
             ))}
-        </Container>
+        </pixiContainer>
     );
 }
 
