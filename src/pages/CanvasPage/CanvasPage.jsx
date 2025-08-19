@@ -7,6 +7,21 @@ import * as PIXI from 'pixi.js';
 
 extend({ Text, Container });
 
+// Mock data voor en gedicht
+const mockPoem = {
+    id: 123,
+    title: 'De Sterrenhemel',
+    author: "H. Marsman",
+    lines: [
+        "De zee, de zee, de zee,",
+        "altijd de zee.",
+        "Zij is de spiegel van mijn ziel,",
+        "de bron van mijn bestaan."
+]
+};
+
+
+
 function useWindowSize() {
     const [size, setSize] = useState({
         width: window.innerWidth,
@@ -38,44 +53,95 @@ function CanvasContent() {
         }
     }, [width, height, app]);
 
-    const textStyle = new PIXI.TextStyle({
+    // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
+    // In een echte app zou je hier een API-call doen.
+    const currentPoem = poemId ? mockPoem : null;
+
+    const titleStyle = new PIXI.TextStyle({
         fill: 'white',
         fontSize: 48,
         fontFamily: 'Arial',
+        fontWeight: 'bold',
     });
 
-    return (
-        <pixiContainer>
-            <pixiText
-                text={poemId ? `Gedicht ID: ${poemId}` : 'Geen gedicht gekozen'}
+    const authorStyle = new PIXI.TextStyle({
+        fill: '#cccccc',
+        fontSize: 24,
+        fontFamily: 'Arial',
+        fontStyle: 'italic',
+    });
+
+    const lineStyle = new PIXI.TextStyle({
+        fill: 'white',
+        fontSize: 32,
+        fontFamily: 'Arial',
+        lineHeight: 44, // Extra ruimte tussen de regels
+    });
+
+    if (!currentPoem) {
+        return (
+            <Text
+                text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
                 anchor={{ x: 0.5, y: 0.5 }}
                 x={width / 2}
                 y={height / 2}
-                style={{
-                    fontFamily: 'Arial',
-                    fontSize: 36,
-                    fill: 0xffffff,
-                    align: 'center'
-                }}
+                style={titleStyle}
             />
-        </pixiContainer>
+        );
+    }
+
+
+    // Als er wel een gedicht is, toon de inhoud
+
+    return (
+        // We groeperen alles in een <pixiContainer> om het makkelijk te verplaatsen
+        <Container x={width / 2} y={height / 4}>
+            <Text
+                text={currentPoem.title}
+                anchor={{ x: 0.5, y: 0 }}
+                    y={0}
+                    style={titleStyle}
+            />
+
+            <Text
+                text={currentPoem.author}
+                anchor={{ x: 0.5, y: 0 }}
+                y={60} // Iets onder de titel
+                style={authorStyle}
+            />
+            {currentPoem.lines.map((line, index) => (
+            <Text
+                key={index}
+                text={line}
+                anchor={{ x: 0.5, y: 0 }}
+                y={120 + index * 44} // Iets onder de auteur, met ruimte en stapel de regels onder elkaar
+                style={lineStyle}
+            />
+            ))}
+        </Container>
     );
 }
 
+// Dit is de hoofd-export, die de state beheert
 export default function CanvasPage() {
+    // De hook wordt hier één keer aangeroepen
     const { width, height } = useWindowSize();
 
     return (
         <Application
+            // Geef de afmetingen door aan de Application component
+            width={width}
+            height={height}
+            // Geef de opties door aan de Application component
             options={{
-                width,
-                height,
-                backgroundColor: 0x1d2230,
+                // backgroundColor is nu background
+                background: 0x1d2230,
                 resolution: window.devicePixelRatio || 1,
-                autoDensity: true
+                autoDensity: true,
             }}
         >
-            <CanvasContent />
+            {/* Geef de afmetingen door aan het kind-component */}
+            <CanvasContent width={width} height={height} />
         </Application>
     );
 }
