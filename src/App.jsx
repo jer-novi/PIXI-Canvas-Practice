@@ -15,6 +15,7 @@ extend({
 export default function App() {
     const [fontMode, setFontMode] = useState('serif');
 
+
     useEffect(() => {
         document.body.classList.remove('font-serif', 'font-sans');
         document.body.classList.add(fontMode === 'serif' ? 'font-serif' : 'font-sans');

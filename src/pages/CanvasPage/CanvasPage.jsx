@@ -1,11 +1,11 @@
-import { Application } from '@pixi/react';              // Stap 1: De Component uit @pixi/react
-import { Text, Container } from 'pixi.js';                 // Stap 2: De Classes uit pixi.js
-import { useSearchParams } from 'react-router-dom';
-import { useState, useLayoutEffect, useEffect } from 'react';
-import { extend, useApplication } from '@pixi/react';
+import {Application} from '@pixi/react';              // Stap 1: De Component uit @pixi/react
+import {Text, Container} from 'pixi.js';                 // Stap 2: De Classes uit pixi.js
+import {useSearchParams} from 'react-router-dom';
+import {useState, useLayoutEffect, useEffect} from 'react';
+import {extend, useApplication} from '@pixi/react';
 import * as PIXI from 'pixi.js';
 
-extend({ Text, Container });
+extend({Text, Container});
 
 // Mock data voor en gedicht
 const mockPoem = {
@@ -17,14 +17,31 @@ const mockPoem = {
         "altijd de zee.",
         "Zij is de spiegel van mijn ziel,",
         "de bron van mijn bestaan."
-]
+    ]
 };
+
+// --- Een hook specifiek voor het laden van het font ---
+
+function useFontLoader(fontFamily) {
+    const [fontLoaded, setFontLoaded] = useState(false);
+
+
+    useEffect(() => {
+        document.fonts.load('1em "{fontFamily}"').then(() => {
+            setFontLoaded(true);
+        });
+    }, [fontFamily]);
+
+    return fontLoaded;
+}
 
 function useWindowSize() {
     const [size, setSize] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
     });
+
+
     useLayoutEffect(() => {
         function updateSize() {
             setSize({
@@ -32,6 +49,7 @@ function useWindowSize() {
                 height: window.innerHeight,
             });
         }
+
         window.addEventListener('resize', updateSize);
         return () => window.removeEventListener('resize', updateSize);
     }, []);
@@ -39,13 +57,17 @@ function useWindowSize() {
 }
 
 function CanvasContent() {
-    const { width, height } = useWindowSize();
+    const {width, height} = useWindowSize();
     const [searchParams] = useSearchParams();
     const poemId = searchParams.get('poemId');
     // --- DE FIX ---
     const app = useApplication(); // useApp() wordt useApplication()
 
+    // --- Gebruik de font loader hook ---
+    const fontLoaded = useFontLoader('Cormorant Garamond'); //
+
     useEffect(() => {
+
         if (app && app.renderer) { // Extra check of 'app' bestaat
             app.renderer.resize(width, height);
         }
@@ -76,11 +98,24 @@ function CanvasContent() {
         lineHeight: 44, // Extra ruimte tussen de regels
     });
 
+    if (!fontLoaded) {
+        // Wacht tot het font geladen is
+        return (
+            <pixiText
+                text="Laden..."
+                anchor={{x: 0.5, y: 0.5}}
+                x={width / 2}
+                y={height / 2}
+                style={{fill: 'white', fontSize: 24, fontFamily: 'Arial'}}
+            />
+        );
+    }
+
     if (!currentPoem) {
         return (
             <pixiText
                 text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
-                anchor={{ x: 0.5, y: 0.5 }}
+                anchor={{x: 0.5, y: 0.5}}
                 x={width / 2}
                 y={height / 2}
                 style={titleStyle}
@@ -93,28 +128,28 @@ function CanvasContent() {
 
     return (
         // We groeperen alles in een <pixiContainer> om het makkelijk te verplaatsen
-        <pixiContainer  x={width / 2} y={height / 4}>
+        <pixiContainer x={width / 2} y={height / 4}>
             <pixiText
                 text={currentPoem.title}
-                anchor={{ x: 0.5, y: 0 }}
+                anchor={{x: 0.5, y: 0}}
                 y={0}
                 style={titleStyle}
             />
 
             <pixiText
                 text={currentPoem.author}
-                anchor={{ x: 0.5, y: 0 }}
+                anchor={{x: 0.5, y: 0}}
                 y={60} // Iets onder de titel
                 style={authorStyle}
             />
             {currentPoem.lines.map((line, index) => (
                 <pixiText
-                key={index}
-                text={line}
-                anchor={{ x: 0.5, y: 0 }}
-                y={120 + index * 44} // Iets onder de auteur, met ruimte en stapel de regels onder elkaar
-                style={lineStyle}
-            />
+                    key={index}
+                    text={line}
+                    anchor={{x: 0.5, y: 0}}
+                    y={120 + index * 44} // Iets onder de auteur, met ruimte en stapel de regels onder elkaar
+                    style={lineStyle}
+                />
             ))}
         </pixiContainer>
     );
@@ -123,7 +158,7 @@ function CanvasContent() {
 // Dit is de hoofd-export, die de state beheert
 export default function CanvasPage() {
     // De hook wordt hier één keer aangeroepen
-    const { width, height } = useWindowSize();
+    const {width, height} = useWindowSize();
 
     return (
         <Application
@@ -139,7 +174,7 @@ export default function CanvasPage() {
             }}
         >
             {/* Geef de afmetingen door aan het kind-component */}
-            <CanvasContent width={width} height={height} />
+            <CanvasContent width={width} height={height}/>
         </Application>
     );
 }
