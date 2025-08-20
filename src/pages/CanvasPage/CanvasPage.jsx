@@ -20,8 +20,6 @@ const mockPoem = {
 ]
 };
 
-
-
 function useWindowSize() {
     const [size, setSize] = useState({
         width: window.innerWidth,
@@ -61,7 +59,6 @@ function CanvasContent() {
         fill: 'white',
         fontSize: 48,
         fontFamily: 'Cormorant Garamond', // <-- AANPASSING
-
         fontWeight: 'bold',
     });
 
@@ -69,7 +66,6 @@ function CanvasContent() {
         fill: '#cccccc',
         fontSize: 24,
         fontFamily: 'Cormorant Garamond', // <-- AANPASSING
-
         fontStyle: 'italic',
     });
 
@@ -77,7 +73,6 @@ function CanvasContent() {
         fill: 'white',
         fontSize: 32,
         fontFamily: 'Cormorant Garamond', // <-- AANPASSING
-
         lineHeight: 44, // Extra ruimte tussen de regels
     });
 
