@@ -1,3 +1,4 @@
+import styles from './CanvasPage.module.css';
 import {Application} from '@pixi/react';              // Stap 1: De Component uit @pixi/react
 import {Text, Container} from 'pixi.js';                 // Stap 2: De Classes uit pixi.js
 import {useSearchParams} from 'react-router-dom';
@@ -131,7 +132,7 @@ function CanvasContent() {
         <pixiContainer x={width / 2} y={height / 4}>
             <pixiText
                 text={currentPoem.title}
-                anchor={{x: 0.5, y: 0}}
+                anchor={{x: 0.5, y: 0}} // <-- DEZE REGEL TOEVOEGEN
                 y={0}
                 style={titleStyle}
             />
@@ -160,21 +161,33 @@ export default function CanvasPage() {
     // De hook wordt hier één keer aangeroepen
     const {width, height} = useWindowSize();
 
+    // We berekenen de breedte van het canvas.
+    // Dit is de volledige breedte min de breedte van de controls.
+    const canvasWidth = width - 340;
+
     return (
-        <Application
-            // Geef de afmetingen door aan de Application component
-            width={width}
-            height={height}
-            // Geef de opties door aan de Application component
-            options={{
-                // backgroundColor is nu background
-                background: 0x1d2230,
-                resolution: window.devicePixelRatio || 1,
-                autoDensity: true,
-            }}
-        >
-            {/* Geef de afmetingen door aan het kind-component */}
-            <CanvasContent width={width} height={height}/>
-        </Application>
+        <div className={styles.canvasContainer}>
+            <div className={styles.canvasWrapper}>
+                <Application
+                    // Geef de afmetingen door aan de Application component
+                    width={canvasWidth}
+                    height={height}
+                    // Geef de opties door aan de Application component
+                    options={{
+                        // backgroundColor is nu background
+                        background: 0x1d2230,
+                        resolution: window.devicePixelRatio || 1,
+                        autoDensity: true,
+                    }}
+                >
+                    {/* Geef de AANGEPASTE breedte door */}
+                    <CanvasContent width={canvasWidth} height={height}/>
+                </Application>
+            </div>
+            <div className={styles.controlsWrapper}>
+                <h2>Styling Controls</h2>
+                <p>Hier komen straks onze sliders en knoppen.</p>
+            </div>
+        </div>
     );
 }

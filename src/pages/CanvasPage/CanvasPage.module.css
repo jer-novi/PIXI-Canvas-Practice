@@ -1,0 +1,21 @@
+.canvasContainer {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+.canvasWrapper {
+    flex-grow: 1;
+    height: 100%;
+
+}
+
+.controlsWrapper {
+    width: 340px;
+    height: 100%;
+    background-color: #272d37;
+    color: #cfd4db;
+    padding: 1rem;
+    overflow-y: auto; /* Maakt scrollen mogelijk als we veel controls hebben */
+    box-sizing: border-box;
+}
