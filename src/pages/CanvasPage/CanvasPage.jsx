@@ -6,12 +6,13 @@ import { useState, useEffect, useLayoutEffect } from "react";
 import { extend, useApplication } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import Controls from "./Controls";
-import { useFontLoader } from "./hooks/useFontLoader";
+import { useFontLoader } from "../../hooks/useFontLoader";
 import { useResponsiveCanvas } from "./hooks/useResponsiveCanvas";
 import { useResponsiveTextPosition } from "./hooks/useResponsiveTextPosition";
 import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
+import { useAutoRecenter } from "./hooks/useAutoRecenter";
 
 // Mock data voor en gedicht
 const mockPoem = {
@@ -41,7 +42,7 @@ function CanvasContent({
   const [searchParams] = useSearchParams();
   const poemId = searchParams.get("poemId");
   // --- DE FIX ---
-  const app = useApplication(); // useApp() wordt useApplication()
+  const { app } = useApplication(); // useApp() -> useApplication() returns { app }
 
   // --- Gebruik de font loader hook ---
   const fontLoaded = useFontLoader("Cormorant Garamond");
@@ -81,6 +82,22 @@ function CanvasContent({
       app.renderer.resize(width, height);
     }
   }, [width, height, app]);
+
+  // --- NIEUW: Roep de auto-recenter hook aan ---
+  // Dit effect zorgt voor centrering als de layout of de tekst-stijl verandert.
+  useAutoRecenter({
+    viewportRef,
+    contentRef,
+    deps: [
+      width,
+      height,
+      fontSize,
+      lineHeight,
+      letterSpacing,
+      fillColor,
+      poemId,
+    ], // Alle variabelen die de positie/grootte beïnvloeden
+  });
 
   // In een echte app zou je hier een API-call doen.
   const titleStyle = new PIXI.TextStyle({
@@ -124,7 +141,7 @@ function CanvasContent({
   // Als er wel een gedicht is, toon de inhoud
   return (
     // --- NIEUW: De Viewport Wrapper ---
-    <pixiViewport
+    <viewport
       ref={viewportRef}
       screenWidth={width}
       screenHeight={height}
@@ -133,8 +150,12 @@ function CanvasContent({
       wheel
       pinch
       decelerate
+      // --- DE FIX: Geef de ticker en events door ---
+      ticker={app.ticker}
+      events={app.renderer?.events}
     >
       <pixiContainer
+        ref={contentRef}
         x={textPosition.containerX}
         y={textPosition.containerY}
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
@@ -163,7 +184,7 @@ function CanvasContent({
           />
         ))}
       </pixiContainer>
-    </pixiViewport>
+    </viewport>
   );
 }
 

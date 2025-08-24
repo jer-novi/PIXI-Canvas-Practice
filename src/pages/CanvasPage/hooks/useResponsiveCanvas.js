@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { useWindowSize } from './useWindowSize';
+import { useState, useMemo } from "react";
+import { useWindowSize } from "../../../hooks/useWindowSize";
 
 /**
  * Custom hook for responsive canvas sizing with fixed controls/nav widths
@@ -17,10 +17,15 @@ export function useResponsiveCanvas() {
     const baseScreenWidth = 1920;
 
     // Calculate widths - never smaller than base ratios
-    const controlsWidth = controlsVisible ? 
-      Math.max(baseControlsWidth, (baseControlsWidth / baseScreenWidth) * windowWidth) : 0;
-    const navWidth = navVisible ? 
-      Math.max(baseNavWidth, (baseNavWidth / baseScreenWidth) * windowWidth) : 0;
+    const controlsWidth = controlsVisible
+      ? Math.max(
+          baseControlsWidth,
+          (baseControlsWidth / baseScreenWidth) * windowWidth
+        )
+      : 0;
+    const navWidth = navVisible
+      ? Math.max(baseNavWidth, (baseNavWidth / baseScreenWidth) * windowWidth)
+      : 0;
 
     // Canvas takes remaining space
     const canvasWidth = windowWidth - controlsWidth - navWidth;
@@ -36,7 +41,7 @@ export function useResponsiveCanvas() {
       controlsVisible,
       navVisible,
       leftSpacer: 0, // No spacers
-      rightSpacer: 0 // No spacers
+      rightSpacer: 0, // No spacers
     };
   }, [windowWidth, windowHeight, controlsVisible, navVisible]);
 
@@ -46,6 +51,6 @@ export function useResponsiveCanvas() {
   return {
     ...layout,
     toggleControls,
-    toggleNav
+    toggleNav,
   };
 }
