@@ -1,0 +1,82 @@
+.layoutContainer {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.controlsPanel {
+  width: 340px;
+  height: 100%;
+  background-color: #2a3441;
+  color: #cfd4db;
+  padding: 0;
+  overflow-y: auto;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border-right: 1px solid #3d4a5c;
+}
+
+.canvasArea {
+  display: flex;
+  flex: 1;
+  height: 100%;
+  background-color: #1a1a1a;
+  align-items: flex-end; /* Canvas tegen onderkant */
+}
+
+.spacer {
+  background-color: #333333;
+  height: 100%;
+  flex-shrink: 0;
+  border-left: 1px solid #444444;
+  border-right: 1px solid #444444;
+}
+
+.canvasWrapper {
+  background-color: #1d2230;
+  position: relative;
+  flex-shrink: 0;
+  flex: 1;
+  background-color: #1d2230;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.navPanel {
+  width: 120px;
+  height: 100%;
+  background-color: #2a3441;
+  color: #cfd4db;
+  padding: 0.5rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  border-left: 1px solid #3d4a5c;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .controlsPanel {
+    width: 280px;
+  }
+  
+  .navPanel {
+    width: 100px;
+  }
+}
+
+@media (max-width: 900px) {
+  .controlsPanel {
+    width: 240px;
+  }
+  
+  .navPanel {
+    width: 80px;
+  }
+}

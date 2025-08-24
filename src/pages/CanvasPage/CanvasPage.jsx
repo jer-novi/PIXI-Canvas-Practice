@@ -1,190 +1,242 @@
-import styles from './CanvasPage.module.css';
-import {Application} from '@pixi/react';              // Stap 1: De Component uit @pixi/react
-import {Text, Container} from 'pixi.js';                 // Stap 2: De Classes uit pixi.js
-import {useSearchParams} from 'react-router-dom';
-import {useState, useLayoutEffect, useEffect} from 'react';
-import {extend, useApplication} from '@pixi/react';
-import * as PIXI from 'pixi.js';
-import Controls from './Controls';
+import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
+import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
+import { useSearchParams } from "react-router-dom";
+import { useState, useEffect, useLayoutEffect } from "react";
+import { extend, useApplication } from "@pixi/react";
+import * as PIXI from "pixi.js";
+import Controls from "./Controls";
+import { useFontLoader } from "./hooks/useFontLoader";
+import { useResponsiveCanvas } from "./hooks/useResponsiveCanvas";
+import { useResponsiveTextPosition } from "./hooks/useResponsiveTextPosition";
+import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
+import ResponsiveLayout from "./components/ResponsiveLayout";
+import Navigation from "./components/Navigation";
 
-
-extend({Text, Container});
+extend({ Text, Container });
 
 // Mock data voor en gedicht
 const mockPoem = {
-    id: 123,
-    title: 'De Sterrenhemel',
-    author: "H. Marsman",
-    lines: [
-        "De zee, de zee, de zee,",
-        "altijd de zee.",
-        "Zij is de spiegel van mijn ziel,",
-        "de bron van mijn bestaan."
-    ]
+  id: 123,
+  title: "De Sterrenhemel",
+  author: "H. Marsman",
+  lines: [
+    "De zee, de zee, de zee,",
+    "altijd de zee.",
+    "Zij is de spiegel van mijn ziel,",
+    "de bron van mijn bestaan.",
+  ],
 };
 
-// --- Een hook specifiek voor het laden van het font ---
+// Hooks zijn nu geïmporteerd uit aparte bestanden
 
+function CanvasContent({
+  canvasWidth,
+  canvasHeight,
+  fontSize,
+  fillColor,
+  letterSpacing,
+  lineHeight,
+}) {
+  const width = canvasWidth;
+  const height = canvasHeight;
+  const [searchParams] = useSearchParams();
+  const poemId = searchParams.get("poemId");
+  // --- DE FIX ---
+  const app = useApplication(); // useApp() wordt useApplication()
 
+  // --- Gebruik de font loader hook ---
+  const fontLoaded = useFontLoader("Cormorant Garamond");
+  
+  // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
+  const currentPoem = poemId ? mockPoem : null;
+  
+  // Responsive text positioning
+  const textPosition = useResponsiveTextPosition(
+    width, 
+    height, 
+    fontSize, 
+    lineHeight, 
+    currentPoem?.lines || []
+  );
 
+  // Modern React 19 pattern: Auto-render on layout changes
+  usePixiAutoRender(app, [
+    width, 
+    height, 
+    textPosition.containerX, 
+    textPosition.containerY, 
+    textPosition.scaleFactor,
+    fontSize,
+    fillColor,
+    letterSpacing,
+    lineHeight
+  ]);
 
-function useFontLoader(fontFamily) {
-    const [fontLoaded, setFontLoaded] = useState(false);
-    useEffect(() => {
-        // Correct template literal for loading font
-        document.fonts.load(`1em "${fontFamily}"`).then(() => setFontLoaded(true));
-    }, [fontFamily]);
-    return fontLoaded;
-}
-
-function useWindowSize() {
-    const [size, setSize] = useState({
-        width: window.innerWidth,
-        height: window.innerHeight,
-    });
-
-
-    useLayoutEffect(() => {
-        function update() {
-            setSize({width: window.innerWidth, height: window.innerHeight});
-        }
-
-        window.addEventListener('resize', update);
-        return () => window.removeEventListener('resize', update);
-    }, []);
-    return size;
-}
-
-function CanvasContent({ width, height, fontSize }) {
-    const [searchParams] = useSearchParams();
-    const poemId = searchParams.get('poemId');
-    // --- DE FIX ---
-    const app = useApplication(); // useApp() wordt useApplication()
-
-    // --- Gebruik de font loader hook ---
-    const fontLoaded = useFontLoader('Cormorant Garamond'); //
-
-  // Deze useEffect is nog steeds nodig om de PIXI renderer zelf te resizen
+  // Resize renderer when canvas dimensions change
   useEffect(() => {
-    if (app && app.renderer) {
+    if (app?.renderer) {
       app.renderer.resize(width, height);
     }
   }, [width, height, app]);
 
-    // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
-    // In een echte app zou je hier een API-call doen.
-    const currentPoem = poemId ? mockPoem : null;
-    const titleStyle = new PIXI.TextStyle({
-        fill: 'white',
-        fontSize: fontSize * 1.5,
-        fontFamily: 'Cormorant Garamond',
-        fontWeight: 'bold',
-    });
+  // In een echte app zou je hier een API-call doen.
+  const titleStyle = new PIXI.TextStyle({
+    fill: fillColor,
+    fontSize: fontSize * 1.5,
+    fontFamily: "Cormorant Garamond",
+    fontWeight: "bold",
+    letterSpacing: letterSpacing,
+  });
 
-    const authorStyle = new PIXI.TextStyle({
-        fill: '#cccccc',
-        fontSize: fontSize * 0.75,
-        fontFamily: 'Cormorant Garamond',
-        fontStyle: 'italic',
-    });
+  const authorStyle = new PIXI.TextStyle({
+    fill: "#cccccc",
+    fontSize: fontSize * 0.75,
+    fontFamily: "Cormorant Garamond",
+    fontStyle: "italic",
+  });
 
-    const lineStyle = new PIXI.TextStyle({
-        fill: 'white',
-        fontSize: fontSize,
-        fontFamily: 'Cormorant Garamond',
-        lineHeight: fontSize * 1.4,
-    });
+  const lineStyle = new PIXI.TextStyle({
+    fill: fillColor,
+    fontSize: fontSize,
+    fontFamily: "Cormorant Garamond",
+    lineHeight: lineHeight,
+    letterSpacing: letterSpacing,
+  });
 
-    if (!fontLoaded) {
-        return (
-            <pixiText
-                text="Laden..."
-                anchor={{x: 0.5, y: 0.5}}
-                x={width / 2}
-                y={height / 2}
-                style={{fill: 'white', fontSize: 24, fontFamily: 'Arial'}}
-            />
-        );
-    }
-
-    if (!currentPoem) {
-        return (
-            <pixiText
-                text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
-                anchor={{x: 0.5, y: 0.5}}
-                x={width / 2}
-                y={height / 2}
-                style={{fill: 'white', fontSize: 24, fontFamily: 'Arial'}}
-            />
-        );
-    }
-
-
-    // Als er wel een gedicht is, toon de inhoud
-
+  if (!fontLoaded) {
     return (
-        // We groeperen alles in een <pixiContainer> om het makkelijk te verplaatsen
-        <pixiContainer x={width / 2} y={height / 4}>
-            <pixiText
-                text={currentPoem.title}
-                anchor={{x: 0.5, y: 0}} // <-- DEZE REGEL TOEVOEGEN
-                y={0}
-                style={titleStyle}
-            />
-
-            <pixiText
-                text={currentPoem.author}
-                anchor={{x: 0.5, y: 0}}
-                y={60} // Iets onder de titel
-                style={authorStyle}
-            />
-            {currentPoem.lines.map((line, index) => (
-                <pixiText
-                    key={index}
-                    text={line}
-                    anchor={{x: 0.5, y: 0}}
-                    y={120 + index * 44} // Iets onder de auteur, met ruimte en stapel de regels onder elkaar
-                    style={lineStyle}
-                />
-            ))}
-        </pixiContainer>
+      <pixiText
+        text="Laden..."
+        anchor={{ x: 0.5, y: 0.5 }}
+        x={width / 2}
+        y={height / 2}
+        style={{ fill: "white", fontSize: 24, fontFamily: "Arial" }}
+      />
     );
+  }
+
+  if (!currentPoem) {
+    return (
+      <pixiText
+        text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
+        anchor={{ x: 0.5, y: 0.5 }}
+        x={width / 2}
+        y={height / 2}
+        style={{ fill: "white", fontSize: 24, fontFamily: "Arial" }}
+      />
+    );
+  }
+
+  // Als er wel een gedicht is, toon de inhoud
+
+  return (
+    // Responsive container positioning
+    <pixiContainer 
+      x={textPosition.containerX} 
+      y={textPosition.containerY}
+      scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
+    >
+      <pixiText
+        text={currentPoem.title}
+        anchor={{ x: 0.5, y: 0 }}
+        y={0}
+        style={titleStyle}
+      />
+
+      <pixiText
+        text={currentPoem.author}
+        anchor={{ x: 0.5, y: 0 }}
+        y={textPosition.authorY}
+        style={authorStyle}
+      />
+
+      {currentPoem.lines.map((line, index) => (
+        <pixiText
+          key={index}
+          text={line}
+          anchor={{ x: 0.5, y: 0 }}
+          y={textPosition.poemStartY + index * lineHeight}
+          style={lineStyle}
+        />
+      ))}
+    </pixiContainer>
+  );
 }
 
 // Dit is de hoofd-export, die de state beheert
 export default function CanvasPage() {
-    // De hook wordt hier één keer aangeroepen
-    const {width, height} = useWindowSize();
+  // De state voor de lettergrootte --- (EERST definiëren)
+  const [fontSize, setFontSize] = useState(36);
 
-    // We berekenen de breedte van het canvas.
-    // Dit is de volledige breedte min de breedte van de controls.
-    const canvasWidth = width - 340;
+  // We slaan de kleur op als een hex-string, omdat dat het standaardformaat is voor een <input type="color">
+  const [fillColor, setFillColor] = useState("#ffffff");
 
+  const [letterSpacing, setLetterSpacing] = useState(0);
 
-    // De state voor de lettergrootte ---
-    const [fontSize, setFontSize] = useState(36);
+  // Use responsive canvas hook instead of manual calculations
+  const layout = useResponsiveCanvas();
 
-    return (
-        <div className={styles.canvasContainer}>
-            <div className={styles.canvasWrapper}>
-                <Application
-                    // Geef de afmetingen door aan de Application component
-                    width={canvasWidth}
-                    height={height}
-                    // Geef de opties door aan de Application component
-                    options={{
-                        // backgroundColor is nu background
-                        background: 0x1d2230,
-                        resolution: window.devicePixelRatio || 1,
-                        autoDensity: true,
-                    }}
-                >
-                    {/* Geef de AANGEPASTE breedte door */}
-                     {/* Geef de fontSize door aan het canvas */}
-                    <CanvasContent width={canvasWidth} height={height} fontSize={fontSize}/>
-                </Application>
-            </div>
-            <Controls fontSize={fontSize} onFontSizeChange={setFontSize} />
-        </div>
-    );
+  // --- De slimme lineHeight state ---
+  const [lineHeight, setLineHeight] = useState(36 * 1.4); // Beginwaarde
+  const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
+  const [userHasAdjusted, setUserHasAdjusted] = useState(false);
+
+  // --- De logica ---
+  const handleFontSizeChange = (newSize) => {
+    setFontSize(newSize);
+    // Als de gebruiker de lineHeight nog niet handmatig heeft aangepast,
+    // schalen we de lineHeight automatisch mee.
+    if (!userHasAdjusted) {
+      setLineHeight(newSize * lineHeightMultiplier);
+    }
+  };
+
+  const handleLineHeightChange = (newHeight) => {
+    // Zodra de gebruiker de slider aanraakt, zetten we de 'flag'.
+    if (!userHasAdjusted) {
+      setUserHasAdjusted(true);
+    }
+    setLineHeight(newHeight);
+    // We berekenen en onthouden de nieuwe, door de gebruiker gekozen verhouding.
+    setLineHeightMultiplier(newHeight / fontSize);
+  };
+
+  return (
+    <ResponsiveLayout
+      layout={layout}
+      controls={
+        <Controls
+          fontSize={fontSize}
+          onFontSizeChange={handleFontSizeChange}
+          fillColor={fillColor}
+          onFillColorChange={setFillColor}
+          letterSpacing={letterSpacing}
+          onLetterSpacingChange={setLetterSpacing}
+          lineHeight={lineHeight}
+          onLineHeightChange={handleLineHeightChange}
+        />
+      }
+      canvas={
+        <Application
+          width={layout.canvasWidth}
+          height={layout.canvasHeight}
+          options={{
+            background: 0x1d2230,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true,
+          }}
+        >
+          <CanvasContent
+            canvasWidth={layout.canvasWidth}
+            canvasHeight={layout.canvasHeight}
+            fontSize={fontSize}
+            fillColor={fillColor}
+            letterSpacing={letterSpacing}
+            lineHeight={lineHeight}
+          />
+        </Application>
+      }
+      navigation={<Navigation />}
+    />
+  );
 }
