@@ -1,3 +1,4 @@
+import { useRef } from "react"; // Zorg dat useRef geïmporteerd is
 import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
 import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
 import { useSearchParams } from "react-router-dom";
@@ -11,8 +12,6 @@ import { useResponsiveTextPosition } from "./hooks/useResponsiveTextPosition";
 import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
-
-extend({ Text, Container });
 
 // Mock data voor en gedicht
 const mockPoem = {
@@ -46,30 +45,34 @@ function CanvasContent({
 
   // --- Gebruik de font loader hook ---
   const fontLoaded = useFontLoader("Cormorant Garamond");
-  
+
+  // --- NIEUW: Refs voor de viewport en de content ---
+  const viewportRef = useRef(null);
+  const contentRef = useRef(null);
+
   // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
   const currentPoem = poemId ? mockPoem : null;
-  
+
   // Responsive text positioning
   const textPosition = useResponsiveTextPosition(
-    width, 
-    height, 
-    fontSize, 
-    lineHeight, 
+    width,
+    height,
+    fontSize,
+    lineHeight,
     currentPoem?.lines || []
   );
 
   // Modern React 19 pattern: Auto-render on layout changes
   usePixiAutoRender(app, [
-    width, 
-    height, 
-    textPosition.containerX, 
-    textPosition.containerY, 
+    width,
+    height,
+    textPosition.containerX,
+    textPosition.containerY,
     textPosition.scaleFactor,
     fontSize,
     fillColor,
     letterSpacing,
-    lineHeight
+    lineHeight,
   ]);
 
   // Resize renderer when canvas dimensions change
@@ -103,7 +106,10 @@ function CanvasContent({
     letterSpacing: letterSpacing,
   });
 
-  if (!fontLoaded) {
+  if (!fontLoaded || !currentPoem) {
+    const message = !fontLoaded
+      ? "Lettertype laden..."
+      : "Geen gedicht gekozen.";
     return (
       <pixiText
         text="Laden..."
@@ -115,51 +121,49 @@ function CanvasContent({
     );
   }
 
-  if (!currentPoem) {
-    return (
-      <pixiText
-        text="Geen gedicht gekozen. Voeg ?poemId=123 toe aan de URL."
-        anchor={{ x: 0.5, y: 0.5 }}
-        x={width / 2}
-        y={height / 2}
-        style={{ fill: "white", fontSize: 24, fontFamily: "Arial" }}
-      />
-    );
-  }
-
   // Als er wel een gedicht is, toon de inhoud
-
   return (
-    // Responsive container positioning
-    <pixiContainer 
-      x={textPosition.containerX} 
-      y={textPosition.containerY}
-      scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
+    // --- NIEUW: De Viewport Wrapper ---
+    <pixiViewport
+      ref={viewportRef}
+      screenWidth={width}
+      screenHeight={height}
+      worldWidth={width}
+      worldHeight={height}
+      wheel
+      pinch
+      decelerate
     >
-      <pixiText
-        text={currentPoem.title}
-        anchor={{ x: 0.5, y: 0 }}
-        y={0}
-        style={titleStyle}
-      />
-
-      <pixiText
-        text={currentPoem.author}
-        anchor={{ x: 0.5, y: 0 }}
-        y={textPosition.authorY}
-        style={authorStyle}
-      />
-
-      {currentPoem.lines.map((line, index) => (
+      <pixiContainer
+        x={textPosition.containerX}
+        y={textPosition.containerY}
+        scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
+      >
         <pixiText
-          key={index}
-          text={line}
+          text={currentPoem.title}
           anchor={{ x: 0.5, y: 0 }}
-          y={textPosition.poemStartY + index * lineHeight}
-          style={lineStyle}
+          y={0}
+          style={titleStyle}
         />
-      ))}
-    </pixiContainer>
+
+        <pixiText
+          text={currentPoem.author}
+          anchor={{ x: 0.5, y: 0 }}
+          y={textPosition.authorY}
+          style={authorStyle}
+        />
+
+        {currentPoem.lines.map((line, index) => (
+          <pixiText
+            key={index}
+            text={line}
+            anchor={{ x: 0.5, y: 0 }}
+            y={textPosition.poemStartY + index * lineHeight}
+            style={lineStyle}
+          />
+        ))}
+      </pixiContainer>
+    </pixiViewport>
   );
 }
 
