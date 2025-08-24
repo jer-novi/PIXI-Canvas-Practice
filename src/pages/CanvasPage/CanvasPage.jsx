@@ -5,6 +5,8 @@ import {useSearchParams} from 'react-router-dom';
 import {useState, useLayoutEffect, useEffect} from 'react';
 import {extend, useApplication} from '@pixi/react';
 import * as PIXI from 'pixi.js';
+import Controls from './Controls';
+
 
 extend({Text, Container});
 
@@ -23,16 +25,15 @@ const mockPoem = {
 
 // --- Een hook specifiek voor het laden van het font ---
 
+
+
+
 function useFontLoader(fontFamily) {
     const [fontLoaded, setFontLoaded] = useState(false);
-
-
     useEffect(() => {
-        document.fonts.load('1em "{fontFamily}"').then(() => {
-            setFontLoaded(true);
-        });
+        // Correct template literal for loading font
+        document.fonts.load(`1em "${fontFamily}"`).then(() => setFontLoaded(true));
     }, [fontFamily]);
-
     return fontLoaded;
 }
 
@@ -44,21 +45,17 @@ function useWindowSize() {
 
 
     useLayoutEffect(() => {
-        function updateSize() {
-            setSize({
-                width: window.innerWidth,
-                height: window.innerHeight,
-            });
+        function update() {
+            setSize({width: window.innerWidth, height: window.innerHeight});
         }
 
-        window.addEventListener('resize', updateSize);
-        return () => window.removeEventListener('resize', updateSize);
+        window.addEventListener('resize', update);
+        return () => window.removeEventListener('resize', update);
     }, []);
     return size;
 }
 
-function CanvasContent() {
-    const {width, height} = useWindowSize();
+function CanvasContent({ width, height, fontSize }) {
     const [searchParams] = useSearchParams();
     const poemId = searchParams.get('poemId');
     // --- DE FIX ---
@@ -67,40 +64,38 @@ function CanvasContent() {
     // --- Gebruik de font loader hook ---
     const fontLoaded = useFontLoader('Cormorant Garamond'); //
 
-    useEffect(() => {
-
-        if (app && app.renderer) { // Extra check of 'app' bestaat
-            app.renderer.resize(width, height);
-        }
-    }, [width, height, app]);
+  // Deze useEffect is nog steeds nodig om de PIXI renderer zelf te resizen
+  useEffect(() => {
+    if (app && app.renderer) {
+      app.renderer.resize(width, height);
+    }
+  }, [width, height, app]);
 
     // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
     // In een echte app zou je hier een API-call doen.
     const currentPoem = poemId ? mockPoem : null;
-
     const titleStyle = new PIXI.TextStyle({
         fill: 'white',
-        fontSize: 48,
-        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
+        fontSize: fontSize * 1.5,
+        fontFamily: 'Cormorant Garamond',
         fontWeight: 'bold',
     });
 
     const authorStyle = new PIXI.TextStyle({
         fill: '#cccccc',
-        fontSize: 24,
-        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
+        fontSize: fontSize * 0.75,
+        fontFamily: 'Cormorant Garamond',
         fontStyle: 'italic',
     });
 
     const lineStyle = new PIXI.TextStyle({
         fill: 'white',
-        fontSize: 32,
-        fontFamily: 'Cormorant Garamond', // <-- AANPASSING
-        lineHeight: 44, // Extra ruimte tussen de regels
+        fontSize: fontSize,
+        fontFamily: 'Cormorant Garamond',
+        lineHeight: fontSize * 1.4,
     });
 
     if (!fontLoaded) {
-        // Wacht tot het font geladen is
         return (
             <pixiText
                 text="Laden..."
@@ -119,7 +114,7 @@ function CanvasContent() {
                 anchor={{x: 0.5, y: 0.5}}
                 x={width / 2}
                 y={height / 2}
-                style={titleStyle}
+                style={{fill: 'white', fontSize: 24, fontFamily: 'Arial'}}
             />
         );
     }
@@ -165,6 +160,10 @@ export default function CanvasPage() {
     // Dit is de volledige breedte min de breedte van de controls.
     const canvasWidth = width - 340;
 
+
+    // De state voor de lettergrootte ---
+    const [fontSize, setFontSize] = useState(36);
+
     return (
         <div className={styles.canvasContainer}>
             <div className={styles.canvasWrapper}>
@@ -181,13 +180,11 @@ export default function CanvasPage() {
                     }}
                 >
                     {/* Geef de AANGEPASTE breedte door */}
-                    <CanvasContent width={canvasWidth} height={height}/>
+                     {/* Geef de fontSize door aan het canvas */}
+                    <CanvasContent width={canvasWidth} height={height} fontSize={fontSize}/>
                 </Application>
             </div>
-            <div className={styles.controlsWrapper}>
-                <h2>Styling Controls</h2>
-                <p>Hier komen straks onze sliders en knoppen.</p>
-            </div>
+            <Controls fontSize={fontSize} onFontSizeChange={setFontSize} />
         </div>
     );
 }

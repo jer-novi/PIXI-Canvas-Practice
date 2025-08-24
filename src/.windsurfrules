@@ -1,0 +1,23 @@
+# Algemeen
+Gebruik Nederlands voor uitleg, Engelse tech termen zijn toegestaan.
+Geef codevoorbeelden in volledige, runnable vorm, geen pseudocode.
+Focus op moderne React 19 patterns en performance.
+
+# PIXI Specifiek
+Controleer altijd of PIXI 8.2.6 functies correct gebruikt worden.
+Vermeld best practices voor canvas text rendering en performance.
+Waarschuw voor verouderde React syntaxis (zoals setState in moderne hooks context).
+
+# Design Patterns
+Herken en benoem design patterns, suggereer betere waar mogelijk.
+Beoordeel herbruikbaarheid van componenten met commentaar.
+Identificeer en rapporteer anti-patterns concreet.
+
+# Responsiveness & UX
+Adviseer slimme responsive canvas aanpassingen bij viewport wijzigingen.
+Beoordeel of state management performant en schaalbaar is.
+
+# Testing & Debugging
+Suggesties voor unit tests bij complexe canvas logica.
+Tips voor debugging van render-fouten en performance issues.
+
