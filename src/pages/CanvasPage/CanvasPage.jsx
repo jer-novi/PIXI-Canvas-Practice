@@ -13,6 +13,11 @@ import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
 import { useAutoRecenter } from "./hooks/useAutoRecenter";
+import {
+  handleFontSizeChangeUtil,
+  handleLineHeightChangeUtil,
+  resetLineHeightUtil,
+} from "./utils/lineHeightUtils";
 
 // Mock data voor en gedicht
 const mockPoem = {
@@ -32,6 +37,8 @@ const mockPoem = {
 function CanvasContent({
   canvasWidth,
   canvasHeight,
+  textAlign,
+
   fontSize,
   fillColor,
   letterSpacing,
@@ -99,6 +106,13 @@ function CanvasContent({
     ], // Alle variabelen die de positie/grootte beïnvloeden
   });
 
+  // --- NIEUW: Vertaal de 'textAlign' state naar een 'anchorX' waarde ---
+  const anchorX = {
+    left: 0,
+    center: 0.5,
+    right: 1,
+  }[textAlign]; // Dit is een handige "lookup" in een object
+
   // In een echte app zou je hier een API-call doen.
   const titleStyle = new PIXI.TextStyle({
     fill: fillColor,
@@ -106,6 +120,7 @@ function CanvasContent({
     fontFamily: "Cormorant Garamond",
     fontWeight: "bold",
     letterSpacing: letterSpacing,
+    align: textAlign,
   });
 
   const authorStyle = new PIXI.TextStyle({
@@ -113,6 +128,7 @@ function CanvasContent({
     fontSize: fontSize * 0.75,
     fontFamily: "Cormorant Garamond",
     fontStyle: "italic",
+    align: textAlign,
   });
 
   const lineStyle = new PIXI.TextStyle({
@@ -121,6 +137,7 @@ function CanvasContent({
     fontFamily: "Cormorant Garamond",
     lineHeight: lineHeight,
     letterSpacing: letterSpacing,
+    align: textAlign,
   });
 
   if (!fontLoaded || !currentPoem) {
@@ -162,14 +179,14 @@ function CanvasContent({
       >
         <pixiText
           text={currentPoem.title}
-          anchor={{ x: 0.5, y: 0 }}
+          anchor={{ x: anchorX, y: 0 }}
           y={0}
           style={titleStyle}
         />
 
         <pixiText
           text={currentPoem.author}
-          anchor={{ x: 0.5, y: 0 }}
+          anchor={{ x: anchorX, y: 0 }}
           y={textPosition.authorY}
           style={authorStyle}
         />
@@ -178,7 +195,7 @@ function CanvasContent({
           <pixiText
             key={index}
             text={line}
-            anchor={{ x: 0.5, y: 0 }}
+            anchor={{ x: anchorX, y: 0 }}
             y={textPosition.poemStartY + index * lineHeight}
             style={lineStyle}
           />
@@ -206,24 +223,40 @@ export default function CanvasPage() {
   const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
   const [userHasAdjusted, setUserHasAdjusted] = useState(false);
 
-  // --- De logica ---
-  const handleFontSizeChange = (newSize) => {
-    setFontSize(newSize);
-    // Als de gebruiker de lineHeight nog niet handmatig heeft aangepast,
-    // schalen we de lineHeight automatisch mee.
-    if (!userHasAdjusted) {
-      setLineHeight(newSize * lineHeightMultiplier);
-    }
-  };
+  const [textAlign, setTextAlign] = useState("center");
 
-  const handleLineHeightChange = (newHeight) => {
-    // Zodra de gebruiker de slider aanraakt, zetten we de 'flag'.
-    if (!userHasAdjusted) {
-      setUserHasAdjusted(true);
-    }
-    setLineHeight(newHeight);
-    // We berekenen en onthouden de nieuwe, door de gebruiker gekozen verhouding.
-    setLineHeightMultiplier(newHeight / fontSize);
+  // --- De logica ---
+  const handleFontSizeChange = (newSize) =>
+    handleFontSizeChangeUtil(newSize, {
+      userHasAdjusted,
+      lineHeightMultiplier,
+      setFontSize,
+      setLineHeight,
+    });
+
+  const handleLineHeightChange = (newHeight) =>
+    handleLineHeightChangeUtil(newHeight, {
+      userHasAdjusted,
+      setUserHasAdjusted,
+      setLineHeight,
+      fontSize,
+      setLineHeightMultiplier,
+    });
+
+  const handleResetLineHeight = () =>
+    resetLineHeightUtil({
+      baseFontSize: 36,
+      defaultMultiplier: 1.4,
+      setLineHeight,
+      setLineHeightMultiplier,
+      setUserHasAdjusted,
+    });
+
+  // Verhouding-slider handler: update multiplier en afgeleide lineHeight
+  const handleLineHeightMultiplierChange = (newMultiplier) => {
+    if (!userHasAdjusted) setUserHasAdjusted(true);
+    setLineHeightMultiplier(newMultiplier);
+    setLineHeight(fontSize * newMultiplier);
   };
 
   return (
@@ -239,6 +272,11 @@ export default function CanvasPage() {
           onLetterSpacingChange={setLetterSpacing}
           lineHeight={lineHeight}
           onLineHeightChange={handleLineHeightChange}
+          lineHeightMultiplier={lineHeightMultiplier}
+          onLineHeightMultiplierChange={handleLineHeightMultiplierChange}
+          onResetLineHeight={handleResetLineHeight}
+          textAlign={textAlign}
+          onTextAlignChange={setTextAlign}
         />
       }
       canvas={
@@ -258,6 +296,7 @@ export default function CanvasPage() {
             fillColor={fillColor}
             letterSpacing={letterSpacing}
             lineHeight={lineHeight}
+            textAlign={textAlign}
           />
         </Application>
       }

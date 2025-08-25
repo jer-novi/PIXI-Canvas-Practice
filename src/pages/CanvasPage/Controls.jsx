@@ -7,9 +7,13 @@ export default function Controls({
   onFillColorChange,
   letterSpacing,
   onLetterSpacingChange,
-
   lineHeight,
   onLineHeightChange,
+  lineHeightMultiplier,
+  onLineHeightMultiplierChange,
+  onResetLineHeight,
+  textAlign,
+  onTextAlignChange,
 }) {
   return (
     <div className={styles.controlsWrapper}>
@@ -50,18 +54,61 @@ export default function Controls({
         <span>{letterSpacing}px</span>
       </div>
 
-      {/* --- NIEUW: Line Height Slider --- */}
-      <div className={styles.controlRow}>
-        <label htmlFor="lineHeight">Regelhoogte</label>
+      {/* --- NIEUW: Line Height Multiplier Slider (vertical layout) --- */}
+      <div className={styles.controlGroup}>
+        <label htmlFor="lineHeightMultiplier">Regelhoogte (verhouding)</label>
         <input
+          className={styles.fullWidthRange}
           type="range"
-          id="lineHeight"
-          min={fontSize * 1.2}
-          max={fontSize * 2.5}
-          value={lineHeight}
-          onChange={(e) => onLineHeightChange(Number(e.target.value))}
+          id="lineHeightMultiplier"
+          min={1.0}
+          max={2.5}
+          step={0.01}
+          value={lineHeightMultiplier}
+          onChange={(e) =>
+            onLineHeightMultiplierChange(parseFloat(e.target.value))
+          }
         />
-        <span>{lineHeight.toFixed(0)}px</span>
+        <div className={styles.valueRow}>
+          <span>{lineHeightMultiplier.toFixed(2)}×</span>
+          <span>{Math.round(fontSize * lineHeightMultiplier)}px</span>
+        </div>
+        {/* Reset knop voor regelhoogte */}
+        <div className={styles.controlRow}>
+          <button
+            type="button"
+            className={styles.resetButton}
+            onClick={onResetLineHeight}
+          >
+            Reset verhouding
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.controlRow}>
+        <label>Uitlijning</label>
+        <div className={styles.buttonGroup}>
+          <button
+            className={textAlign === "left" ? styles.active : ""}
+            onClick={() => onTextAlignChange("left")}
+          >
+            Links
+          </button>
+
+          <button
+            className={textAlign === "center" ? styles.active : ""}
+            onClick={() => onTextAlignChange("center")}
+          >
+            Midden
+          </button>
+
+          <button
+            className={textAlign === "right" ? styles.active : ""}
+            onClick={() => onTextAlignChange("right")}
+          >
+            Rechts
+          </button>
+        </div>
       </div>
     </div>
   );

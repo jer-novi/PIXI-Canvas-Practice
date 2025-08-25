@@ -1,3 +1,42 @@
+/* Basisstijl voor alle control-knoppen */
+.buttonGroup button,
+.resetButton {
+  background-color: transparent;
+  border: none;
+  color: #a0aec0;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* Hover-staat delen */
+.buttonGroup button:hover,
+.resetButton:hover {
+  background-color: #4a5568;
+}
+
+/* Active-staat delen — voeg ook .active als losse class toe (zie hieronder) */
+.buttonGroup button.active,
+.resetButton.active {
+  background-color: #02690b;
+  color: white;
+}
+
+/* Alleen voor groep-knoppen (scheidingslijnen en container rounding) */
+.buttonGroup {
+  display: flex;
+  border: 1px solid #4a5568;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.buttonGroup button {
+  border-left: 1px solid #4a5568;
+}
+
+.buttonGroup button:first-child {
+  border-left: none;
+}
+
 .canvasContainer {
   display: flex;
   width: 100vw;
@@ -51,5 +90,27 @@
   flex-shrink: 0;
   min-width: 40px;
   text-align: right;
+  font-size: 0.85rem;
+}
+
+/* Vertical layout for wide sliders under the label */
+.controlGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.controlGroup label {
+  font-size: 0.9rem;
+}
+
+.fullWidthRange {
+  width: 100%;
+}
+
+.valueRow {
+  display: flex;
+  justify-content: space-between;
   font-size: 0.85rem;
 }
