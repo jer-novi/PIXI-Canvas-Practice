@@ -1,4 +1,4 @@
-import { useRef } from "react"; // Zorg dat useRef geïmporteerd is
+import { useMemouseRef } from "react"; // Zorg dat useRef geïmporteerd is
 import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
 import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
 import { useSearchParams } from "react-router-dom";
@@ -103,15 +103,18 @@ function CanvasContent({
       letterSpacing,
       fillColor,
       poemId,
+      textAlign,
     ], // Alle variabelen die de positie/grootte beïnvloeden
   });
 
   // --- NIEUW: Vertaal de 'textAlign' state naar een 'anchorX' waarde ---
-  const anchorX = {
-    left: 0,
-    center: 0.5,
-    right: 1,
-  }[textAlign]; // Dit is een handige "lookup" in een object
+  const anchorX = useMemo(() => {
+    return {
+      left: 0,
+      center: 0.5,
+      right: 1,
+    }[textAlign];
+  }, [textAlign]); // deps-array is het tweede argument van useMemo
 
   // In een echte app zou je hier een API-call doen.
   const titleStyle = new PIXI.TextStyle({
