@@ -2,7 +2,7 @@ import { useMemouseRef } from "react"; // Zorg dat useRef geïmporteerd is
 import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
 import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
 import { useSearchParams } from "react-router-dom";
-import { useState, useEffect, useLayoutEffect } from "react";
+import { useState, useLayoutEffect, useEffect, useRef } from "react";
 import { extend, useApplication } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import Controls from "./Controls";
