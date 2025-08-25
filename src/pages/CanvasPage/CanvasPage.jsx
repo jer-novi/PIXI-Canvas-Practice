@@ -1,8 +1,7 @@
-import { useMemouseRef } from "react"; // Zorg dat useRef geïmporteerd is
 import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
 import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
 import { useSearchParams } from "react-router-dom";
-import { useState, useLayoutEffect, useEffect, useRef } from "react";
+import { useState, useLayoutEffect, useEffect, useRef, useMemo } from "react";
 import { extend, useApplication } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import Controls from "./Controls";
@@ -13,6 +12,9 @@ import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
 import { useAutoRecenter } from "./hooks/useAutoRecenter";
+
+// Development-only debug tooling (tree-shaken in production)
+import { debugManager } from "../../debug/DebugManager";
 import {
   handleFontSizeChangeUtil,
   handleLineHeightChangeUtil,
@@ -38,11 +40,12 @@ function CanvasContent({
   canvasWidth,
   canvasHeight,
   textAlign,
-
   fontSize,
   fillColor,
   letterSpacing,
   lineHeight,
+  viewportRef,
+  contentRef,
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -53,10 +56,6 @@ function CanvasContent({
 
   // --- Gebruik de font loader hook ---
   const fontLoaded = useFontLoader("Cormorant Garamond");
-
-  // --- NIEUW: Refs voor de viewport en de content ---
-  const viewportRef = useRef(null);
-  const contentRef = useRef(null);
 
   // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
   const currentPoem = poemId ? mockPoem : null;
@@ -106,6 +105,29 @@ function CanvasContent({
       textAlign,
     ], // Alle variabelen die de positie/grootte beïnvloeden
   });
+
+  useEffect(() => {
+    console.log("Viewport Debug:", {
+      app: !!app,
+      ticker: !!app?.ticker,
+      renderer: !!app?.renderer,
+      events: !!app?.renderer?.events,
+      width,
+      height,
+    });
+  }, [app, width, height]);
+
+  // --- Development Debug Integration (Clean Separation) ---
+  useEffect(() => {
+    // Register components with debug manager (development only)
+    if (app && viewportRef.current && contentRef.current) {
+      debugManager.registerComponents(
+        app,
+        viewportRef.current,
+        contentRef.current
+      );
+    }
+  }, [app, viewportRef.current, contentRef.current]);
 
   // --- NIEUW: Vertaal de 'textAlign' state naar een 'anchorX' waarde ---
   const anchorX = useMemo(() => {
@@ -158,6 +180,11 @@ function CanvasContent({
     );
   }
 
+  // Wacht tot Pixi app en events-systeem klaar zijn (vereist door pixi-viewport)
+  if (!app || !app.renderer || !app.renderer.events) {
+    return null;
+  }
+
   // Als er wel een gedicht is, toon de inhoud
   return (
     // --- NIEUW: De Viewport Wrapper ---
@@ -171,8 +198,8 @@ function CanvasContent({
       pinch
       decelerate
       // --- DE FIX: Geef de ticker en events door ---
-      ticker={app.ticker}
-      events={app.renderer?.events}
+      ticker={PIXI.Ticker.shared}
+      events={app.renderer.events}
     >
       <pixiContainer
         ref={contentRef}
@@ -210,6 +237,10 @@ function CanvasContent({
 
 // Dit is de hoofd-export, die de state beheert
 export default function CanvasPage() {
+  // --- NIEUW: Refs voor de viewport en de content (verplaatst van CanvasContent) ---
+  const viewportRef = useRef(null);
+  const contentRef = useRef(null);
+
   // De state voor de lettergrootte --- (EERST definiëren)
   const [fontSize, setFontSize] = useState(36);
 
@@ -224,6 +255,15 @@ export default function CanvasPage() {
   // --- De slimme lineHeight state ---
   const [lineHeight, setLineHeight] = useState(36 * 1.4); // Beginwaarde
   const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
+
+  // Text positioning hook for debug info
+  const textPosition = useResponsiveTextPosition(
+    layout.canvasWidth,
+    layout.canvasHeight,
+    fontSize,
+    lineHeight,
+    mockPoem?.lines || []
+  );
   const [userHasAdjusted, setUserHasAdjusted] = useState(false);
 
   const [textAlign, setTextAlign] = useState("center");
@@ -263,47 +303,71 @@ export default function CanvasPage() {
   };
 
   return (
-    <ResponsiveLayout
-      layout={layout}
-      controls={
-        <Controls
-          fontSize={fontSize}
-          onFontSizeChange={handleFontSizeChange}
-          fillColor={fillColor}
-          onFillColorChange={setFillColor}
-          letterSpacing={letterSpacing}
-          onLetterSpacingChange={setLetterSpacing}
-          lineHeight={lineHeight}
-          onLineHeightChange={handleLineHeightChange}
-          lineHeightMultiplier={lineHeightMultiplier}
-          onLineHeightMultiplierChange={handleLineHeightMultiplierChange}
-          onResetLineHeight={handleResetLineHeight}
-          textAlign={textAlign}
-          onTextAlignChange={setTextAlign}
-        />
-      }
-      canvas={
-        <Application
-          width={layout.canvasWidth}
-          height={layout.canvasHeight}
-          options={{
-            background: 0x1d2230,
-            resolution: window.devicePixelRatio || 1,
-            autoDensity: true,
+    <>
+      <ResponsiveLayout
+        layout={layout}
+        controls={
+          <Controls
+            fontSize={fontSize}
+            onFontSizeChange={handleFontSizeChange}
+            fillColor={fillColor}
+            onFillColorChange={setFillColor}
+            letterSpacing={letterSpacing}
+            onLetterSpacingChange={setLetterSpacing}
+            lineHeight={lineHeight}
+            onLineHeightChange={handleLineHeightChange}
+            lineHeightMultiplier={lineHeightMultiplier}
+            onLineHeightMultiplierChange={handleLineHeightMultiplierChange}
+            onResetLineHeight={handleResetLineHeight}
+            textAlign={textAlign}
+            onTextAlignChange={setTextAlign}
+          />
+        }
+        canvas={
+          <Application
+            width={layout.canvasWidth}
+            height={layout.canvasHeight}
+            options={{
+              background: 0x1d2230,
+              resolution: window.devicePixelRatio || 1,
+              autoDensity: true,
+            }}
+          >
+            <CanvasContent
+              canvasWidth={layout.canvasWidth}
+              canvasHeight={layout.canvasHeight}
+              fontSize={fontSize}
+              fillColor={fillColor}
+              letterSpacing={letterSpacing}
+              lineHeight={lineHeight}
+              textAlign={textAlign}
+              viewportRef={viewportRef}
+              contentRef={contentRef}
+            />
+          </Application>
+        }
+        navigation={<Navigation />}
+      />
+
+      {/* Development Mode Indicator (Clean, Non-Intrusive) */}
+      {import.meta.env.DEV && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "10px",
+            left: "10px",
+            background: "rgba(0,100,0,0.8)",
+            color: "white",
+            padding: "4px 8px",
+            borderRadius: "4px",
+            fontSize: "11px",
+            fontFamily: "monospace",
+            zIndex: 1000,
           }}
         >
-          <CanvasContent
-            canvasWidth={layout.canvasWidth}
-            canvasHeight={layout.canvasHeight}
-            fontSize={fontSize}
-            fillColor={fillColor}
-            letterSpacing={letterSpacing}
-            lineHeight={lineHeight}
-            textAlign={textAlign}
-          />
-        </Application>
-      }
-      navigation={<Navigation />}
-    />
+          DEV MODE | Console: window.debugCanvas.toggle()
+        </div>
+      )}
+    </>
   );
 }
