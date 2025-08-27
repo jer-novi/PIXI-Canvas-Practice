@@ -1,3 +1,4 @@
+import React, { useRef, useState } from "react";
 import styles from "./CanvasPage.module.css";
 
 export default function Controls({
@@ -14,7 +15,35 @@ export default function Controls({
   onResetLineHeight,
   textAlign,
   onTextAlignChange,
+  selectedLine,
+  onLineColorChange,
+  onResetSelectedLine,
+  viewportDragEnabled,
+  onViewportToggle,
+  onColorPickerActiveChange,
 }) {
+  // RAF-throttled color updates to avoid overloading GPU while dragging the color picker
+  const rafIdRef = useRef(null);
+  const pendingColorRef = useRef(null);
+
+  // Track color picker active state
+  const [isColorPickerActive, setIsColorPickerActive] = useState(false);
+
+  const scheduleColorUpdate = (color) => {
+    pendingColorRef.current = color;
+    if (rafIdRef.current) return;
+    rafIdRef.current = requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const next = pendingColorRef.current;
+      if (next == null) return;
+      if (selectedLine !== null) {
+        onLineColorChange(next);
+      } else {
+        onFillColorChange(next);
+      }
+    });
+  };
+
   return (
     <div className={styles.controlsWrapper}>
       <h2>Styling Controls</h2>
@@ -30,15 +59,34 @@ export default function Controls({
         />
         <span>{fontSize}px</span>
       </div>
-      {/* --- NIEUW: Color Picker --- */}
-      <div className={styles.controlRow}>
-        <label htmlFor="fillColor">Kleur</label>
-        <input
-          type="color"
-          id="fillColor"
-          value={fillColor}
-          onChange={(e) => onFillColorChange(e.target.value)}
-        />
+      {/* --- Color Picker with Line Selection Support --- */}
+      <div className={`${styles.controlRow} ${selectedLine !== null ? styles.controlColumn : ''}`}>
+        <label htmlFor="fillColor">
+          {selectedLine !== null ? `Lijn ${selectedLine + 1} Kleur` : 'Globale Kleur'}
+        </label>
+        <div className={styles.colorControls}>
+          <input
+            type="color"
+            id="fillColor"
+            value={fillColor}
+            onInput={(e) => scheduleColorUpdate(e.target.value)}
+            onChange={(e) => scheduleColorUpdate(e.target.value)}
+          />
+          {selectedLine !== null && (
+            <div className={styles.lineControls}>
+              <span className={styles.hintText}>
+                Selecteer geen lijn voor globale kleur
+              </span>
+              <button
+                type="button"
+                className={styles.resetButton}
+                onClick={onResetSelectedLine}
+              >
+                Reset lijn-stijl
+              </button>
+            </div>
+          )}
+        </div>
       </div>
       {/* --- NIEUW: Letter Spacing Slider --- */}
       <div className={styles.controlRow}>
@@ -110,6 +158,34 @@ export default function Controls({
           </button>
         </div>
       </div>
+
+      {/* Viewport Control Toggle */}
+      <div className={styles.controlRow}>
+        <label>Camera Control</label>
+        <div className={styles.buttonGroup}>
+          <button
+            className={viewportDragEnabled ? styles.active : ''}
+            onClick={() => onViewportToggle(true)}
+          >
+            Enabled (Ctrl+Drag)
+          </button>
+          <button
+            className={!viewportDragEnabled ? styles.active : ''}
+            onClick={() => onViewportToggle(false)}
+          >
+            Disabled
+          </button>
+        </div>
+      </div>
+
+      {/* Selection Info */}
+      {selectedLine !== null && (
+        <div className={styles.controlRow}>
+          <span style={{ fontSize: '14px', color: '#ffff00', fontWeight: 'bold' }}>
+            Lijn {selectedLine + 1} geselecteerd - Druk Escape om te deselecteren
+          </span>
+        </div>
+      )}
     </div>
   );
 }

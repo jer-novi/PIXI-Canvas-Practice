@@ -114,3 +114,69 @@
   justify-content: space-between;
   font-size: 0.85rem;
 }
+
+.selectionInfo {
+  background: rgba(255, 204, 0, 0.1);
+  border: 1px solid #ffcc00;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.modeToggle {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.clearButton {
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* Vertical layout for color controls when a line is selected */
+.controlColumn {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem !important;
+}
+
+.controlColumn .colorControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  padding-left: 0.25rem;
+}
+
+.controlColumn .lineControls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.controlColumn .hintText {
+  font-size: 0.8rem !important;
+  color: #a0aec0 !important;
+  margin: 0.25rem 0;
+}
+
+.controlColumn .resetButton {
+  align-self: flex-start;
+  margin: 0 !important;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid #4a5568;
+  border-radius: 4px;
+}
+
+.controlColumn .resetButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+}

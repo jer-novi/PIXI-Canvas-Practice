@@ -75,10 +75,10 @@ class DebugManager {
       try {
         // Enhanced PIXI DevTools integration
         if (viewport) {
-          viewport.name = 'MainViewport'; // Name for DevTools
+          viewport.label = 'MainViewport'; // Label for DevTools (v8 compatible)
         }
         if (contentContainer) {
-          contentContainer.name = 'ContentContainer'; // Name for DevTools
+          contentContainer.label = 'ContentContainer'; // Label for DevTools (v8 compatible)
         }
       } catch (error) {
         console.warn('PIXI DevTools integration failed:', error);

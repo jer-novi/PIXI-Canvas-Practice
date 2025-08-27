@@ -1,7 +1,8 @@
 import { poems, getPoemById } from "../../data/testdata";
 import PoemLine from "./components/poemLine";
-import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
-import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
+import { Application, extend, useApplication } from "@pixi/react";
+import { Text, Container, Graphics } from "pixi.js";
+import { Viewport } from "pixi-viewport";
 import { useSearchParams } from "react-router-dom";
 import {
   useState,
@@ -11,10 +12,14 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import { extend, useApplication } from "@pixi/react";
 import * as PIXI from "pixi.js";
+
+// CRITICAL: extend() MUST be called at module level, outside components
+extend({ Text, Container, Graphics, Viewport });
+
 import Controls from "./Controls";
 import { useFontLoader } from "../../hooks/useFontLoader";
+import { useTextStyles } from "./hooks/useTextStyles";
 import { useResponsiveCanvas } from "./hooks/useResponsiveCanvas";
 import { useResponsiveTextPosition } from "./hooks/useResponsiveTextPosition";
 import { usePixiAutoRender } from "./hooks/usePixiAutoRender";
@@ -44,6 +49,8 @@ function CanvasContent({
   contentRef,
   selectedLine,
   onLineSelect,
+  viewportDragEnabled,
+  lineOverrides,
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -119,6 +126,24 @@ function CanvasContent({
     });
   }, [app, width, height]);
 
+  // Viewport plugin control
+  useEffect(() => {
+    if (viewportRef.current) {
+      const viewport = viewportRef.current;
+      
+      if (viewportDragEnabled) {
+        // Enable viewport controls
+        viewport.drag().pinch().wheel().decelerate();
+      } else {
+        // Disable viewport controls for line selection
+        viewport.plugins.remove('drag');
+        viewport.plugins.remove('pinch');
+        viewport.plugins.remove('wheel');
+        viewport.plugins.remove('decelerate');
+      }
+    }
+  }, [viewportDragEnabled]);
+
   // --- Development Debug Integration (Clean Separation) ---
   useEffect(() => {
     // Register components with debug manager (development only)
@@ -140,41 +165,16 @@ function CanvasContent({
     }[textAlign];
   }, [textAlign]); // deps-array is het tweede argument van useMemo
 
-  // In een echte app zou je hier een API-call doen.
-  const titleStyle = new PIXI.TextStyle({
-    fill: fillColor,
-    fontSize: fontSize * 1.5,
-    fontFamily: "Cormorant Garamond",
-    fontWeight: "bold",
-    letterSpacing: letterSpacing,
-    align: textAlign,
-  });
-
-  const authorStyle = new PIXI.TextStyle({
-    fill: "#cccccc",
-    fontSize: fontSize * 0.75,
-    fontFamily: "Cormorant Garamond",
-    fontStyle: "italic",
-    align: textAlign,
-  });
-
-  const lineStyle = {
-    fontFamily: "Cormorant Garamond",
-    fontSize: fontSize,
-    fill: fillColor,
-    lineHeight: lineHeight,
-    letterSpacing: letterSpacing,
-    align: textAlign,
-    wordWrap: true,
-    wordWrapWidth: 600,
-    breakWords: true,
+  // Use the updated useTextStyles hook with global styles
+  const globalStyles = {
+    fillColor,
+    fontSize,
+    letterSpacing,
+    lineHeight,
+    textAlign,
   };
-
-  const selectedLineStyle = {
-    ...lineStyle,
-    fill: "#ffcc00",
-    fontWeight: "bold",
-  };
+  
+  const { titleStyle, authorStyle, lineStyle } = useTextStyles(fontLoaded, globalStyles);
 
   if (!fontLoaded || !currentPoem) {
     const message = !fontLoaded
@@ -196,20 +196,15 @@ function CanvasContent({
     return null;
   }
 
-  // Als er wel een gedicht is, toon de inhoud
+    // Als er wel een gedicht is, toon de inhoud
   return (
     // --- NIEUW: De Viewport Wrapper ---
-    <viewport
+    <pixiViewport
       ref={viewportRef}
       screenWidth={width}
       screenHeight={height}
       worldWidth={width}
       worldHeight={height}
-      wheel
-      pinch
-      decelerate
-      // --- DE FIX: Geef de ticker en events door ---
-      ticker={PIXI.Ticker.shared}
       events={app.renderer.events}
     >
       <pixiContainer
@@ -221,6 +216,7 @@ function CanvasContent({
       >
         <pixiText
           text={currentPoem.title}
+          x={0}
           anchor={{ x: anchorX, y: 0 }}
           y={0}
           style={titleStyle}
@@ -228,6 +224,7 @@ function CanvasContent({
 
         <pixiText
           text={currentPoem.author}
+          x={0}
           anchor={{ x: anchorX, y: 0 }}
           y={textPosition.authorY}
           style={authorStyle}
@@ -236,16 +233,18 @@ function CanvasContent({
         {currentPoem.lines.map((line, index) => (
           <PoemLine
             key={index}
-            lineText={line}
-            yPosition={120 + index * lineHeight}
-            style={lineStyle}
-            anchorX={anchorX}
+            line={line}
+            x={0}
+            y={textPosition.poemStartY + index * lineHeight}
+            baseStyle={lineStyle}
+            lineOverrides={lineOverrides[index]}
             isSelected={selectedLine === index}
             onSelect={() => onLineSelect(index)}
+            anchorX={anchorX}
           />
         ))}
       </pixiContainer>
-    </viewport>
+    </pixiViewport>
   );
 }
 
@@ -257,12 +256,71 @@ export default function CanvasPage() {
 
   // State for selected line and line selection handler
   const [selectedLine, setSelectedLine] = useState(null);
+  const [viewportDragEnabled, setViewportDragEnabled] = useState(false); // Default disabled
+  
+  // State for per-line styling overrides
+  const [lineOverrides, setLineOverrides] = useState({});
 
   // Handle line selection
   const handleLineSelect = useCallback((index) => {
     console.log(`Line ${index} selected`);
     setSelectedLine((prev) => (prev === index ? null : index));
   }, []);
+
+  // Handle line color change for selected line
+  const handleLineColorChange = useCallback((color) => {
+    if (selectedLine !== null) {
+      setLineOverrides(prev => ({
+        ...prev,
+        [selectedLine]: {
+          ...prev[selectedLine],
+          fillColor: color
+        }
+      }));
+    }
+  }, [selectedLine]);
+
+  // Reset individual line style for selected line
+  const handleResetSelectedLine = useCallback(() => {
+    if (selectedLine !== null) {
+      setLineOverrides(prev => {
+        const next = { ...prev };
+        delete next[selectedLine];
+        return next;
+      });
+    }
+  }, [selectedLine]);
+
+  // Viewport control
+  const handleViewportToggle = useCallback((enabled) => {
+    setViewportDragEnabled(enabled);
+    console.log(`Viewport dragging: ${enabled ? 'enabled' : 'disabled'}`);
+  }, []);
+
+  // Keyboard shortcuts for viewport control
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedLine(null); // Clear selection
+      }
+      if (event.ctrlKey && !viewportDragEnabled) {
+        setViewportDragEnabled(true); // Enable viewport on Ctrl hold
+      }
+    };
+
+    const handleKeyUp = (event) => {
+      if (!event.ctrlKey && viewportDragEnabled) {
+        setViewportDragEnabled(false); // Disable viewport on Ctrl release
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [viewportDragEnabled]);
 
   // Font size state
   const [fontSize, setFontSize] = useState(36);
@@ -343,6 +401,11 @@ export default function CanvasPage() {
             onResetLineHeight={handleResetLineHeight}
             textAlign={textAlign}
             onTextAlignChange={setTextAlign}
+            selectedLine={selectedLine}
+            onLineColorChange={handleLineColorChange}
+            onResetSelectedLine={handleResetSelectedLine}
+            viewportDragEnabled={viewportDragEnabled}
+            onViewportToggle={handleViewportToggle}
           />
         }
         canvas={
@@ -367,6 +430,8 @@ export default function CanvasPage() {
               contentRef={contentRef}
               selectedLine={selectedLine}
               onLineSelect={handleLineSelect}
+              viewportDragEnabled={viewportDragEnabled}
+              lineOverrides={lineOverrides}
             />
           </Application>
         }
