@@ -133,45 +133,43 @@ export function useAutoRecenter({ viewportRef, contentRef, deps }) {
       const centerX = content.x;
 
       /**
-       * SIMPLIFIED Y POSITIONING: Always show content at 20% from viewport top
+       * X POSITIONING ONLY: Stable text alignment without Y camera movement
        * 
        * @description
-       * LEARNING FOCUS: Keep Y logic simple while mastering X positioning
+       * LEARNING FOCUS: Master text alignment concepts without Y positioning complexity
        * 
-       * Mathematical Formula for "20% from top":
-       * - Goal: content.y (world coordinate) appears at 20% from viewport top
-       * - Viewport center = 50% from viewport top
-       * - To show content at 20%, camera must be positioned:
-       *   camera.y = content.y + (viewport.screenHeight * 0.3)
+       * Core principle:
+       * - X positioning prevents text alignment drift
+       * - Y positioning handled entirely by useResponsiveTextPosition 
+       * - Camera NEVER adjusts Y axis - only X centering
+       * - No camera-induced vertical movement during control changes
        * 
-       * Why 0.3?
-       * - 20% from top = position is 30% ABOVE center (50% - 20% = 30%)
-       * - Camera positioned 30% of screen height below content
-       * - Result: content appears 30% above camera center = 20% from viewport top
-       * 
-       * Benefits:
-       * ✅ Always consistent positioning regardless of font changes
-       * ✅ No drift when adjusting sliders
-       * ✅ Simple to understand and debug
-       * ✅ Focus can remain on learning X positioning (which works correctly)
+       * Benefits for learning:
+       * ✅ Zero Y distractions while mastering X alignment concepts
+       * ✅ Clean separation: content positioning vs camera centering
+       * ✅ Predictable behavior: only X axis responds to alignment changes
+       * ✅ Pure focus on anchor point vs container position concepts
        */
-      const simpleY = content.y + (viewport.screenHeight * 0.3);
 
       /**
-       * Animate viewport to new center position
-       *
+       * X-only viewport animation (with static Y)
+       * 
        * @description
-       * Simple, consistent animation to maintain content at 20% from viewport top
+       * Only animate X position to center content horizontally.
+       * Y axis uses current camera position - no vertical movement.
+       * 
+       * Technical note: PIXI viewport.animate() requires both x,y coordinates.
+       * Providing only x breaks the animation. Solution: use current Y position.
        */
       viewport.animate({
         /**
          * Target position in world coordinates
          * - X: Stable container center (prevents alignment drift)
-         * - Y: Simple formula ensures content always at 20% from top
+         * - Y: Current camera Y position (no movement, just maintains position)
          */
-        position: {
+        position: { 
           x: centerX,
-          y: simpleY,
+          y: viewport.center.y // Keep current Y - no camera Y movement
         },
 
         /**

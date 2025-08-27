@@ -101,15 +101,11 @@ function CanvasContent({
     viewportRef,
     contentRef,
     deps: [
-      width,
-      height,
-      fontSize,
-      lineHeight,
-      letterSpacing,
-      fillColor,
-      poemId,
-      textAlign,
-    ], // Alle variabelen die de positie/grootte beïnvloeden
+      width,     // Canvas width changes require X recentering
+      height,    // Canvas height changes also trigger resize and require X recentering
+      poemId,    // New content needs X recentering  
+      textAlign, // Text alignment changes need X recentering (MAIN LEARNING FOCUS)
+    ], // Only X positioning triggers - Y handled by useResponsiveTextPosition
   });
 
   useEffect(() => {

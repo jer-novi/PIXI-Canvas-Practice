@@ -170,8 +170,8 @@ class DebugManager {
             },
             positioning: {
               calculatedCenterX: Math.round(content.x),
-              calculatedCenterY: Math.round(content.y + (viewport.screenHeight * 0.3)),
-              formula: `content.y (${Math.round(content.y)}) + screenHeight * 0.3 (${Math.round(viewport.screenHeight * 0.3)})`
+              cameraStrategy: "X-only positioning - Y handled by useResponsiveTextPosition",
+              note: "No camera Y adjustment - static positioning for learning focus"
             }
           };
 
@@ -274,12 +274,13 @@ class DebugManager {
         &nbsp;&nbsp;Y: ${data.content?.position?.y || 'N/A'}
       </div>
       <div style="margin: 4px 0;">
-        <strong>Calculated Camera:</strong><br>
-        &nbsp;&nbsp;X: ${data.positioning?.calculatedCenterX || 'N/A'}<br>
-        &nbsp;&nbsp;Y: ${data.positioning?.calculatedCenterY || 'N/A'}
+        <strong>Camera Positioning:</strong><br>
+        &nbsp;&nbsp;X: ${data.positioning?.calculatedCenterX || 'N/A'} (auto-centered)<br>
+        &nbsp;&nbsp;Y: Static positioning (no camera adjustment)<br>
+        &nbsp;&nbsp;Strategy: ${data.positioning?.cameraStrategy || 'N/A'}
       </div>
-      <div style="margin: 4px 0; font-size: 9px; color: #666;">
-        <strong>Formula:</strong> ${data.positioning?.formula || 'N/A'}
+      <div style="margin: 4px 0; font-size: 9px; color: #888;">
+        <strong>Focus:</strong> ${data.positioning?.note || 'N/A'}
       </div>
       <div style="margin: 4px 0; border-top: 1px solid #333; padding-top: 4px;">
         <strong>Bounds (Local vs World):</strong><br>
