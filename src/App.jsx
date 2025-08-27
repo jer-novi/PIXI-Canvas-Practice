@@ -1,9 +1,9 @@
 import { Application, extend } from "@pixi/react";
+import { Viewport } from "pixi-viewport"; // <-- NIEUW: Importeer Viewport
 import { Container, Graphics, Sprite, Text } from "pixi.js"; // add Text here
 import { TextDemo } from "./TextDemo";
 import CanvasPage from "./pages/CanvasPage/CanvasPage.jsx";
 import { useEffect, useState } from "react";
-import { Viewport } from "pixi-viewport"; // <-- NIEUW: Importeer Viewport
 
 // extend tells @pixi/react what Pixi.js components are available
 extend({

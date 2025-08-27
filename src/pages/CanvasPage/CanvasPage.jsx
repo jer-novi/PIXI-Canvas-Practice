@@ -1,7 +1,16 @@
+import { poems, getPoemById } from "../../data/testdata";
+import PoemLine from "./components/poemLine";
 import { Application } from "@pixi/react"; // Stap 1: De Component uit @pixi/react
 import { Text, Container } from "pixi.js"; // Stap 2: De Classes uit pixi.js
 import { useSearchParams } from "react-router-dom";
-import { useState, useLayoutEffect, useEffect, useRef, useMemo } from "react";
+import {
+  useState,
+  useLayoutEffect,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { extend, useApplication } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import Controls from "./Controls";
@@ -21,19 +30,6 @@ import {
   resetLineHeightUtil,
 } from "./utils/lineHeightUtils";
 
-// Mock data voor en gedicht
-const mockPoem = {
-  id: 123,
-  title: "De Sterrenhemel",
-  author: "H. Marsman",
-  lines: [
-    "De zee, de zee, de zee,",
-    "altijd de zee.",
-    "Zij is de spiegel van mijn ziel,",
-    "de bron van mijn bestaan.",
-  ],
-};
-
 // Hooks zijn nu geïmporteerd uit aparte bestanden
 
 function CanvasContent({
@@ -46,11 +42,13 @@ function CanvasContent({
   lineHeight,
   viewportRef,
   contentRef,
+  selectedLine,
+  onLineSelect,
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
-  const [searchParams] = useSearchParams();
-  const poemId = searchParams.get("poemId");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const poemId = searchParams.get("poemId") ?? "123";
   // --- DE FIX ---
   const { app } = useApplication(); // useApp() -> useApplication() returns { app }
 
@@ -58,7 +56,7 @@ function CanvasContent({
   const fontLoaded = useFontLoader("Cormorant Garamond");
 
   // We gebruiken nu het 'poemId' om te bepalen welke data we tonen.
-  const currentPoem = poemId ? mockPoem : null;
+  const currentPoem = poemId ? getPoemById(poemId) : null;
 
   // Responsive text positioning
   const textPosition = useResponsiveTextPosition(
@@ -68,6 +66,14 @@ function CanvasContent({
     lineHeight,
     currentPoem?.lines || []
   );
+
+  useEffect(() => {
+    if (!searchParams.get("poemId")) {
+      const params = new URLSearchParams(searchParams);
+      params.set("poemId", "123");
+      setSearchParams(params, { replace: true }); // geen extra push in history
+    }
+  }, [searchParams, setSearchParams]);
 
   // Modern React 19 pattern: Auto-render on layout changes
   usePixiAutoRender(app, [
@@ -156,14 +162,23 @@ function CanvasContent({
     align: textAlign,
   });
 
-  const lineStyle = new PIXI.TextStyle({
-    fill: fillColor,
-    fontSize: fontSize,
+  const lineStyle = {
     fontFamily: "Cormorant Garamond",
+    fontSize: fontSize,
+    fill: fillColor,
     lineHeight: lineHeight,
     letterSpacing: letterSpacing,
     align: textAlign,
-  });
+    wordWrap: true,
+    wordWrapWidth: 600,
+    breakWords: true,
+  };
+
+  const selectedLineStyle = {
+    ...lineStyle,
+    fill: "#ffcc00",
+    fontWeight: "bold",
+  };
 
   if (!fontLoaded || !currentPoem) {
     const message = !fontLoaded
@@ -206,6 +221,7 @@ function CanvasContent({
         x={textPosition.containerX}
         y={textPosition.containerY}
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
+        eventMode="passive" // forward events to children
       >
         <pixiText
           text={currentPoem.title}
@@ -222,12 +238,14 @@ function CanvasContent({
         />
 
         {currentPoem.lines.map((line, index) => (
-          <pixiText
+          <PoemLine
             key={index}
-            text={line}
-            anchor={{ x: anchorX, y: 0 }}
-            y={textPosition.poemStartY + index * lineHeight}
+            lineText={line}
+            yPosition={120 + index * lineHeight}
             style={lineStyle}
+            anchorX={anchorX}
+            isSelected={selectedLine === index}
+            onSelect={() => onLineSelect(index)}
           />
         ))}
       </pixiContainer>
@@ -235,25 +253,33 @@ function CanvasContent({
   );
 }
 
-// Dit is de hoofd-export, die de state beheert
+// Main component that manages state
 export default function CanvasPage() {
-  // --- NIEUW: Refs voor de viewport en de content (verplaatst van CanvasContent) ---
+  // --- Refs for viewport and content ---
   const viewportRef = useRef(null);
   const contentRef = useRef(null);
 
-  // De state voor de lettergrootte --- (EERST definiëren)
+  // State for selected line and line selection handler
+  const [selectedLine, setSelectedLine] = useState(null);
+
+  // Handle line selection
+  const handleLineSelect = useCallback((index) => {
+    console.log(`Line ${index} selected`);
+    setSelectedLine((prev) => (prev === index ? null : index));
+  }, []);
+
+  // Font size state
   const [fontSize, setFontSize] = useState(36);
 
-  // We slaan de kleur op als een hex-string, omdat dat het standaardformaat is voor een <input type="color">
+  // Color and spacing states
   const [fillColor, setFillColor] = useState("#ffffff");
-
   const [letterSpacing, setLetterSpacing] = useState(0);
 
-  // Use responsive canvas hook instead of manual calculations
+  // Use responsive canvas hook
   const layout = useResponsiveCanvas();
 
-  // --- De slimme lineHeight state ---
-  const [lineHeight, setLineHeight] = useState(36 * 1.4); // Beginwaarde
+  // Line height state
+  const [lineHeight, setLineHeight] = useState(36 * 1.4);
   const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
 
   // Text positioning hook for debug info
@@ -262,7 +288,7 @@ export default function CanvasPage() {
     layout.canvasHeight,
     fontSize,
     lineHeight,
-    mockPoem?.lines || []
+    [] // baseline; poem selection and exact lines are handled in CanvasContent
   );
   const [userHasAdjusted, setUserHasAdjusted] = useState(false);
 
@@ -343,6 +369,8 @@ export default function CanvasPage() {
               textAlign={textAlign}
               viewportRef={viewportRef}
               contentRef={contentRef}
+              selectedLine={selectedLine}
+              onLineSelect={handleLineSelect}
             />
           </Application>
         }
