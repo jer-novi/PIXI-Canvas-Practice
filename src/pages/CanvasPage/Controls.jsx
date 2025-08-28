@@ -21,6 +21,10 @@ export default function Controls({
   viewportDragEnabled,
   onViewportToggle,
   onColorPickerActiveChange,
+  titleColor,
+  onTitleColorChange,
+  authorColor,
+  onAuthorColorChange,
 }) {
   // RAF-throttled color updates to avoid overloading GPU while dragging the color picker
   const rafIdRef = useRef(null);
@@ -60,9 +64,15 @@ export default function Controls({
         <span>{fontSize}px</span>
       </div>
       {/* --- Color Picker with Line Selection Support --- */}
-      <div className={`${styles.controlRow} ${selectedLine !== null ? styles.controlColumn : ''}`}>
+      <div
+        className={`${styles.controlRow} ${
+          selectedLine !== null ? styles.controlColumn : ""
+        }`}
+      >
         <label htmlFor="fillColor">
-          {selectedLine !== null ? `Lijn ${selectedLine + 1} Kleur` : 'Globale Kleur'}
+          {selectedLine !== null
+            ? `Lijn ${selectedLine + 1} Kleur`
+            : "Globale Kleur"}
         </label>
         <div className={styles.colorControls}>
           <input
@@ -71,6 +81,14 @@ export default function Controls({
             value={fillColor}
             onInput={(e) => scheduleColorUpdate(e.target.value)}
             onChange={(e) => scheduleColorUpdate(e.target.value)}
+            onFocus={() => {
+              setIsColorPickerActive(true);
+              onColorPickerActiveChange?.(true);
+            }}
+            onBlur={() => {
+              setIsColorPickerActive(false);
+              onColorPickerActiveChange?.(false);
+            }}
           />
           {selectedLine !== null && (
             <div className={styles.lineControls}>
@@ -88,6 +106,29 @@ export default function Controls({
           )}
         </div>
       </div>
+
+      {/* --- Title Color Picker --- */}
+      <div className={styles.controlRow}>
+        <label htmlFor="titleColor">Titel Kleur</label>
+        <input
+          type="color"
+          id="titleColor"
+          value={titleColor}
+          onChange={(e) => onTitleColorChange(e.target.value)}
+        />
+      </div>
+
+      {/* --- Author Color Picker --- */}
+      <div className={styles.controlRow}>
+        <label htmlFor="authorColor">Auteur Kleur</label>
+        <input
+          type="color"
+          id="authorColor"
+          value={authorColor}
+          onChange={(e) => onAuthorColorChange(e.target.value)}
+        />
+      </div>
+
       {/* --- NIEUW: Letter Spacing Slider --- */}
       <div className={styles.controlRow}>
         <label htmlFor="letterSpacing">Letterafstand</label>
@@ -96,7 +137,7 @@ export default function Controls({
           id="letterSpacing"
           min="-5"
           max="15"
-          value={letterSpacing}
+          value={`${letterSpacing}`} // Template literal converteert naar string
           onChange={(e) => onLetterSpacingChange(Number(e.target.value))}
         />
         <span>{letterSpacing}px</span>
@@ -164,13 +205,13 @@ export default function Controls({
         <label>Camera Control</label>
         <div className={styles.buttonGroup}>
           <button
-            className={viewportDragEnabled ? styles.active : ''}
+            className={viewportDragEnabled ? styles.active : ""}
             onClick={() => onViewportToggle(true)}
           >
             Enabled (Ctrl+Drag)
           </button>
           <button
-            className={!viewportDragEnabled ? styles.active : ''}
+            className={!viewportDragEnabled ? styles.active : ""}
             onClick={() => onViewportToggle(false)}
           >
             Disabled
@@ -181,8 +222,11 @@ export default function Controls({
       {/* Selection Info */}
       {selectedLine !== null && (
         <div className={styles.controlRow}>
-          <span style={{ fontSize: '14px', color: '#ffff00', fontWeight: 'bold' }}>
-            Lijn {selectedLine + 1} geselecteerd - Druk Escape om te deselecteren
+          <span
+            style={{ fontSize: "14px", color: "#ffff00", fontWeight: "bold" }}
+          >
+            Lijn {selectedLine + 1} geselecteerd - Druk Escape om te
+            deselecteren
           </span>
         </div>
       )}

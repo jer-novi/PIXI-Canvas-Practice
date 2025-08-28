@@ -10,12 +10,13 @@ const PoemLine = ({
   lineOverrides,
   isSelected, 
   onSelect,
-  anchorX = 0.5
+  anchorX = 0.5,
+  isColorPickerActive = false
 }) => {
   const textRef = useRef();
   
   // Use the new useLineStyle hook to compute the final style
-  const computedStyle = useLineStyle(baseStyle, lineOverrides, isSelected);
+  const computedStyle = useLineStyle(baseStyle, lineOverrides, isSelected, isColorPickerActive);
 
   useEffect(() => {
     const textElement = textRef.current;

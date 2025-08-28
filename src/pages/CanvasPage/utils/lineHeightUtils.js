@@ -60,13 +60,13 @@ export function handleLineHeightChangeUtil(newHeight, {
  * Also resets the multiplier and clears the user-adjusted flag.
  */
 export function resetLineHeightUtil({
-  baseFontSize = 36,
+  currentFontSize,
   defaultMultiplier = 1.4,
   setLineHeight,
   setLineHeightMultiplier,
   setUserHasAdjusted,
 }) {
-  setLineHeight(getInitialLineHeight(baseFontSize, defaultMultiplier));
+  setLineHeight(getInitialLineHeight(currentFontSize, defaultMultiplier));
   setLineHeightMultiplier(defaultMultiplier);
   setUserHasAdjusted(false);
 }
