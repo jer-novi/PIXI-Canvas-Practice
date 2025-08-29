@@ -1,6 +1,8 @@
 // src/pages/CanvasPage/hooks/useCanvasHandlers.js
 
 import { useCallback, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getPoemById } from "../../../data/testdata";
 import {
   handleFontSizeChangeUtil,
   handleLineHeightChangeUtil,
@@ -8,11 +10,17 @@ import {
 } from "../utils/lineHeightUtils";
 
 export function useCanvasHandlers(canvasState) {
+  // Access current poem data for Alt-A functionality
+  const [searchParams] = useSearchParams();
+  const poemId = searchParams.get("poemId") ?? "123";
+  const currentPoem = poemId ? getPoemById(poemId) : null;
+
   const {
     selectedLines, // <-- We hebben nu de Set met selecties nodig
 
     handleSelect, // <-- Nieuwe handler uit useSelection
     clearSelection, // <-- Nieuwe handler uit useSelection
+    selectAll, // <-- NEW: Add selectAll function
     lineOverrides,
     setLineOverrides,
     viewportDragEnabled,
@@ -163,6 +171,15 @@ export function useCanvasHandlers(canvasState) {
       if (event.key === "Escape") {
         clearSelection(); // <-- Gebruik de nieuwe clearSelection functie
       }
+      
+      // NEW: Alt-A select all functionality
+      if (event.altKey && event.key === "a") {
+        event.preventDefault(); // Prevent browser Alt-A behavior
+        if (currentPoem?.lines) {
+          selectAll(currentPoem.lines.length);
+        }
+      }
+      
       if (event.ctrlKey && !viewportDragEnabled) {
         setViewportDragEnabled(true);
       }
@@ -180,7 +197,7 @@ export function useCanvasHandlers(canvasState) {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [viewportDragEnabled, clearSelection, setViewportDragEnabled]);
+  }, [viewportDragEnabled, clearSelection, selectAll, currentPoem, setViewportDragEnabled]);
 
   return {
     handleLineSelect,

@@ -59,10 +59,21 @@ export function useSelection() {
     [selectedLines]
   );
 
+  // NEW: Select all lines functionality for Alt-A
+  const selectAll = useCallback((totalLines) => {
+    const allLines = new Set();
+    for (let i = 0; i < totalLines; i++) {
+      allLines.add(i);
+    }
+    setSelectedLines(allLines);
+    setLastSelectedLine(totalLines > 0 ? totalLines - 1 : null); // Set last selected to final line
+  }, []);
+
   return {
     selectedLines,
     handleSelect,
     clearSelection,
+    selectAll, // NEW: Add selectAll to the hook interface
     isSelected,
   };
 }
