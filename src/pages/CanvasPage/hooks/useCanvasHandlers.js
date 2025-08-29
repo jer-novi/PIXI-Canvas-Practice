@@ -42,6 +42,19 @@ export function useCanvasHandlers(canvasState) {
     }
   }, [selectedLine, setLineOverrides]);
 
+  // Line letter spacing change for selected line
+  const handleLineLetterSpacingChange = useCallback((spacing) => {
+    if (selectedLine !== null) {
+      setLineOverrides(prev => ({
+        ...prev,
+        [selectedLine]: {
+          ...prev[selectedLine],
+          letterSpacing: spacing
+        }
+      }));
+    }
+  }, [selectedLine, setLineOverrides]);
+
   // Reset individual line style
   const handleResetSelectedLine = useCallback(() => {
     if (selectedLine !== null) {
@@ -52,6 +65,25 @@ export function useCanvasHandlers(canvasState) {
       });
     }
   }, [selectedLine, setLineOverrides]);
+
+  // Apply global letter spacing to all lines (reset all individual overrides)
+  const handleApplyGlobalLetterSpacing = useCallback(() => {
+    setLineOverrides(prev => {
+      const next = { ...prev };
+      // Remove all letterSpacing overrides from all lines
+      Object.keys(next).forEach(lineIndex => {
+        if (next[lineIndex]?.letterSpacing !== undefined) {
+          const { letterSpacing, ...rest } = next[lineIndex];
+          if (Object.keys(rest).length === 0) {
+            delete next[lineIndex];
+          } else {
+            next[lineIndex] = rest;
+          }
+        }
+      });
+      return next;
+    });
+  }, [setLineOverrides]);
 
   // Viewport control
   const handleViewportToggle = useCallback((enabled) => {
@@ -128,7 +160,9 @@ export function useCanvasHandlers(canvasState) {
   return {
     handleLineSelect,
     handleLineColorChange,
+    handleLineLetterSpacingChange,
     handleResetSelectedLine,
+    handleApplyGlobalLetterSpacing,
     handleViewportToggle,
     handleColorPickerActiveChange,
     handleFontSizeChange,

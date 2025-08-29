@@ -17,7 +17,10 @@ export default function Controls({
   onTextAlignChange,
   selectedLine,
   onLineColorChange,
+  onLineLetterSpacingChange,
   onResetSelectedLine,
+  onApplyGlobalLetterSpacing,
+  lineOverrides,
   viewportDragEnabled,
   onViewportToggle,
   onColorPickerActiveChange,
@@ -32,6 +35,15 @@ export default function Controls({
 
   // Track color picker active state
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
+
+  // Calculate current letter spacing value (global or line-specific)
+  const currentLetterSpacing = selectedLine !== null
+    ? (lineOverrides?.[selectedLine]?.letterSpacing ?? letterSpacing)
+    : letterSpacing;
+
+  // Check if there are any letter spacing overrides
+  const hasLetterSpacingOverrides = lineOverrides &&
+    Object.values(lineOverrides).some(override => override?.letterSpacing !== undefined);
 
   const scheduleColorUpdate = (color) => {
     pendingColorRef.current = color;
@@ -129,18 +141,53 @@ export default function Controls({
         />
       </div>
 
-      {/* --- NIEUW: Letter Spacing Slider --- */}
-      <div className={styles.controlRow}>
-        <label htmlFor="letterSpacing">Letterafstand</label>
-        <input
-          type="range"
-          id="letterSpacing"
-          min="-5"
-          max="15"
-          value={`${letterSpacing}`} // Template literal converteert naar string
-          onChange={(e) => onLetterSpacingChange(Number(e.target.value))}
-        />
-        <span>{letterSpacing}px</span>
+      {/* --- Letter Spacing Slider (Adaptive for Line Selection) --- */}
+      <div
+        className={`${styles.controlRow} ${
+          selectedLine !== null ? styles.controlColumn : ""
+        }`}
+      >
+        <label htmlFor="letterSpacing">
+          {selectedLine !== null
+            ? `Lijn ${selectedLine + 1} Letterafstand`
+            : "Letterafstand"}
+        </label>
+        <div className={styles.spacingControls}>
+          <input
+            type="range"
+            id="letterSpacing"
+            min="-5"
+            max="15"
+            value={`${currentLetterSpacing}`}
+            onChange={(e) => {
+              const newSpacing = Number(e.target.value);
+              if (selectedLine !== null) {
+                onLineLetterSpacingChange(newSpacing);
+              } else {
+                onLetterSpacingChange(newSpacing);
+              }
+            }}
+          />
+          <span>{currentLetterSpacing}px</span>
+          {selectedLine !== null && (
+            <div className={styles.lineControls}>
+              <span className={styles.hintText}>
+                Selecteer geen lijn voor globale letterafstand
+              </span>
+            </div>
+          )}
+          {selectedLine === null && hasLetterSpacingOverrides && (
+            <div className={styles.lineControls}>
+              <button
+                type="button"
+                className={styles.resetButton}
+                onClick={onApplyGlobalLetterSpacing}
+              >
+                Pas globaal toe
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* --- NIEUW: Line Height Multiplier Slider (vertical layout) --- */}

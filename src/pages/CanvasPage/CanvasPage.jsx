@@ -53,7 +53,10 @@ export default function CanvasPage() {
             onTextAlignChange={canvasState.setTextAlign}
             selectedLine={canvasState.selectedLine}
             onLineColorChange={handlers.handleLineColorChange}
+            onLineLetterSpacingChange={handlers.handleLineLetterSpacingChange}
             onResetSelectedLine={handlers.handleResetSelectedLine}
+            onApplyGlobalLetterSpacing={handlers.handleApplyGlobalLetterSpacing}
+            lineOverrides={canvasState.lineOverrides}
             viewportDragEnabled={canvasState.viewportDragEnabled}
             onViewportToggle={handlers.handleViewportToggle}
             onColorPickerActiveChange={handlers.handleColorPickerActiveChange}
