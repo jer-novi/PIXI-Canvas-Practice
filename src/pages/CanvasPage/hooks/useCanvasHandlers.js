@@ -1,3 +1,5 @@
+// src/pages/CanvasPage/hooks/useCanvasHandlers.js
+
 import { useCallback, useEffect } from "react";
 import {
   handleFontSizeChangeUtil,
@@ -7,8 +9,10 @@ import {
 
 export function useCanvasHandlers(canvasState) {
   const {
-    selectedLine,
-    setSelectedLine,
+    selectedLines, // <-- We hebben nu de Set met selecties nodig
+
+    handleSelect, // <-- Nieuwe handler uit useSelection
+    clearSelection, // <-- Nieuwe handler uit useSelection
     lineOverrides,
     setLineOverrides,
     viewportDragEnabled,
@@ -23,120 +27,141 @@ export function useCanvasHandlers(canvasState) {
     setUserHasAdjusted,
   } = canvasState;
 
-  // Line selection handler
-  const handleLineSelect = useCallback((index) => {
-    console.log(`Line ${index} selected`);
-    setSelectedLine((prev) => (prev === index ? null : index));
-  }, [setSelectedLine]);
+  // Line selection handler is nu een simpele doorgever
+  const handleLineSelect = useCallback(
+    (index, event) => {
+      handleSelect(index, event);
+    },
+    [handleSelect]
+  );
 
-  // Line color change for selected line
-  const handleLineColorChange = useCallback((color) => {
-    if (selectedLine !== null) {
-      setLineOverrides(prev => ({
-        ...prev,
-        [selectedLine]: {
-          ...prev[selectedLine],
-          fillColor: color
-        }
-      }));
-    }
-  }, [selectedLine, setLineOverrides]);
+  // Past kleur toe op ALLE geselecteerde regels
+  const handleLineColorChange = useCallback(
+    (color) => {
+      if (selectedLines.size > 0) {
+        setLineOverrides((prev) => {
+          const newOverrides = { ...prev };
+          selectedLines.forEach((index) => {
+            newOverrides[index] = { ...newOverrides[index], fillColor: color };
+          });
+          return newOverrides;
+        });
+      }
+    },
+    [selectedLines, setLineOverrides]
+  );
 
-  // Line letter spacing change for selected line
-  const handleLineLetterSpacingChange = useCallback((spacing) => {
-    if (selectedLine !== null) {
-      setLineOverrides(prev => ({
-        ...prev,
-        [selectedLine]: {
-          ...prev[selectedLine],
-          letterSpacing: spacing
-        }
-      }));
-    }
-  }, [selectedLine, setLineOverrides]);
-
-  // Reset individual line style
-  const handleResetSelectedLine = useCallback(() => {
-    if (selectedLine !== null) {
-      setLineOverrides(prev => {
-        const next = { ...prev };
-        delete next[selectedLine];
-        return next;
+  // Reset de stijl voor ALLE geselecteerde regels
+  const handleResetSelectedLines = useCallback(() => {
+    if (selectedLines.size > 0) {
+      setLineOverrides((prev) => {
+        const newOverrides = { ...prev };
+        selectedLines.forEach((index) => {
+          // Verwijder de hele override voor de geselecteerde regel
+          // Simpeler dan individuele properties verwijderen
+          delete newOverrides[index];
+        });
+        return newOverrides;
       });
+      clearSelection(); // Deselecteer na het resetten
     }
-  }, [selectedLine, setLineOverrides]);
-
-  // Apply global letter spacing to all lines (reset all individual overrides)
-  const handleApplyGlobalLetterSpacing = useCallback(() => {
-    setLineOverrides(prev => {
-      const next = { ...prev };
-      // Remove all letterSpacing overrides from all lines
-      Object.keys(next).forEach(lineIndex => {
-        if (next[lineIndex]?.letterSpacing !== undefined) {
-          const { letterSpacing, ...rest } = next[lineIndex];
-          if (Object.keys(rest).length === 0) {
-            delete next[lineIndex];
-          } else {
-            next[lineIndex] = rest;
-          }
-        }
-      });
-      return next;
-    });
-  }, [setLineOverrides]);
+  }, [selectedLines, setLineOverrides, clearSelection]);
 
   // Viewport control
-  const handleViewportToggle = useCallback((enabled) => {
-    setViewportDragEnabled(enabled);
-    console.log(`Viewport dragging: ${enabled ? 'enabled' : 'disabled'}`);
-  }, [setViewportDragEnabled]);
+  const handleViewportToggle = useCallback(
+    (enabled) => {
+      setViewportDragEnabled(enabled);
+    },
+    [setViewportDragEnabled]
+  );
 
   // Color picker active state
-  const handleColorPickerActiveChange = useCallback((isActive) => {
-    canvasState.setIsColorPickerActive(isActive);
-  }, [canvasState]);
+  const handleColorPickerActiveChange = useCallback(
+    (isActive) => {
+      canvasState.setIsColorPickerActive(isActive);
+    },
+    [canvasState]
+  );
 
-  // Font size change with utility
-  const handleFontSizeChange = useCallback((newSize) =>
-    handleFontSizeChangeUtil(newSize, {
-      userHasAdjusted,
-      lineHeightMultiplier,
-      setFontSize,
-      setLineHeight,
-    }), [userHasAdjusted, lineHeightMultiplier, setFontSize, setLineHeight]);
+  // Font size, line height, etc. blijven hetzelfde...
+  const handleFontSizeChange = useCallback(
+    (newSize) =>
+      handleFontSizeChangeUtil(newSize, {
+        userHasAdjusted,
+        lineHeightMultiplier,
+        setFontSize,
+        setLineHeight,
+      }),
+    [userHasAdjusted, lineHeightMultiplier, setFontSize, setLineHeight]
+  );
 
-  // Line height change with utility
-  const handleLineHeightChange = useCallback((newHeight) =>
-    handleLineHeightChangeUtil(newHeight, {
+  const handleLineHeightChange = useCallback(
+    (newHeight) =>
+      handleLineHeightChangeUtil(newHeight, {
+        userHasAdjusted,
+        setUserHasAdjusted,
+        setLineHeight,
+        fontSize,
+        setLineHeightMultiplier,
+      }),
+    [
       userHasAdjusted,
       setUserHasAdjusted,
       setLineHeight,
       fontSize,
       setLineHeightMultiplier,
-    }), [userHasAdjusted, setUserHasAdjusted, setLineHeight, fontSize, setLineHeightMultiplier]);
+    ]
+  );
 
-  // Reset line height
-  const handleResetLineHeight = useCallback(() =>
-    resetLineHeightUtil({
-      currentFontSize: fontSize,
-      defaultMultiplier: 1.4,
-      setLineHeight,
-      setLineHeightMultiplier,
+  const handleResetLineHeight = useCallback(
+    () =>
+      resetLineHeightUtil({
+        currentFontSize: fontSize,
+        setLineHeight,
+        setLineHeightMultiplier,
+        setUserHasAdjusted,
+      }),
+    [fontSize, setLineHeight, setLineHeightMultiplier, setUserHasAdjusted]
+  );
+
+  const handleLineHeightMultiplierChange = useCallback(
+    (newMultiplier) => {
+      if (!userHasAdjusted) setUserHasAdjusted(true);
+      setLineHeightMultiplier(newMultiplier);
+      setLineHeight(fontSize * newMultiplier);
+    },
+    [
+      userHasAdjusted,
       setUserHasAdjusted,
-    }), [fontSize, setLineHeight, setLineHeightMultiplier, setUserHasAdjusted]);
+      setLineHeightMultiplier,
+      setLineHeight,
+      fontSize,
+    ]
+  );
 
-  // Line height multiplier change
-  const handleLineHeightMultiplierChange = useCallback((newMultiplier) => {
-    if (!userHasAdjusted) setUserHasAdjusted(true);
-    setLineHeightMultiplier(newMultiplier);
-    setLineHeight(fontSize * newMultiplier);
-  }, [userHasAdjusted, setUserHasAdjusted, setLineHeightMultiplier, setLineHeight, fontSize]);
+  const handleLineLetterSpacingChange = useCallback(
+    (spacing) => {
+      if (selectedLines.size > 0) {
+        setLineOverrides((prev) => {
+          const newOverrides = { ...prev };
+          selectedLines.forEach((index) => {
+            newOverrides[index] = {
+              ...newOverrides[index],
+              letterSpacing: spacing,
+            };
+          });
+          return newOverrides;
+        });
+      }
+    },
+    [selectedLines, setLineOverrides]
+  );
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') {
-        setSelectedLine(null);
+      if (event.key === "Escape") {
+        clearSelection(); // <-- Gebruik de nieuwe clearSelection functie
       }
       if (event.ctrlKey && !viewportDragEnabled) {
         setViewportDragEnabled(true);
@@ -149,20 +174,19 @@ export function useCanvasHandlers(canvasState) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [viewportDragEnabled, setSelectedLine, setViewportDragEnabled]);
+  }, [viewportDragEnabled, clearSelection, setViewportDragEnabled]);
 
   return {
     handleLineSelect,
     handleLineColorChange,
     handleLineLetterSpacingChange,
-    handleResetSelectedLine,
-    handleApplyGlobalLetterSpacing,
+    handleResetSelectedLines, // <-- Hernoemd voor duidelijkheid
     handleViewportToggle,
     handleColorPickerActiveChange,
     handleFontSizeChange,

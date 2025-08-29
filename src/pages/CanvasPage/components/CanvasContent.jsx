@@ -22,7 +22,7 @@ export function CanvasContent({
   authorColor,
   viewportRef,
   contentRef,
-  selectedLine,
+  selectedLines,
   onLineSelect,
   viewportDragEnabled,
   lineOverrides,
@@ -104,10 +104,10 @@ export function CanvasContent({
       if (viewportDragEnabled) {
         viewport.drag().pinch().wheel().decelerate();
       } else {
-        viewport.plugins.remove('drag');
-        viewport.plugins.remove('pinch');
-        viewport.plugins.remove('wheel');
-        viewport.plugins.remove('decelerate');
+        viewport.plugins.remove("drag");
+        viewport.plugins.remove("pinch");
+        viewport.plugins.remove("wheel");
+        viewport.plugins.remove("decelerate");
       }
     }
   }, [viewportDragEnabled]);
@@ -143,11 +143,16 @@ export function CanvasContent({
     authorColor,
   };
 
-  const { titleStyle, authorStyle, lineStyle } = useTextStyles(fontLoaded, globalStyles);
+  const { titleStyle, authorStyle, lineStyle } = useTextStyles(
+    fontLoaded,
+    globalStyles
+  );
 
   // Loading state
   if (!fontLoaded || !currentPoem) {
-    const message = !fontLoaded ? "Lettertype laden..." : "Geen gedicht gekozen.";
+    const message = !fontLoaded
+      ? "Lettertype laden..."
+      : "Geen gedicht gekozen.";
     return (
       <pixiText
         text={message}
@@ -204,8 +209,10 @@ export function CanvasContent({
             y={textPosition.poemStartY + index * lineHeight}
             baseStyle={lineStyle}
             lineOverrides={lineOverrides[index]}
-            isSelected={selectedLine === index}
-            onSelect={() => onLineSelect(index)}
+            //isSelected={selectedLine === index} // <-- OUDE LOGICA
+            isSelected={selectedLines.has(index)} // <-- NIEUWE LOGICA
+            //onSelect={() => onLineSelect(index)} // <-- OUDE LOGICA
+            onSelect={(event) => onLineSelect(index, event)} // <-- NIEUWE LOGICA: geef event door!
             anchorX={anchorX}
             isColorPickerActive={isColorPickerActive}
           />

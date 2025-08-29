@@ -1,4 +1,7 @@
+// src/pages/CanvasPage/hooks/useCanvasState.js
+
 import { useState, useRef } from "react";
+import { useSelection } from "./useSelection"; // <-- STAP 2.1: Importeer de hook
 
 export function useCanvasState() {
   // Refs
@@ -6,7 +9,9 @@ export function useCanvasState() {
   const contentRef = useRef(null);
 
   // UI State
-  const [selectedLine, setSelectedLine] = useState(null);
+  // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
+  const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
+
   const [viewportDragEnabled, setViewportDragEnabled] = useState(false);
   const [lineOverrides, setLineOverrides] = useState({});
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
@@ -30,8 +35,7 @@ export function useCanvasState() {
     contentRef,
 
     // UI State
-    selectedLine,
-    setSelectedLine,
+    ...selection, // <-- STAP 2.4: Voeg alle selection state & handlers toe
     viewportDragEnabled,
     setViewportDragEnabled,
     lineOverrides,

@@ -47,14 +47,16 @@ export default function CanvasPage() {
             lineHeight={canvasState.lineHeight}
             onLineHeightChange={handlers.handleLineHeightChange}
             lineHeightMultiplier={canvasState.lineHeightMultiplier}
-            onLineHeightMultiplierChange={handlers.handleLineHeightMultiplierChange}
+            onLineHeightMultiplierChange={
+              handlers.handleLineHeightMultiplierChange
+            }
             onResetLineHeight={handlers.handleResetLineHeight}
             textAlign={canvasState.textAlign}
             onTextAlignChange={canvasState.setTextAlign}
-            selectedLine={canvasState.selectedLine}
+            selectedLines={canvasState.selectedLines}
             onLineColorChange={handlers.handleLineColorChange}
             onLineLetterSpacingChange={handlers.handleLineLetterSpacingChange}
-            onResetSelectedLine={handlers.handleResetSelectedLine}
+            handleResetSelectedLines={handlers.handleResetSelectedLines}
             onApplyGlobalLetterSpacing={handlers.handleApplyGlobalLetterSpacing}
             lineOverrides={canvasState.lineOverrides}
             viewportDragEnabled={canvasState.viewportDragEnabled}
@@ -88,7 +90,7 @@ export default function CanvasPage() {
               authorColor={canvasState.authorColor}
               viewportRef={canvasState.viewportRef}
               contentRef={canvasState.contentRef}
-              selectedLine={canvasState.selectedLine}
+              selectedLines={canvasState.selectedLines}
               onLineSelect={handlers.handleLineSelect}
               viewportDragEnabled={canvasState.viewportDragEnabled}
               lineOverrides={canvasState.lineOverrides}
