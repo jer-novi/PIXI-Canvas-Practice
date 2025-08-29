@@ -62,7 +62,6 @@ export default function CanvasPage() {
             viewportDragEnabled={canvasState.viewportDragEnabled}
             onViewportToggle={handlers.handleViewportToggle}
             onColorPickerActiveChange={handlers.handleColorPickerActiveChange}
-            
             // Hierarchical color system props
             effectiveTitleColor={canvasState.effectiveTitleColor}
             effectiveAuthorColor={canvasState.effectiveAuthorColor}
@@ -73,10 +72,12 @@ export default function CanvasPage() {
             onResetTitleColor={handlers.handleResetTitleColor}
             onResetAuthorColor={handlers.handleResetAuthorColor}
             onSyncAllColorsToGlobal={handlers.handleSyncAllColorsToGlobal}
-            
             // Deprecated: keeping for backward compatibility
             titleColor={canvasState.titleColor}
             authorColor={canvasState.authorColor}
+            availableFonts={canvasState.availableFonts}
+            fontFamily={canvasState.fontFamily}
+            onFontFamilyChange={handlers.handleFontFamilyChange}
           />
         }
         canvas={
@@ -101,10 +102,12 @@ export default function CanvasPage() {
               authorColor={canvasState.effectiveAuthorColor}
               viewportRef={canvasState.viewportRef}
               contentRef={canvasState.contentRef}
-              selectedLines={canvasState.selectedLines}
+              fontFamily={canvasState.fontFamily}
+              onFontFamilyChange={handlers.handleFontFamilyChange}
+              selectedLines={canvasState.selectedLines} // Was er al
+              lineOverrides={canvasState.lineOverrides} // Was er al
               onLineSelect={handlers.handleLineSelect}
               viewportDragEnabled={canvasState.viewportDragEnabled}
-              lineOverrides={canvasState.lineOverrides}
               isColorPickerActive={canvasState.isColorPickerActive}
             />
           </Application>

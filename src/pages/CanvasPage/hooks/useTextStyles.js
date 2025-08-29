@@ -14,6 +14,7 @@ export function useTextStyles(
     // Hierarchical color system: use override if exists, otherwise use global color
     const baseTitleColor = globalStyles?.effectiveTitleColor || baseFillColor;
     const baseAuthorColor = globalStyles?.effectiveAuthorColor || baseFillColor;
+    const fontFamily = globalStyles?.fontFamily || "Cormorant Garamond";
 
     if (!fontLoaded) {
       return {

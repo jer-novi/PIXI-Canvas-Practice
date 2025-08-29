@@ -18,14 +18,12 @@ export default function Controls({
   onResetLineHeight,
   textAlign,
   onTextAlignChange,
-  selectedLines, // <-- Nieuw: Set object
-  lineOverrides, // <-- Nieuw: voor het tonen van override-waardes
   onLineColorChange,
   handleResetSelectedLines, // <-- Hernoemde handler
   viewportDragEnabled,
   onViewportToggle,
   onColorPickerActiveChange,
-  
+
   // Hierarchical color system properties
   effectiveTitleColor,
   effectiveAuthorColor,
@@ -36,29 +34,43 @@ export default function Controls({
   onResetTitleColor,
   onResetAuthorColor,
   onSyncAllColorsToGlobal,
-  
+
   // Deprecated: keeping for backward compatibility
   titleColor,
   authorColor,
+
+  fontFamily,
+  onFontFamilyChange,
+  availableFonts,
+
+  // We hebben deze ook nodig om de juiste 'value' te tonen
+  selectedLines,
+  lineOverrides,
 }) {
-  // Afgeleide state voor de UI
   const selectionCount = selectedLines.size;
   const hasSelection = selectionCount > 0;
   const singleSelectedLineIndex =
     selectionCount === 1 ? selectedLines.values().next().value : null;
 
-  // Bepaal welke kleur getoond wordt in de kleurkiezer
+  // Bepaal welke kleur getoond wordt
   const displayedColor =
     singleSelectedLineIndex !== null
-      ? lineOverrides[singleSelectedLineIndex]?.fillColor ?? fillColor // Override of globale kleur
-      : fillColor; // Globale kleur bij geen of meervoudige selectie
+      ? lineOverrides[singleSelectedLineIndex]?.fillColor ?? fillColor
+      : fillColor;
 
+  // Bepaal welke letterafstand getoond wordt
   const displayedLetterSpacing =
     singleSelectedLineIndex !== null
       ? lineOverrides[singleSelectedLineIndex]?.letterSpacing ?? letterSpacing
       : letterSpacing;
 
-  // Handler voor de kleurkiezer
+  // ✅ CORRECT: Bepaal hier welk lettertype getoond wordt
+  const displayedFontFamily =
+    singleSelectedLineIndex !== null
+      ? lineOverrides[singleSelectedLineIndex]?.fontFamily ?? fontFamily
+      : fontFamily;
+
+  // De handleColorInput functie wordt weer simpel
   const handleColorInput = (color) => {
     if (hasSelection) {
       onLineColorChange(color);
@@ -70,6 +82,23 @@ export default function Controls({
   return (
     <div className={styles.controlsWrapper}>
       <h2>Styling Controls</h2>
+
+      {/* --- NIEUW: Font Family Dropdown --- */}
+      <div className={styles.controlRow}>
+        <label htmlFor="fontFamily">Lettertype</label>
+        <select
+          id="fontFamily"
+          value={displayedFontFamily}
+          onChange={(e) => onFontFamilyChange(e.target.value)}
+          style={{ width: "100%", padding: "4px" }} // simpele styling
+        >
+          {availableFonts.map((font) => (
+            <option key={font.name} value={font.value}>
+              {font.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {/* ... (fontSize, letterSpacing, etc. blijven hetzelfde voor nu) ... */}
       <div className={styles.controlRow}>
@@ -147,7 +176,10 @@ export default function Controls({
           <span className={styles.labelText}>Titel Kleur</span>
           <span className={styles.colorIndicator}>
             {hasTitleColorOverride ? (
-              <span title="Specifieke titel kleur actief" className={styles.overrideActive}>
+              <span
+                title="Specifieke titel kleur actief"
+                className={styles.overrideActive}
+              >
                 ⚙️
               </span>
             ) : (
@@ -163,10 +195,17 @@ export default function Controls({
             id="titleColor"
             value={effectiveTitleColor}
             onChange={(e) => {
-              console.log("🔴 TITLE onChange triggered! Value:", e.target.value);
+              console.log(
+                "🔴 TITLE onChange triggered! Value:",
+                e.target.value
+              );
               onTitleColorChange(e.target.value);
             }}
-            title={hasTitleColorOverride ? "Specifieke titel kleur" : "Klik om titel kleur aan te passen (overschrijft globaal)"}
+            title={
+              hasTitleColorOverride
+                ? "Specifieke titel kleur"
+                : "Klik om titel kleur aan te passen (overschrijft globaal)"
+            }
           />
           {hasTitleColorOverride && (
             <button
@@ -187,7 +226,10 @@ export default function Controls({
           <span className={styles.labelText}>Auteur Kleur</span>
           <span className={styles.colorIndicator}>
             {hasAuthorColorOverride ? (
-              <span title="Specifieke auteur kleur actief" className={styles.overrideActive}>
+              <span
+                title="Specifieke auteur kleur actief"
+                className={styles.overrideActive}
+              >
                 ⚙️
               </span>
             ) : (
@@ -203,7 +245,11 @@ export default function Controls({
             id="authorColor"
             value={effectiveAuthorColor}
             onChange={(e) => onAuthorColorChange(e.target.value)}
-            title={hasAuthorColorOverride ? "Specifieke auteur kleur" : "Klik om auteur kleur aan te passen (overschrijft globaal)"}
+            title={
+              hasAuthorColorOverride
+                ? "Specifieke auteur kleur"
+                : "Klik om auteur kleur aan te passen (overschrijft globaal)"
+            }
           />
           {hasAuthorColorOverride && (
             <button

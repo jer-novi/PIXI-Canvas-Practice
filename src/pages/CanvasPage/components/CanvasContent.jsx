@@ -27,6 +27,7 @@ export function CanvasContent({
   viewportDragEnabled,
   lineOverrides,
   isColorPickerActive,
+  fontFamily,
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -141,6 +142,7 @@ export function CanvasContent({
     textAlign,
     effectiveTitleColor: titleColor,
     effectiveAuthorColor: authorColor,
+    fontFamily, // <-- 2. Voeg de prop hier toe aan het object
   };
 
   const { titleStyle, authorStyle, lineStyle } = useTextStyles(

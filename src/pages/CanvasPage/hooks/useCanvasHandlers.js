@@ -16,13 +16,9 @@ export function useCanvasHandlers(canvasState) {
   const currentPoem = poemId ? getPoemById(poemId) : null;
 
   const {
-    selectedLines, // <-- We hebben nu de Set met selecties nodig
-
     handleSelect, // <-- Nieuwe handler uit useSelection
     clearSelection, // <-- Nieuwe handler uit useSelection
     selectAll, // <-- NEW: Add selectAll function
-    lineOverrides,
-    setLineOverrides,
     viewportDragEnabled,
     setViewportDragEnabled,
     fontSize,
@@ -33,13 +29,20 @@ export function useCanvasHandlers(canvasState) {
     setLineHeightMultiplier,
     userHasAdjusted,
     setUserHasAdjusted,
-    
+
     // Hierarchical color system
     titleColorOverride,
     setTitleColorOverride,
     authorColorOverride,
     setAuthorColorOverride,
     fillColor,
+    fontFamily, // <-- Voeg deze toe om de globale waarde te kennen
+    setFontFamily, // <-- Nieuw
+    loadFont, // <-- Nieuw, van de font manager
+    selectedLines, // <-- Belangrijk voor per-regel logica
+    lineOverrides, // <-- DEZE TOEVOEGEN
+
+    setLineOverrides, // <-- Belangrijk voor per-regel logica
   } = canvasState;
 
   // Line selection handler is nu een simpele doorgever
@@ -173,15 +176,21 @@ export function useCanvasHandlers(canvasState) {
   );
 
   // Hierarchical color system handlers
-  const handleTitleColorChange = useCallback((color) => {
-    console.log("🎯 handleTitleColorChange called with:", color);
-    setTitleColorOverride(color);
-    console.log("🎯 setTitleColorOverride called");
-  }, [setTitleColorOverride]);
+  const handleTitleColorChange = useCallback(
+    (color) => {
+      console.log("🎯 handleTitleColorChange called with:", color);
+      setTitleColorOverride(color);
+      console.log("🎯 setTitleColorOverride called");
+    },
+    [setTitleColorOverride]
+  );
 
-  const handleAuthorColorChange = useCallback((color) => {
-    setAuthorColorOverride(color);
-  }, [setAuthorColorOverride]);
+  const handleAuthorColorChange = useCallback(
+    (color) => {
+      setAuthorColorOverride(color);
+    },
+    [setAuthorColorOverride]
+  );
 
   const handleResetTitleColor = useCallback(() => {
     setTitleColorOverride(null);
@@ -195,37 +204,47 @@ export function useCanvasHandlers(canvasState) {
     // Count existing overrides for confirmation
     const titleOverride = titleColorOverride !== null;
     const authorOverride = authorColorOverride !== null;
-    const lineColorOverrides = Object.values(lineOverrides).filter(override => override.fillColor).length;
-    
-    const totalOverrides = (titleOverride ? 1 : 0) + (authorOverride ? 1 : 0) + lineColorOverrides;
-    
+    const lineColorOverrides = Object.values(lineOverrides).filter(
+      (override) => override.fillColor
+    ).length;
+
+    const totalOverrides =
+      (titleOverride ? 1 : 0) + (authorOverride ? 1 : 0) + lineColorOverrides;
+
     if (totalOverrides === 0) {
       alert("Er zijn geen kleur overrides om te resetten.");
       return;
     }
-    
+
     // Simple confirmation dialog
-    const confirmMessage = `Dit zal ${totalOverrides} kleur override${totalOverrides === 1 ? '' : 's'} verwijderen:\n\n` +
+    const confirmMessage =
+      `Dit zal ${totalOverrides} kleur override${
+        totalOverrides === 1 ? "" : "s"
+      } verwijderen:\n\n` +
       (titleOverride ? "• Titel kleur override\n" : "") +
       (authorOverride ? "• Auteur kleur override\n" : "") +
-      (lineColorOverrides > 0 ? `• ${lineColorOverrides} gedichtregels kleur override${lineColorOverrides === 1 ? '' : 's'}\n` : "") +
+      (lineColorOverrides > 0
+        ? `• ${lineColorOverrides} gedichtregels kleur override${
+            lineColorOverrides === 1 ? "" : "s"
+          }\n`
+        : "") +
       "\nAlle kleuren zullen de globale kleur volgen. Doorgaan?";
-    
+
     if (!confirm(confirmMessage)) {
       return;
     }
-    
+
     // Reset title and author to global color
     setTitleColorOverride(null);
     setAuthorColorOverride(null);
-    
+
     // Reset all line overrides to only keep non-color properties
     setLineOverrides((prev) => {
       const newOverrides = { ...prev };
-      Object.keys(newOverrides).forEach(index => {
+      Object.keys(newOverrides).forEach((index) => {
         const override = { ...newOverrides[index] };
         delete override.fillColor; // Remove color override
-        
+
         // If no other overrides remain, remove the entire entry
         if (Object.keys(override).length === 0) {
           delete newOverrides[index];
@@ -235,7 +254,40 @@ export function useCanvasHandlers(canvasState) {
       });
       return newOverrides;
     });
-  }, [titleColorOverride, authorColorOverride, lineOverrides, setTitleColorOverride, setAuthorColorOverride, setLineOverrides]);
+  }, [
+    titleColorOverride,
+    authorColorOverride,
+    lineOverrides,
+    setTitleColorOverride,
+    setAuthorColorOverride,
+    setLineOverrides,
+  ]);
+
+  const handleFontFamilyChange = useCallback(
+    (newFontFamily) => {
+      // Taak 1: Zorg dat het lettertype geladen wordt (dit gebeurt altijd)
+      loadFont(newFontFamily);
+
+      // Taak 2: Pas het lettertype toe, afhankelijk van de selectie
+      if (selectedLines.size > 0) {
+        // SCENARIO 1: Er zijn regels geselecteerd
+        setLineOverrides((prevOverrides) => {
+          const newOverrides = { ...prevOverrides };
+          selectedLines.forEach((index) => {
+            newOverrides[index] = {
+              ...newOverrides[index],
+              fontFamily: newFontFamily,
+            };
+          });
+          return newOverrides;
+        });
+      } else {
+        // SCENARIO 2: Er zijn geen regels geselecteerd
+        setFontFamily(newFontFamily);
+      }
+    },
+    [loadFont, setFontFamily, selectedLines, setLineOverrides]
+  ); // Dependencies bijgewerkt
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -243,7 +295,7 @@ export function useCanvasHandlers(canvasState) {
       if (event.key === "Escape") {
         clearSelection(); // <-- Gebruik de nieuwe clearSelection functie
       }
-      
+
       // NEW: Alt-A select all functionality
       if (event.altKey && event.key === "a") {
         event.preventDefault(); // Prevent browser Alt-A behavior
@@ -251,7 +303,7 @@ export function useCanvasHandlers(canvasState) {
           selectAll(currentPoem.lines.length);
         }
       }
-      
+
       if (event.ctrlKey && !viewportDragEnabled) {
         setViewportDragEnabled(true);
       }
@@ -269,7 +321,13 @@ export function useCanvasHandlers(canvasState) {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [viewportDragEnabled, clearSelection, selectAll, currentPoem, setViewportDragEnabled]);
+  }, [
+    viewportDragEnabled,
+    clearSelection,
+    selectAll,
+    currentPoem,
+    setViewportDragEnabled,
+  ]);
 
   return {
     handleLineSelect,
@@ -282,12 +340,13 @@ export function useCanvasHandlers(canvasState) {
     handleLineHeightChange,
     handleResetLineHeight,
     handleLineHeightMultiplierChange,
-    
+
     // Hierarchical color system handlers
     handleTitleColorChange,
     handleAuthorColorChange,
     handleResetTitleColor,
     handleResetAuthorColor,
     handleSyncAllColorsToGlobal,
+    handleFontFamilyChange, // <-- Exporteer de nieuwe handlerv
   };
 }
