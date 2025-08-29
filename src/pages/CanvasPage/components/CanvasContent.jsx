@@ -139,8 +139,8 @@ export function CanvasContent({
     letterSpacing,
     lineHeight,
     textAlign,
-    titleColor,
-    authorColor,
+    effectiveTitleColor: titleColor,
+    effectiveAuthorColor: authorColor,
   };
 
   const { titleStyle, authorStyle, lineStyle } = useTextStyles(

@@ -10,8 +10,10 @@ export function useTextStyles(
     const baseFillColor = globalStyles?.fillColor || "white";
     const baseFontSize = globalStyles?.fontSize || 32;
     const baseLetterSpacing = globalStyles?.letterSpacing || 0;
-    const baseTitleColor = globalStyles?.titleColor || "#ffffff";
-    const baseAuthorColor = globalStyles?.authorColor || "#cccccc";
+    
+    // Hierarchical color system: use override if exists, otherwise use global color
+    const baseTitleColor = globalStyles?.effectiveTitleColor || baseFillColor;
+    const baseAuthorColor = globalStyles?.effectiveAuthorColor || baseFillColor;
 
     if (!fontLoaded) {
       return {

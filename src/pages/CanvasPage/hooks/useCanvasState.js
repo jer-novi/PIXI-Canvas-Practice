@@ -1,6 +1,6 @@
 // src/pages/CanvasPage/hooks/useCanvasState.js
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useSelection } from "./useSelection"; // <-- STAP 2.1: Importeer de hook
 
 export function useCanvasState() {
@@ -20,14 +20,38 @@ export function useCanvasState() {
   const [fontSize, setFontSize] = useState(36);
   const [fillColor, setFillColor] = useState("#ffffff");
   const [letterSpacing, setLetterSpacing] = useState(0);
+  
+  // Hierarchical color system: null means use global color, otherwise use override
+  const [titleColorOverride, setTitleColorOverride] = useState(null);
+  const [authorColorOverride, setAuthorColorOverride] = useState(null);
+  
+  // Deprecated: keeping for backward compatibility, will be removed
   const [titleColor, setTitleColor] = useState("#ffffff");
   const [authorColor, setAuthorColor] = useState("#cccccc");
+  
   const [lineHeight, setLineHeight] = useState(36 * 1.4);
   const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
   const [textAlign, setTextAlign] = useState("center");
 
   // Internal State
   const [userHasAdjusted, setUserHasAdjusted] = useState(false);
+
+  // Reactive computed values using useMemo
+  const effectiveTitleColor = useMemo(() => {
+    return titleColorOverride || fillColor;
+  }, [titleColorOverride, fillColor]);
+
+  const effectiveAuthorColor = useMemo(() => {
+    return authorColorOverride || fillColor;
+  }, [authorColorOverride, fillColor]);
+
+  const hasTitleColorOverride = useMemo(() => {
+    return titleColorOverride !== null;
+  }, [titleColorOverride]);
+
+  const hasAuthorColorOverride = useMemo(() => {
+    return authorColorOverride !== null;
+  }, [authorColorOverride]);
 
   return {
     // Refs
@@ -50,10 +74,25 @@ export function useCanvasState() {
     setFillColor,
     letterSpacing,
     setLetterSpacing,
+    
+    // Hierarchical color system
+    titleColorOverride,
+    setTitleColorOverride,
+    authorColorOverride,
+    setAuthorColorOverride,
+    
+    // Computed effective colors (now reactive)
+    effectiveTitleColor,
+    effectiveAuthorColor,
+    hasTitleColorOverride,
+    hasAuthorColorOverride,
+    
+    // Deprecated: keeping for backward compatibility
     titleColor,
     setTitleColor,
     authorColor,
     setAuthorColor,
+    
     lineHeight,
     setLineHeight,
     lineHeightMultiplier,

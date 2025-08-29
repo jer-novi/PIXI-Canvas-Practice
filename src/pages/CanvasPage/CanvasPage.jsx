@@ -62,10 +62,21 @@ export default function CanvasPage() {
             viewportDragEnabled={canvasState.viewportDragEnabled}
             onViewportToggle={handlers.handleViewportToggle}
             onColorPickerActiveChange={handlers.handleColorPickerActiveChange}
+            
+            // Hierarchical color system props
+            effectiveTitleColor={canvasState.effectiveTitleColor}
+            effectiveAuthorColor={canvasState.effectiveAuthorColor}
+            hasTitleColorOverride={canvasState.hasTitleColorOverride}
+            hasAuthorColorOverride={canvasState.hasAuthorColorOverride}
+            onTitleColorChange={handlers.handleTitleColorChange}
+            onAuthorColorChange={handlers.handleAuthorColorChange}
+            onResetTitleColor={handlers.handleResetTitleColor}
+            onResetAuthorColor={handlers.handleResetAuthorColor}
+            onSyncAllColorsToGlobal={handlers.handleSyncAllColorsToGlobal}
+            
+            // Deprecated: keeping for backward compatibility
             titleColor={canvasState.titleColor}
-            onTitleColorChange={canvasState.setTitleColor}
             authorColor={canvasState.authorColor}
-            onAuthorColorChange={canvasState.setAuthorColor}
           />
         }
         canvas={
@@ -86,8 +97,8 @@ export default function CanvasPage() {
               letterSpacing={canvasState.letterSpacing}
               lineHeight={canvasState.lineHeight}
               textAlign={canvasState.textAlign}
-              titleColor={canvasState.titleColor}
-              authorColor={canvasState.authorColor}
+              titleColor={canvasState.effectiveTitleColor}
+              authorColor={canvasState.effectiveAuthorColor}
               viewportRef={canvasState.viewportRef}
               contentRef={canvasState.contentRef}
               selectedLines={canvasState.selectedLines}

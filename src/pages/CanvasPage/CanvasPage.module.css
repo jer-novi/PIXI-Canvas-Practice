@@ -180,3 +180,117 @@
 .controlColumn .resetButton:hover {
   background: rgba(255, 255, 255, 0.15);
 }
+
+/* Hierarchical Color System Styling */
+.controlSection {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid #4a5568;
+  border-radius: 6px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.controlSection h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.syncButton {
+  background: linear-gradient(135deg, #4299e1, #3182ce);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.syncButton:hover {
+  background: linear-gradient(135deg, #3182ce, #2c5aa0);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.syncButton:active {
+  transform: translateY(0);
+}
+
+/* Color control label styling */
+.labelText {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.colorIndicator {
+  display: inline-block;
+  font-size: 0.8rem;
+}
+
+.overrideActive {
+  color: #f6ad55;
+  filter: drop-shadow(0 0 2px rgba(246, 173, 85, 0.3));
+}
+
+.globalActive {
+  color: #68d391;
+  filter: drop-shadow(0 0 2px rgba(104, 211, 145, 0.3));
+}
+
+/* Color controls container */
+.colorControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Reset color button styling */
+.resetColorButton {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.resetColorButton:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: rotate(-180deg);
+}
+
+.resetColorButton:active {
+  transform: rotate(-180deg) scale(0.95);
+}
+
+/* Enhanced tooltips styling */
+.controlRow [title]:hover {
+  position: relative;
+}
+
+/* Responsive adjustments for color controls */
+@media (max-width: 400px) {
+  .colorControls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+  
+  .resetColorButton {
+    align-self: flex-start;
+    margin-left: 0;
+  }
+}

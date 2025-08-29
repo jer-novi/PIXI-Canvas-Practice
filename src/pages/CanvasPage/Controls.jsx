@@ -25,10 +25,21 @@ export default function Controls({
   viewportDragEnabled,
   onViewportToggle,
   onColorPickerActiveChange,
-  titleColor,
+  
+  // Hierarchical color system properties
+  effectiveTitleColor,
+  effectiveAuthorColor,
+  hasTitleColorOverride,
+  hasAuthorColorOverride,
   onTitleColorChange,
-  authorColor,
   onAuthorColorChange,
+  onResetTitleColor,
+  onResetAuthorColor,
+  onSyncAllColorsToGlobal,
+  
+  // Deprecated: keeping for backward compatibility
+  titleColor,
+  authorColor,
 }) {
   // Afgeleide state voor de UI
   const selectionCount = selectedLines.size;
@@ -115,24 +126,96 @@ export default function Controls({
         </div>
       </div>
 
-      {/* ... (andere controls zoals Title, Author, etc.) ... */}
-      <div className={styles.controlRow}>
-        <label htmlFor="titleColor">Titel Kleur</label>
-        <input
-          type="color"
-          id="titleColor"
-          value={titleColor}
-          onChange={(e) => onTitleColorChange(e.target.value)}
-        />
+      {/* Global Color Sync Section */}
+      <div className={styles.controlSection}>
+        <h3>Globale Kleurinstellingen</h3>
+        <div className={styles.controlRow}>
+          <button
+            type="button"
+            className={styles.syncButton}
+            onClick={onSyncAllColorsToGlobal}
+            title="Synchroniseer alle kleuren met globale kleur (resets alle overrides)"
+          >
+            🔄 Sync Alle Kleuren
+          </button>
+        </div>
       </div>
+
+      {/* Hierarchical Title Color Control */}
       <div className={styles.controlRow}>
-        <label htmlFor="authorColor">Auteur Kleur</label>
-        <input
-          type="color"
-          id="authorColor"
-          value={authorColor}
-          onChange={(e) => onAuthorColorChange(e.target.value)}
-        />
+        <label htmlFor="titleColor">
+          <span className={styles.labelText}>Titel Kleur</span>
+          <span className={styles.colorIndicator}>
+            {hasTitleColorOverride ? (
+              <span title="Specifieke titel kleur actief" className={styles.overrideActive}>
+                ⚙️
+              </span>
+            ) : (
+              <span title="Volgt globale kleur" className={styles.globalActive}>
+                🔗
+              </span>
+            )}
+          </span>
+        </label>
+        <div className={styles.colorControls}>
+          <input
+            type="color"
+            id="titleColor"
+            value={effectiveTitleColor}
+            onChange={(e) => {
+              console.log("🔴 TITLE onChange triggered! Value:", e.target.value);
+              onTitleColorChange(e.target.value);
+            }}
+            title={hasTitleColorOverride ? "Specifieke titel kleur" : "Klik om titel kleur aan te passen (overschrijft globaal)"}
+          />
+          {hasTitleColorOverride && (
+            <button
+              type="button"
+              className={styles.resetColorButton}
+              onClick={onResetTitleColor}
+              title="Reset naar globale kleur"
+            >
+              ↺
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Hierarchical Author Color Control */}
+      <div className={styles.controlRow}>
+        <label htmlFor="authorColor">
+          <span className={styles.labelText}>Auteur Kleur</span>
+          <span className={styles.colorIndicator}>
+            {hasAuthorColorOverride ? (
+              <span title="Specifieke auteur kleur actief" className={styles.overrideActive}>
+                ⚙️
+              </span>
+            ) : (
+              <span title="Volgt globale kleur" className={styles.globalActive}>
+                🔗
+              </span>
+            )}
+          </span>
+        </label>
+        <div className={styles.colorControls}>
+          <input
+            type="color"
+            id="authorColor"
+            value={effectiveAuthorColor}
+            onChange={(e) => onAuthorColorChange(e.target.value)}
+            title={hasAuthorColorOverride ? "Specifieke auteur kleur" : "Klik om auteur kleur aan te passen (overschrijft globaal)"}
+          />
+          {hasAuthorColorOverride && (
+            <button
+              type="button"
+              className={styles.resetColorButton}
+              onClick={onResetAuthorColor}
+              title="Reset naar globale kleur"
+            >
+              ↺
+            </button>
+          )}
+        </div>
       </div>
       <div className={styles.controlRow}>
         <label htmlFor="letterSpacing">

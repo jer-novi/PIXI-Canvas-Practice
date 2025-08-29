@@ -33,6 +33,13 @@ export function useCanvasHandlers(canvasState) {
     setLineHeightMultiplier,
     userHasAdjusted,
     setUserHasAdjusted,
+    
+    // Hierarchical color system
+    titleColorOverride,
+    setTitleColorOverride,
+    authorColorOverride,
+    setAuthorColorOverride,
+    fillColor,
   } = canvasState;
 
   // Line selection handler is nu een simpele doorgever
@@ -165,6 +172,71 @@ export function useCanvasHandlers(canvasState) {
     [selectedLines, setLineOverrides]
   );
 
+  // Hierarchical color system handlers
+  const handleTitleColorChange = useCallback((color) => {
+    console.log("🎯 handleTitleColorChange called with:", color);
+    setTitleColorOverride(color);
+    console.log("🎯 setTitleColorOverride called");
+  }, [setTitleColorOverride]);
+
+  const handleAuthorColorChange = useCallback((color) => {
+    setAuthorColorOverride(color);
+  }, [setAuthorColorOverride]);
+
+  const handleResetTitleColor = useCallback(() => {
+    setTitleColorOverride(null);
+  }, [setTitleColorOverride]);
+
+  const handleResetAuthorColor = useCallback(() => {
+    setAuthorColorOverride(null);
+  }, [setAuthorColorOverride]);
+
+  const handleSyncAllColorsToGlobal = useCallback(() => {
+    // Count existing overrides for confirmation
+    const titleOverride = titleColorOverride !== null;
+    const authorOverride = authorColorOverride !== null;
+    const lineColorOverrides = Object.values(lineOverrides).filter(override => override.fillColor).length;
+    
+    const totalOverrides = (titleOverride ? 1 : 0) + (authorOverride ? 1 : 0) + lineColorOverrides;
+    
+    if (totalOverrides === 0) {
+      alert("Er zijn geen kleur overrides om te resetten.");
+      return;
+    }
+    
+    // Simple confirmation dialog
+    const confirmMessage = `Dit zal ${totalOverrides} kleur override${totalOverrides === 1 ? '' : 's'} verwijderen:\n\n` +
+      (titleOverride ? "• Titel kleur override\n" : "") +
+      (authorOverride ? "• Auteur kleur override\n" : "") +
+      (lineColorOverrides > 0 ? `• ${lineColorOverrides} gedichtregels kleur override${lineColorOverrides === 1 ? '' : 's'}\n` : "") +
+      "\nAlle kleuren zullen de globale kleur volgen. Doorgaan?";
+    
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+    
+    // Reset title and author to global color
+    setTitleColorOverride(null);
+    setAuthorColorOverride(null);
+    
+    // Reset all line overrides to only keep non-color properties
+    setLineOverrides((prev) => {
+      const newOverrides = { ...prev };
+      Object.keys(newOverrides).forEach(index => {
+        const override = { ...newOverrides[index] };
+        delete override.fillColor; // Remove color override
+        
+        // If no other overrides remain, remove the entire entry
+        if (Object.keys(override).length === 0) {
+          delete newOverrides[index];
+        } else {
+          newOverrides[index] = override;
+        }
+      });
+      return newOverrides;
+    });
+  }, [titleColorOverride, authorColorOverride, lineOverrides, setTitleColorOverride, setAuthorColorOverride, setLineOverrides]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -210,5 +282,12 @@ export function useCanvasHandlers(canvasState) {
     handleLineHeightChange,
     handleResetLineHeight,
     handleLineHeightMultiplierChange,
+    
+    // Hierarchical color system handlers
+    handleTitleColorChange,
+    handleAuthorColorChange,
+    handleResetTitleColor,
+    handleResetAuthorColor,
+    handleSyncAllColorsToGlobal,
   };
 }
