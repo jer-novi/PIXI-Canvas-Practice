@@ -28,6 +28,7 @@ export function CanvasContent({
   lineOverrides,
   isColorPickerActive,
   fontFamily,
+  fontStatus,
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -147,7 +148,8 @@ export function CanvasContent({
 
   const { titleStyle, authorStyle, lineStyle } = useTextStyles(
     fontLoaded,
-    globalStyles
+    globalStyles,
+    fontStatus // <-- 2. Geef de prop door aan de hook
   );
 
   // Loading state
@@ -214,6 +216,8 @@ export function CanvasContent({
             //isSelected={selectedLine === index} // <-- OUDE LOGICA
             isSelected={selectedLines.has(index)} // <-- NIEUWE LOGICA
             //onSelect={() => onLineSelect(index)} // <-- OUDE LOGICA
+            fontStatus={fontStatus} // <-- 3. Geef de prop door aan de PoemLine
+            globalFontFamily={fontFamily} // Geef ook de globale font mee als fallback
             onSelect={(event) => onLineSelect(index, event)} // <-- NIEUWE LOGICA: geef event door!
             anchorX={anchorX}
             isColorPickerActive={isColorPickerActive}

@@ -1,20 +1,35 @@
 import { useMemo } from "react";
 import * as PIXI from "pixi.js";
 
-export function useTextStyles(
-  fontLoaded,
-  globalStyles,
-  fontFamily = "Cormorant Garamond"
-) {
+export function useTextStyles(fontLoaded, globalStyles, fontStatus) {
   return useMemo(() => {
     const baseFillColor = globalStyles?.fillColor || "white";
     const baseFontSize = globalStyles?.fontSize || 32;
     const baseLetterSpacing = globalStyles?.letterSpacing || 0;
-    
+
     // Hierarchical color system: use override if exists, otherwise use global color
     const baseTitleColor = globalStyles?.effectiveTitleColor || baseFillColor;
     const baseAuthorColor = globalStyles?.effectiveAuthorColor || baseFillColor;
-    const fontFamily = globalStyles?.fontFamily || "Cormorant Garamond";
+    const requestedFont = globalStyles?.fontFamily || "Cormorant Garamond";
+    const currentGlobalFont = globalStyles?.fontFamily || "Cormorant Garamond"; // EERST DEFINIËREN
+
+    const fontFamily =
+      fontStatus[requestedFont] === "loaded"
+        ? requestedFont
+        : currentGlobalFont;
+
+    const requestedTitleFont = globalStyles?.effectiveTitleFont || fontFamily;
+    const titleFont =
+      fontStatus[requestedTitleFont] === "loaded"
+        ? requestedTitleFont
+        : fontFamily;
+
+    // Bepaal de effectieve auteur-font met fallback naar de globale font
+    const requestedAuthorFont = globalStyles?.effectiveAuthorFont || fontFamily;
+    const authorFont =
+      fontStatus[requestedAuthorFont] === "loaded"
+        ? requestedAuthorFont
+        : fontFamily;
 
     if (!fontLoaded) {
       return {
@@ -44,24 +59,24 @@ export function useTextStyles(
       titleStyle: new PIXI.TextStyle({
         fill: baseTitleColor,
         fontSize: 48,
-        fontFamily,
+        fontFamily: titleFont,
         fontWeight: "bold",
       }),
       authorStyle: new PIXI.TextStyle({
         fill: baseAuthorColor,
         fontSize: 24,
-        fontFamily,
+        fontFamily: authorFont,
         fontStyle: "italic",
       }),
       lineStyle: new PIXI.TextStyle({
         fill: baseFillColor,
         fontSize: baseFontSize,
-        fontFamily,
+        fontFamily: fontFamily,
         lineHeight: baseFontSize + 12,
         letterSpacing: baseLetterSpacing,
       }),
     };
-  }, [fontLoaded, fontFamily, globalStyles]);
+  }, [fontLoaded, globalStyles, fontStatus]);
 }
 
 // New hook for creating individual line styles with overrides
@@ -69,7 +84,9 @@ export function useLineStyle(
   baseStyle,
   lineOverrides,
   isSelected,
-  isColorPickerActive = false
+  isColorPickerActive = false,
+  fontStatus, // <-- Nieuw argument
+  fallbackFontFamily // <-- Nieuw argument
 ) {
   return useMemo(() => {
     if (!baseStyle) return null;
@@ -107,8 +124,37 @@ export function useLineStyle(
       if (lineOverrides.letterSpacing) {
         styleProps.letterSpacing = lineOverrides.letterSpacing;
       }
+      // DE FIX: Vervang de simpele override met de slimme fallback-logica
+      if (lineOverrides.fontFamily) {
+        const requestedFont = lineOverrides.fontFamily;
+        // Gebruik de globalFont als fallback als de gevraagde niet geladen is
+        styleProps.fontFamily =
+          fontStatus[requestedFont] === "loaded"
+            ? requestedFont
+            : fallbackFontFamily;
+      }
+    }
+
+    const requestedFont = lineOverrides?.fontFamily || fallbackFontFamily;
+    const finalFontFamily =
+      fontStatus[requestedFont] === "loaded"
+        ? requestedFont
+        : fallbackFontFamily;
+
+    styleProps.fontFamily = finalFontFamily;
+
+    // Pas de override alleen toe als deze bestaat, anders wordt de baseStyle al gebruikt.
+    if (lineOverrides?.fontFamily) {
+      styleProps.fontFamily = finalFontFamily;
     }
 
     return new PIXI.TextStyle(styleProps);
-  }, [baseStyle, lineOverrides, isSelected, isColorPickerActive]);
+  }, [
+    baseStyle,
+    lineOverrides,
+    isSelected,
+    isColorPickerActive,
+    fontStatus,
+    fallbackFontFamily,
+  ]);
 }

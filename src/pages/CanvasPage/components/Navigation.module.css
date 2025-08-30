@@ -28,3 +28,44 @@
 .navItem:active {
   background-color: #5a6a7d;
 }
+
+.syncSection {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #4a5a6d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.syncLabel {
+  font-size: 11px;
+  color: #a0a9b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.syncButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: #3d4a5c;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  font-size: 14px;
+  color: inherit;
+}
+
+.syncButton:hover {
+  background-color: #4a5a6d;
+}
+
+.syncButton:active {
+  background-color: #5a6a7d;
+}

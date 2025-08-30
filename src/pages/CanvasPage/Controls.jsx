@@ -33,7 +33,6 @@ export default function Controls({
   onAuthorColorChange,
   onResetTitleColor,
   onResetAuthorColor,
-  onSyncAllColorsToGlobal,
 
   // Deprecated: keeping for backward compatibility
   titleColor,
@@ -148,25 +147,10 @@ export default function Controls({
                 className={styles.resetButton}
                 onClick={handleResetSelectedLines}
               >
-                Reset stijl
+                Reset regelkleur en letterafstand
               </button>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Global Color Sync Section */}
-      <div className={styles.controlSection}>
-        <h3>Globale Kleurinstellingen</h3>
-        <div className={styles.controlRow}>
-          <button
-            type="button"
-            className={styles.syncButton}
-            onClick={onSyncAllColorsToGlobal}
-            title="Synchroniseer alle kleuren met globale kleur (resets alle overrides)"
-          >
-            🔄 Sync Alle Kleuren
-          </button>
         </div>
       </div>
 

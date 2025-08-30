@@ -38,11 +38,12 @@ export function useCanvasHandlers(canvasState) {
     fillColor,
     fontFamily, // <-- Voeg deze toe om de globale waarde te kennen
     setFontFamily, // <-- Nieuw
+
+    lineOverrides, // <-- DEZE TOEVOEGEN
+    setPendingFontFamily, // <-- De nieuwe setter
     loadFont, // <-- Nieuw, van de font manager
     selectedLines, // <-- Belangrijk voor per-regel logica
-    lineOverrides, // <-- DEZE TOEVOEGEN
-
-    setLineOverrides, // <-- Belangrijk voor per-regel logica
+    setLineOverrides,
   } = canvasState;
 
   // Line selection handler is nu een simpele doorgever
@@ -263,16 +264,72 @@ export function useCanvasHandlers(canvasState) {
     setLineOverrides,
   ]);
 
+  const handleSyncAllFontsToGlobal = useCallback(() => {
+    // Count existing font overrides for confirmation
+    const lineFontOverrides = Object.values(lineOverrides).filter(
+      (override) => override.fontFamily
+    ).length;
+
+    if (lineFontOverrides === 0) {
+      alert("Er zijn geen lettertype overrides om te resetten.");
+      return;
+    }
+
+    // Simple confirmation dialog
+    const confirmMessage =
+      `Dit zal ${lineFontOverrides} lettertype override${
+        lineFontOverrides === 1 ? "" : "s"
+      } verwijderen:\n\n` +
+      `• ${lineFontOverrides} gedichtregels lettertype override${
+        lineFontOverrides === 1 ? "" : "s"
+      }\n\n` +
+      "Alle regels zullen het globale lettertype volgen. Doorgaan?";
+
+    if (!confirm(confirmMessage)) {
+      return;
+    }
+
+    // Reset all line font overrides to only keep non-font properties
+    let allLinesReset = true;
+    setLineOverrides((prev) => {
+      const newOverrides = { ...prev };
+      Object.keys(newOverrides).forEach((index) => {
+        const override = { ...newOverrides[index] };
+        delete override.fontFamily; // Remove font override
+
+        // If no other overrides remain, remove the entire entry
+        if (Object.keys(override).length === 0) {
+          delete newOverrides[index];
+        } else {
+          newOverrides[index] = override;
+          allLinesReset = false; // Still has other overrides
+        }
+      });
+      return newOverrides;
+    });
+
+    // If all lines are reset, set global font to Cormorant Garamond
+    if (allLinesReset) {
+      loadFont("Cormorant Garamond");
+      setPendingFontFamily("Cormorant Garamond");
+    }
+  }, [
+    lineOverrides,
+    setLineOverrides,
+    loadFont,
+    setPendingFontFamily,
+  ]);
+
   const handleFontFamilyChange = useCallback(
     (newFontFamily) => {
       // Taak 1: Zorg dat het lettertype geladen wordt (dit gebeurt altijd)
       loadFont(newFontFamily);
 
-      // Taak 2: Pas het lettertype toe, afhankelijk van de selectie
+      // 2. Leg de 'intentie' van de gebruiker vast
       if (selectedLines.size > 0) {
-        // SCENARIO 1: Er zijn regels geselecteerd
-        setLineOverrides((prevOverrides) => {
-          const newOverrides = { ...prevOverrides };
+        // Pas de override toe op de geselecteerde regels
+        setLineOverrides((prev) => {
+          const newOverrides = { ...prev };
           selectedLines.forEach((index) => {
             newOverrides[index] = {
               ...newOverrides[index],
@@ -282,12 +339,12 @@ export function useCanvasHandlers(canvasState) {
           return newOverrides;
         });
       } else {
-        // SCENARIO 2: Er zijn geen regels geselecteerd
-        setFontFamily(newFontFamily);
+        // Zet het lettertype in de wachtrij voor de globale stijl
+        setPendingFontFamily(newFontFamily);
       }
     },
-    [loadFont, setFontFamily, selectedLines, setLineOverrides]
-  ); // Dependencies bijgewerkt
+    [loadFont, setPendingFontFamily, selectedLines, setLineOverrides]
+  );
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -347,6 +404,7 @@ export function useCanvasHandlers(canvasState) {
     handleResetTitleColor,
     handleResetAuthorColor,
     handleSyncAllColorsToGlobal,
+    handleSyncAllFontsToGlobal,
     handleFontFamilyChange, // <-- Exporteer de nieuwe handlerv
   };
 }

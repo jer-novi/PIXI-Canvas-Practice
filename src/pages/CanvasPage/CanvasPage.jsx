@@ -71,7 +71,6 @@ export default function CanvasPage() {
             onAuthorColorChange={handlers.handleAuthorColorChange}
             onResetTitleColor={handlers.handleResetTitleColor}
             onResetAuthorColor={handlers.handleResetAuthorColor}
-            onSyncAllColorsToGlobal={handlers.handleSyncAllColorsToGlobal}
             // Deprecated: keeping for backward compatibility
             titleColor={canvasState.titleColor}
             authorColor={canvasState.authorColor}
@@ -103,6 +102,7 @@ export default function CanvasPage() {
               viewportRef={canvasState.viewportRef}
               contentRef={canvasState.contentRef}
               fontFamily={canvasState.fontFamily}
+              fontStatus={canvasState.fontStatus}
               onFontFamilyChange={handlers.handleFontFamilyChange}
               selectedLines={canvasState.selectedLines} // Was er al
               lineOverrides={canvasState.lineOverrides} // Was er al
@@ -112,7 +112,12 @@ export default function CanvasPage() {
             />
           </Application>
         }
-        navigation={<Navigation />}
+        navigation={
+          <Navigation
+            onSyncAllColorsToGlobal={handlers.handleSyncAllColorsToGlobal}
+            onSyncAllFontsToGlobal={handlers.handleSyncAllFontsToGlobal}
+          />
+        }
       />
 
       {/* Development Mode Indicator (Clean, Non-Intrusive) */}

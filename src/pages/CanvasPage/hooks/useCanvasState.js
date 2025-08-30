@@ -1,6 +1,6 @@
 // src/pages/CanvasPage/hooks/useCanvasState.js
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelection } from "./useSelection"; // <-- STAP 2.1: Importeer de hook
 import { useFontManager } from "./useFontManager"; // <-- STAP 2.1: Importeer de manager
 
@@ -17,12 +17,32 @@ export function useCanvasState() {
 
   // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
   const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
-  const fontManager = useFontManager(); // <-- STAP 2.2: Roep de manager aan
+  const { fontStatus, loadFont, availableFonts } = useFontManager();
 
   // Text Styling State
-  const [fontFamily, setFontFamily] = useState("Cormorant Garamond"); // <-- STAP 2.3: Nieuwe state voor het lettertype
-  const [fontSize, setFontSize] = useState(36);
+  const [currentFontFamily, setCurrentFontFamily] =
+    useState("Cormorant Garamond");
+  const [pendingFontFamily, setPendingFontFamily] = useState(null);
 
+  // Deze 'watcher' reageert als een font klaar is met laden
+  useEffect(() => {
+    // 1. Is er een font in de wachtrij ÉN is de status daarvan 'loaded'?
+    if (pendingFontFamily && fontStatus[pendingFontFamily] === "loaded") {
+      // 2. JA -> Update de zichtbare (huidige) font
+      setCurrentFontFamily(pendingFontFamily);
+
+      // 3. Maak de wachtrij leeg, zodat deze useEffect niet nog eens afgaat
+      setPendingFontFamily(null);
+    }
+  }, [
+    pendingFontFamily,
+    fontStatus,
+    setCurrentFontFamily,
+    setPendingFontFamily,
+  ]); // De dependency array
+
+  // Text Styling State (Zet deze bovenaan de styling state)
+  const [fontSize, setFontSize] = useState(36);
   const [fillColor, setFillColor] = useState("#ffffff");
   const [letterSpacing, setLetterSpacing] = useState(0);
 
@@ -73,9 +93,14 @@ export function useCanvasState() {
     setIsColorPickerActive,
 
     // NIEUW: Font-gerelateerde state en functies
-    fontFamily,
-    setFontFamily,
-    ...fontManager, // Voegt availableFonts, fontStatus, en loadFont toe
+    currentFontFamily,
+    setCurrentFontFamily,
+    pendingFontFamily,
+    setPendingFontFamily,
+    fontStatus,
+    loadFont,
+    availableFonts,
+    fontFamily: currentFontFamily,
 
     // Text Styling State
     fontSize,

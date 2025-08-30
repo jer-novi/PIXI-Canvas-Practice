@@ -1,6 +1,9 @@
 import styles from './Navigation.module.css';
 
-export default function Navigation() {
+export default function Navigation({
+  onSyncAllColorsToGlobal,
+  onSyncAllFontsToGlobal,
+}) {
   return (
     <div className={styles.navContainer}>
       <div className={styles.navItem}>
@@ -11,6 +14,27 @@ export default function Navigation() {
       </div>
       <div className={styles.navItem}>
         <span>⚙️</span>
+      </div>
+      
+      {/* Sync Actions */}
+      <div className={styles.syncSection}>
+        <div className={styles.syncLabel}>Sync</div>
+        <button
+          type="button"
+          className={styles.syncButton}
+          onClick={onSyncAllColorsToGlobal}
+          title="Reset alle kleuren naar globaal"
+        >
+          🎨
+        </button>
+        <button
+          type="button"
+          className={styles.syncButton}
+          onClick={onSyncAllFontsToGlobal}
+          title="Reset alle fonts naar globaal"
+        >
+          🔤
+        </button>
       </div>
     </div>
   );

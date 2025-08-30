@@ -1,22 +1,31 @@
 // src/pages/CanvasPage/components/PoemLine.jsx
-import React, { useRef, useEffect } from 'react';
-import { useLineStyle } from '../hooks/useTextStyles';
+import React, { useRef, useEffect } from "react";
+import { useLineStyle } from "../hooks/useTextStyles";
 
-const PoemLine = ({ 
-  line, 
-  x, 
-  y, 
-  baseStyle, 
+const PoemLine = ({
+  line,
+  x,
+  y,
+  baseStyle,
   lineOverrides,
-  isSelected, 
+  isSelected,
   onSelect,
+  fontStatus, // <-- Deze prop komt al binnen van CanvasContent
+  globalFontFamily, // <-- Deze prop komt ook al binnen
   anchorX = 0.5,
-  isColorPickerActive = false
+  isColorPickerActive = false,
 }) => {
   const textRef = useRef();
-  
+
   // Use the new useLineStyle hook to compute the final style
-  const computedStyle = useLineStyle(baseStyle, lineOverrides, isSelected, isColorPickerActive);
+  const computedStyle = useLineStyle(
+    baseStyle,
+    lineOverrides,
+    isSelected,
+    isColorPickerActive,
+    fontStatus, // <-- Geef de status door
+    globalFontFamily // <-- Geef de globale font door als fallback
+  );
 
   useEffect(() => {
     const textElement = textRef.current;
@@ -31,34 +40,29 @@ const PoemLine = ({
     };
 
     const handlePointerOver = () => {
-      textElement.cursor = 'pointer';
+      textElement.cursor = "pointer";
     };
 
     // Set up event handling
-    textElement.eventMode = 'static';
+    textElement.eventMode = "static";
     textElement.interactive = true;
     textElement.buttonMode = true;
-    
+
     // Add event listeners
-    textElement.on('pointerdown', handlePointerDown);
-    textElement.on('pointerover', handlePointerOver);
+    textElement.on("pointerdown", handlePointerDown);
+    textElement.on("pointerover", handlePointerOver);
 
     // Cleanup
     return () => {
       if (textElement) {
-        textElement.off('pointerdown', handlePointerDown);
-        textElement.off('pointerover', handlePointerOver);
+        textElement.off("pointerdown", handlePointerDown);
+        textElement.off("pointerover", handlePointerOver);
       }
     };
   }, [onSelect]);
 
   return (
-    <pixiContainer 
-      x={x} 
-      y={y}
-      eventMode="passive"
-      interactiveChildren={true}
-    >
+    <pixiContainer x={x} y={y} eventMode="passive" interactiveChildren={true}>
       <pixiText
         ref={textRef}
         text={line}
