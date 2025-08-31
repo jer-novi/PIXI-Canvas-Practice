@@ -15,7 +15,7 @@ export function usePexels() {
     // Hier komt de logica om met de Pexels API te praten
     // 1. Zet isLoading op true en reset de error state
     // 2. Bouw de volledige URL met de zoekopdracht (e.g., `?query=nature&per_page=1`)
-    // 3. Gebruik de `fetch` API om de data op te halen
+    // 3. Gebruik axios om de data op te halen
     // 4. Belangrijk: Voeg de API sleutel toe in de `headers` van de request
     // 5. Verwerk het antwoord (response.json())
     // 6. Sla de resultaten op in de `photos` state
