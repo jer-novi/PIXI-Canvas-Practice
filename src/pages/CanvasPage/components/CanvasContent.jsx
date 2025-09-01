@@ -9,6 +9,7 @@ import { useResponsiveTextPosition } from "../hooks/useResponsiveTextPosition";
 import { usePixiAutoRender } from "../hooks/usePixiAutoRender";
 import { useAutoRecenter } from "../hooks/useAutoRecenter";
 import { debugManager } from "../../../debug/DebugManager";
+import BackgroundImage from './BackgroundImage'; // <-- Importeren
 
 export function CanvasContent({
   canvasWidth,
@@ -29,6 +30,7 @@ export function CanvasContent({
   isColorPickerActive,
   fontFamily,
   fontStatus,
+  backgroundImage, // <-- De nieuwe prop
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -182,6 +184,13 @@ export function CanvasContent({
       worldHeight={height}
       events={app.renderer.events}
     >
+      {/* Render de achtergrond EERST, zodat hij achter de tekst komt */}
+      <BackgroundImage 
+        imageUrl={backgroundImage} 
+        canvasWidth={width}
+        canvasHeight={height}
+      />
+
       <pixiContainer
         ref={contentRef}
         x={textPosition.containerX}

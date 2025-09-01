@@ -77,6 +77,12 @@ export default function CanvasPage() {
             availableFonts={canvasState.availableFonts}
             fontFamily={canvasState.fontFamily}
             onFontFamilyChange={handlers.handleFontFamilyChange}
+            // Pexels background props
+            photos={canvasState.photos}
+            isLoading={canvasState.isLoading}
+            error={canvasState.error}
+            onSearch={handlers.handleSearchBackground}
+            onSetBackground={handlers.handleSetBackground}
           />
         }
         canvas={
@@ -109,6 +115,7 @@ export default function CanvasPage() {
               onLineSelect={handlers.handleLineSelect}
               viewportDragEnabled={canvasState.viewportDragEnabled}
               isColorPickerActive={canvasState.isColorPickerActive}
+              backgroundImage={canvasState.backgroundImage}
             />
           </Application>
         }

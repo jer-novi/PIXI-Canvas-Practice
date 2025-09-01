@@ -23,7 +23,6 @@ export function useCanvasHandlers(canvasState) {
     setViewportDragEnabled,
     fontSize,
     setFontSize,
-    lineHeight,
     setLineHeight,
     lineHeightMultiplier,
     setLineHeightMultiplier,
@@ -35,15 +34,14 @@ export function useCanvasHandlers(canvasState) {
     setTitleColorOverride,
     authorColorOverride,
     setAuthorColorOverride,
-    fillColor,
-    fontFamily, // <-- Voeg deze toe om de globale waarde te kennen
-    setFontFamily, // <-- Nieuw
 
     lineOverrides, // <-- DEZE TOEVOEGEN
     setPendingFontFamily, // <-- De nieuwe setter
     loadFont, // <-- Nieuw, van de font manager
     selectedLines, // <-- Belangrijk voor per-regel logica
     setLineOverrides,
+    searchPhotos, // <-- van usePexels
+    setBackgroundImage // <-- van useCanvasState
   } = canvasState;
 
   // Line selection handler is nu een simpele doorgever
@@ -346,6 +344,15 @@ export function useCanvasHandlers(canvasState) {
     [loadFont, setPendingFontFamily, selectedLines, setLineOverrides]
   );
 
+  // NIEUWE HANDLERS
+  const handleSearchBackground = useCallback((query) => {
+    searchPhotos(query);
+  }, [searchPhotos]);
+
+  const handleSetBackground = useCallback((imageUrl) => {
+    setBackgroundImage(imageUrl);
+  }, [setBackgroundImage]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -406,5 +413,7 @@ export function useCanvasHandlers(canvasState) {
     handleSyncAllColorsToGlobal,
     handleSyncAllFontsToGlobal,
     handleFontFamilyChange, // <-- Exporteer de nieuwe handlerv
+    handleSearchBackground,
+    handleSetBackground,
   };
 }

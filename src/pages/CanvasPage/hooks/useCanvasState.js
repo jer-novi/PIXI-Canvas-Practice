@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelection } from "./useSelection"; // <-- STAP 2.1: Importeer de hook
 import { useFontManager } from "./useFontManager"; // <-- STAP 2.1: Importeer de manager
+import { usePexels } from "./usePexels"; // <-- Importeren
 
 export function useCanvasState() {
   // Refs
@@ -18,11 +19,15 @@ export function useCanvasState() {
   // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
   const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
   const { fontStatus, loadFont, availableFonts } = useFontManager();
+  const pexels = usePexels(); // <-- De nieuwe hook aanroepen
 
   // Text Styling State
   const [currentFontFamily, setCurrentFontFamily] =
     useState("Cormorant Garamond");
   const [pendingFontFamily, setPendingFontFamily] = useState(null);
+
+  // Nieuwe state voor de achtergrond
+  const [backgroundImage, setBackgroundImage] = useState(null); // URL van de gekozen afbeelding
 
   // Deze 'watcher' reageert als een font klaar is met laden
   useEffect(() => {
@@ -101,6 +106,13 @@ export function useCanvasState() {
     loadFont,
     availableFonts,
     fontFamily: currentFontFamily,
+
+    // Pexels-gerelateerde state en functies
+    ...pexels, // photos, isLoading, error, searchPhotos
+
+    // Achtergrond state
+    backgroundImage,
+    setBackgroundImage,
 
     // Text Styling State
     fontSize,

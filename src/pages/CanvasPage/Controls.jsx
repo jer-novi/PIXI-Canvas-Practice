@@ -1,6 +1,6 @@
 // src/pages/CanvasPage/Controls.jsx
 
-import React from "react";
+import React, { useState } from "react"; // <-- useState importeren
 import styles from "./CanvasPage.module.css";
 
 export default function Controls({
@@ -10,8 +10,6 @@ export default function Controls({
   onFillColorChange,
   letterSpacing,
   onLetterSpacingChange,
-  lineHeight,
-  onLineHeightChange,
   lineHeightMultiplier,
   onLineHeightMultiplierChange,
   onLineLetterSpacingChange, // <-- DEZE ONTBRAK!
@@ -34,18 +32,23 @@ export default function Controls({
   onResetTitleColor,
   onResetAuthorColor,
 
-  // Deprecated: keeping for backward compatibility
-  titleColor,
-  authorColor,
-
   fontFamily,
   onFontFamilyChange,
   availableFonts,
+
+  // Pexels background props
+  photos,
+  isLoading,
+  error,
+  onSearch, // Dit wordt onze handleSearchBackground
+  onSetBackground, // Dit wordt onze handleSetBackground
 
   // We hebben deze ook nodig om de juiste 'value' te tonen
   selectedLines,
   lineOverrides,
 }) {
+  const [query, setQuery] = useState('Groningen gevel'); // Start met een relevante zoekterm
+
   const selectionCount = selectedLines.size;
   const hasSelection = selectionCount > 0;
   const singleSelectedLineIndex =
@@ -78,9 +81,41 @@ export default function Controls({
     }
   };
 
+  const handleSearchClick = () => {
+    if (query.trim()) {
+      onSearch(query.trim());
+    }
+  };
+
   return (
     <div className={styles.controlsWrapper}>
       <h2>Styling Controls</h2>
+
+      {/* --- NIEUW: Achtergrond Sectie --- */}
+      <div className={styles.controlSection}>
+        <h3>Achtergrond</h3>
+        <div className={styles.controlRow}>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearchClick()}
+            placeholder="Zoek een achtergrond..."
+            className={styles.searchInput}
+          />
+          <button onClick={handleSearchClick} disabled={isLoading} className={styles.searchButton}>
+            {isLoading ? '...' : 'Zoek'}
+          </button>
+        </div>
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        <div className={styles.photoGrid}>
+          {photos.map(photo => (
+            <div key={photo.id} className={styles.photoThumbnail} onClick={() => onSetBackground(photo.src.large2x)}>
+              <img src={photo.src.tiny} alt={photo.alt} />
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* --- NIEUW: Font Family Dropdown --- */}
       <div className={styles.controlRow}>
