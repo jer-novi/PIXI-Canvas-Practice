@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback, useRef } from "react";
 import { useApplication } from "@pixi/react";
 import { poems, getPoemById } from "../../../data/testdata";
 import PoemLine from "./poemLine";
@@ -9,7 +9,8 @@ import { useResponsiveTextPosition } from "../hooks/useResponsiveTextPosition";
 import { usePixiAutoRender } from "../hooks/usePixiAutoRender";
 import { useAutoRecenter } from "../hooks/useAutoRecenter";
 import { debugManager } from "../../../debug/DebugManager";
-import BackgroundImage from './BackgroundImage'; // <-- Importeren
+import BackgroundImage from "./BackgroundImage"; // <-- Importeren
+import { useDraggable } from "../hooks/useDraggable"; // <-- STAP 1: Importeer de hook
 
 export function CanvasContent({
   canvasWidth,
@@ -22,7 +23,6 @@ export function CanvasContent({
   titleColor,
   authorColor,
   viewportRef,
-  contentRef,
   selectedLines,
   onLineSelect,
   viewportDragEnabled,
@@ -31,6 +31,10 @@ export function CanvasContent({
   fontFamily,
   fontStatus,
   backgroundImage, // <-- De nieuwe prop
+  contentRef,
+  poemOffset,
+  setPoemOffset, // <-- STAP 2: Ontvang de state setter
+  moveMode, // <-- En de moveMode
 }) {
   const width = canvasWidth;
   const height = canvasHeight;
@@ -154,6 +158,40 @@ export function CanvasContent({
     fontStatus // <-- 2. Geef de prop door aan de hook
   );
 
+  const originalPoemOffset = useRef(poemOffset);
+
+  const handleDragStart = useCallback(() => {
+    if (contentRef.current) {
+      originalPoemOffset.current = poemOffset; // Onthoud de startpositie
+      contentRef.current.alpha = 0.5; // Visuele feedback
+    }
+  }, [poemOffset, contentRef]);
+
+  const handleDragMove = useCallback(
+    (dragOffset) => {
+      // We updaten de state met de originele positie + de nieuwe sleep-offset
+      setPoemOffset({
+        x: originalPoemOffset.current.x + dragOffset.x,
+        y: originalPoemOffset.current.y + dragOffset.y,
+      });
+    },
+    [setPoemOffset]
+  );
+
+  const handleDragEnd = useCallback(() => {
+    if (contentRef.current) {
+      contentRef.current.alpha = 1.0; // Herstel visuele feedback
+    }
+  }, [contentRef]);
+
+  // STAP 4: Roep de hook aan en koppel hem aan de contentRef
+  // We doen dit alleen als de moveMode 'poem' is!
+  useDraggable(contentRef, {
+    onDragStart: moveMode === "poem" ? handleDragStart : undefined,
+    onDragMove: moveMode === "poem" ? handleDragMove : undefined,
+    onDragEnd: moveMode === "poem" ? handleDragEnd : undefined,
+  });
+
   // Loading state
   if (!fontLoaded || !currentPoem) {
     const message = !fontLoaded
@@ -185,16 +223,16 @@ export function CanvasContent({
       events={app.renderer.events}
     >
       {/* Render de achtergrond EERST, zodat hij achter de tekst komt */}
-      <BackgroundImage 
-        imageUrl={backgroundImage} 
+      <BackgroundImage
+        imageUrl={backgroundImage}
         canvasWidth={width}
         canvasHeight={height}
       />
 
       <pixiContainer
         ref={contentRef}
-        x={textPosition.containerX}
-        y={textPosition.containerY}
+        x={textPosition.containerX + poemOffset.x}
+        y={textPosition.containerY + poemOffset.y}
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
         eventMode="passive"
       >
@@ -214,24 +252,28 @@ export function CanvasContent({
           style={authorStyle}
         />
 
-        {currentPoem.lines.map((line, index) => (
-          <PoemLine
-            key={index}
-            line={line}
-            x={0}
-            y={textPosition.poemStartY + index * lineHeight}
-            baseStyle={lineStyle}
-            lineOverrides={lineOverrides[index]}
-            //isSelected={selectedLine === index} // <-- OUDE LOGICA
-            isSelected={selectedLines.has(index)} // <-- NIEUWE LOGICA
-            //onSelect={() => onLineSelect(index)} // <-- OUDE LOGICA
-            fontStatus={fontStatus} // <-- 3. Geef de prop door aan de PoemLine
-            globalFontFamily={fontFamily} // Geef ook de globale font mee als fallback
-            onSelect={(event) => onLineSelect(index, event)} // <-- NIEUWE LOGICA: geef event door!
-            anchorX={anchorX}
-            isColorPickerActive={isColorPickerActive}
-          />
-        ))}
+        {currentPoem.lines.map((line, index) => {
+          const lineOffset = lineOverrides[index]?.offset || { x: 0, y: 0 };
+
+          return (
+            <PoemLine
+              key={index}
+              line={line}
+              x={0 + lineOffset.x}
+              y={textPosition.poemStartY + index * lineHeight + lineOffset.y}
+              baseStyle={lineStyle}
+              lineOverrides={lineOverrides[index]}
+              //isSelected={selectedLine === index} // <-- OUDE LOGICA
+              isSelected={selectedLines.has(index)} // <-- NIEUWE LOGICA
+              //onSelect={() => onLineSelect(index)} // <-- OUDE LOGICA
+              fontStatus={fontStatus} // <-- 3. Geef de prop door aan de PoemLine
+              globalFontFamily={fontFamily} // Geef ook de globale font mee als fallback
+              onSelect={(event) => onLineSelect(index, event)} // <-- NIEUWE LOGICA: geef event door!
+              anchorX={anchorX}
+              isColorPickerActive={isColorPickerActive}
+            />
+          );
+        })}
       </pixiContainer>
     </pixiViewport>
   );

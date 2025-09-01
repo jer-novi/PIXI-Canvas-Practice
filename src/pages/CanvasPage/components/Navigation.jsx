@@ -1,8 +1,12 @@
-import styles from './Navigation.module.css';
+import styles from "./Navigation.module.css";
+import MoveControls from "./MoveControls"; // <-- Importeren
 
 export default function Navigation({
   onSyncAllColorsToGlobal,
   onSyncAllFontsToGlobal,
+  moveMode,
+  setMoveMode,
+  selectedLines,
 }) {
   return (
     <div className={styles.navContainer}>
@@ -15,7 +19,7 @@ export default function Navigation({
       <div className={styles.navItem}>
         <span>⚙️</span>
       </div>
-      
+
       {/* Sync Actions */}
       <div className={styles.syncSection}>
         <div className={styles.syncLabel}>Sync</div>
@@ -36,6 +40,12 @@ export default function Navigation({
           🔤
         </button>
       </div>
+      {/* Nieuwe Move Controls */}
+      <MoveControls
+        moveMode={moveMode}
+        setMoveMode={setMoveMode}
+        selectedLines={selectedLines}
+      />
     </div>
   );
 }

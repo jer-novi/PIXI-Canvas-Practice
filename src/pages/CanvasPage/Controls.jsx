@@ -103,14 +103,14 @@ export default function Controls({
     const city = e.target.value;
     if (city) {
       // Reset andere dropdown
-      if (dropdownType === 'anwb') {
+      if (dropdownType === "anwb") {
         setSelectedCapital("");
         setSelectedAnwbCity(city);
       } else {
         setSelectedAnwbCity("");
         setSelectedCapital(city);
       }
-      
+
       // Zoek EN open modal
       onCitySearch(city);
       onOpenPhotoGrid();
@@ -124,20 +124,20 @@ export default function Controls({
       {/* --- NIEUWE COMPACTE ACHTERGROND SECTIE --- */}
       <div className={styles.controlSection}>
         <h3>Achtergrond</h3>
-        
+
         {/* Hoofdknop om foto grid te openen */}
-        <button 
+        <button
           onClick={onOpenPhotoGrid}
           className={styles.chooseBackgroundButton}
         >
           🖼️ Kies achtergrond
         </button>
-        
+
         {/* Dropdown selecties */}
         <div className={styles.controlRow}>
           <select
             value={selectedAnwbCity}
-            onChange={(e) => handleDropdownSearch(e, 'anwb')}
+            onChange={(e) => handleDropdownSearch(e, "anwb")}
             className={styles.cityDropdown}
           >
             <option value="">ANWB steden...</option>
@@ -148,11 +148,11 @@ export default function Controls({
             ))}
           </select>
         </div>
-        
+
         <div className={styles.controlRow}>
           <select
             value={selectedCapital}
-            onChange={(e) => handleDropdownSearch(e, 'capital')}
+            onChange={(e) => handleDropdownSearch(e, "capital")}
             className={styles.cityDropdown}
           >
             <option value="">Hoofdsteden...</option>
@@ -163,20 +163,35 @@ export default function Controls({
             ))}
           </select>
         </div>
-        
+
         {/* Button row: Vrij zoeken + Reset collectie */}
         <div className={styles.buttonRow}>
-          <button onClick={() => setIsFreeSearchVisible(!isFreeSearchVisible)}>
-            {isFreeSearchVisible ? '← Terug' : 'Vrij zoeken'}
+          <button
+            onClick={() => {
+              const willOpen = !isFreeSearchVisible;
+              setIsFreeSearchVisible(willOpen);
+
+              // Reset dropdowns wanneer vrij zoeken wordt geopend
+              if (willOpen) {
+                setSelectedAnwbCity("");
+                setSelectedCapital("");
+              }
+            }}
+          >
+            {isFreeSearchVisible ? "← Terug" : "Vrij zoeken"}
           </button>
-          <button onClick={() => {
-            onResetToCollection();
-            onOpenPhotoGrid(); // AUTO-OPEN MODAL
-          }}>
+          <button
+            onClick={() => {
+              setSelectedAnwbCity(""); // Reset ANWB dropdown
+              setSelectedCapital(""); // Reset hoofdsteden dropdown
+              onResetToCollection();
+              onOpenPhotoGrid();
+            }}
+          >
             Reset collectie
           </button>
         </div>
-        
+
         {/* Vrij zoeken input (alleen als visible) */}
         {isFreeSearchVisible && (
           <div className={styles.freeSearchSection}>

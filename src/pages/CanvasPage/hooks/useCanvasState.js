@@ -10,6 +10,11 @@ export function useCanvasState() {
   const viewportRef = useRef(null);
   const contentRef = useRef(null);
 
+  // --- NIEUW: State voor Drag-and-Drop ---
+  const [poemOffset, setPoemOffset] = useState({ x: 0, y: 0 });
+  const [moveMode, setMoveMode] = useState("poem"); // 'poem' of 'line'
+  // --- Einde nieuwe state ---
+
   // UI State
 
   const [viewportDragEnabled, setViewportDragEnabled] = useState(false);
@@ -149,6 +154,11 @@ export function useCanvasState() {
     setLineHeightMultiplier,
     textAlign,
     setTextAlign,
+
+    poemOffset,
+    setPoemOffset,
+    moveMode,
+    setMoveMode,
 
     // Internal State
     userHasAdjusted,

@@ -91,6 +91,8 @@ export default function CanvasPage() {
             hasPrevPage={canvasState.hasPrevPage}
             onResetToCollection={handlers.handleResetToCollection}
             onOpenPhotoGrid={handlers.handleOpenPhotoGrid}
+            poemOffset={canvasState.poemOffset}
+            setPoemOffset={canvasState.setPoemOffset}
           />
         }
         canvas={
@@ -130,6 +132,9 @@ export default function CanvasPage() {
               hasPrevPage={canvasState.hasPrevPage}
               onSearch={handlers.handleSearchBackground} // De bestaande voor vrij zoeken
               onCitySearch={handlers.handleCitySearch} // De nieuwe voor de dropdowns
+              poemOffset={canvasState.poemOffset}
+              setPoemOffset={canvasState.setPoemOffset}
+              moveMode={canvasState.moveMode}
             />
           </Application>
         }
@@ -137,6 +142,9 @@ export default function CanvasPage() {
           <Navigation
             onSyncAllColorsToGlobal={handlers.handleSyncAllColorsToGlobal}
             onSyncAllFontsToGlobal={handlers.handleSyncAllFontsToGlobal}
+            moveMode={canvasState.moveMode}
+            setMoveMode={canvasState.setMoveMode}
+            selectedLines={canvasState.selectedLines}
           />
         }
       />

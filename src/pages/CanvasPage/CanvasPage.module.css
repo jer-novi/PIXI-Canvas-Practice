@@ -402,7 +402,6 @@
   transform: scale(1.1);
 }
 
-
 .cityDropdown {
   width: 100%;
   padding: 8px;
@@ -517,7 +516,8 @@
   overflow-y: auto;
   margin-bottom: 1rem;
   max-height: 400px;
-  padding-right: 4px; /* Voor scrollbar ruimte */
+  padding: 4px; /* Voor scrollbar ruimte en voorkomen overflow on hover van foto's 
+  */
 }
 
 .floatingPhotoThumbnail {
