@@ -13,6 +13,7 @@ import { useCanvasHandlers } from "./hooks/useCanvasHandlers";
 import { CanvasContent } from "./components/CanvasContent";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
+import FloatingPhotoGrid from "./components/FloatingPhotoGrid";
 
 // Main component that manages state
 export default function CanvasPage() {
@@ -81,8 +82,15 @@ export default function CanvasPage() {
             photos={canvasState.photos}
             isLoading={canvasState.isLoading}
             error={canvasState.error}
-            onSearch={handlers.handleSearchBackground}
+            onSearch={handlers.handleSearchBackground} // De bestaande voor vrij zoeken
+            onCitySearch={handlers.handleCitySearch}
             onSetBackground={handlers.handleSetBackground}
+            onNextPage={handlers.handleNextPage}
+            onPrevPage={handlers.handlePrevPage}
+            hasNextPage={canvasState.hasNextPage}
+            hasPrevPage={canvasState.hasPrevPage}
+            onResetToCollection={handlers.handleResetToCollection}
+            onOpenPhotoGrid={handlers.handleOpenPhotoGrid}
           />
         }
         canvas={
@@ -116,6 +124,12 @@ export default function CanvasPage() {
               viewportDragEnabled={canvasState.viewportDragEnabled}
               isColorPickerActive={canvasState.isColorPickerActive}
               backgroundImage={canvasState.backgroundImage}
+              onNextPage={handlers.handleNextPage}
+              onPrevPage={handlers.handlePrevPage}
+              hasNextPage={canvasState.hasNextPage}
+              hasPrevPage={canvasState.hasPrevPage}
+              onSearch={handlers.handleSearchBackground} // De bestaande voor vrij zoeken
+              onCitySearch={handlers.handleCitySearch} // De nieuwe voor de dropdowns
             />
           </Application>
         }
@@ -126,6 +140,22 @@ export default function CanvasPage() {
           />
         }
       />
+
+      {/* Floating Photo Grid */}
+      {canvasState.photoGridVisible && (
+        <FloatingPhotoGrid
+          photos={canvasState.photos}
+          isLoading={canvasState.isLoading}
+          error={canvasState.error}
+          currentQuery={canvasState.currentQuery}
+          onSetBackground={handlers.handleSetBackground}
+          onClose={() => canvasState.setPhotoGridVisible(false)}
+          onNextPage={handlers.handleNextPage}
+          onPrevPage={handlers.handlePrevPage}
+          hasNextPage={canvasState.hasNextPage}
+          hasPrevPage={canvasState.hasPrevPage}
+        />
+      )}
 
       {/* Development Mode Indicator (Clean, Non-Intrusive) */}
       {import.meta.env.DEV && (

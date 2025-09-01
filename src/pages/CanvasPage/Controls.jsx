@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"; // <-- useState importeren
 import styles from "./CanvasPage.module.css";
+import { anwbCities, capitalCities } from "../../data/searchData"; // <-- Importeer steden
 
 export default function Controls({
   fontSize,
@@ -42,12 +43,22 @@ export default function Controls({
   error,
   onSearch, // Dit wordt onze handleSearchBackground
   onSetBackground, // Dit wordt onze handleSetBackground
+  onCitySearch, // Wordt handleCitySearch
+  onNextPage, // wordt handleNextPage
+  onPrevPage, // wordt handlePrevPage
+  hasNextPage,
+  hasPrevPage,
+  onResetToCollection, // New prop for resetting to collection
+  onOpenPhotoGrid, // New prop to open floating photo grid
 
   // We hebben deze ook nodig om de juiste 'value' te tonen
   selectedLines,
   lineOverrides,
 }) {
-  const [query, setQuery] = useState('Groningen gevel'); // Start met een relevante zoekterm
+  const [query, setQuery] = useState("");
+  const [isFreeSearchVisible, setIsFreeSearchVisible] = useState(false);
+  const [selectedAnwbCity, setSelectedAnwbCity] = useState("");
+  const [selectedCapital, setSelectedCapital] = useState("");
 
   const selectionCount = selectedLines.size;
   const hasSelection = selectionCount > 0;
@@ -84,6 +95,25 @@ export default function Controls({
   const handleSearchClick = () => {
     if (query.trim()) {
       onSearch(query.trim());
+      onOpenPhotoGrid(); // AUTO-OPEN MODAL
+    }
+  };
+
+  const handleDropdownSearch = (e, dropdownType) => {
+    const city = e.target.value;
+    if (city) {
+      // Reset andere dropdown
+      if (dropdownType === 'anwb') {
+        setSelectedCapital("");
+        setSelectedAnwbCity(city);
+      } else {
+        setSelectedAnwbCity("");
+        setSelectedCapital(city);
+      }
+      
+      // Zoek EN open modal
+      onCitySearch(city);
+      onOpenPhotoGrid();
     }
   };
 
@@ -91,30 +121,91 @@ export default function Controls({
     <div className={styles.controlsWrapper}>
       <h2>Styling Controls</h2>
 
-      {/* --- NIEUW: Achtergrond Sectie --- */}
+      {/* --- NIEUWE COMPACTE ACHTERGROND SECTIE --- */}
       <div className={styles.controlSection}>
         <h3>Achtergrond</h3>
+        
+        {/* Hoofdknop om foto grid te openen */}
+        <button 
+          onClick={onOpenPhotoGrid}
+          className={styles.chooseBackgroundButton}
+        >
+          🖼️ Kies achtergrond
+        </button>
+        
+        {/* Dropdown selecties */}
         <div className={styles.controlRow}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearchClick()}
-            placeholder="Zoek een achtergrond..."
-            className={styles.searchInput}
-          />
-          <button onClick={handleSearchClick} disabled={isLoading} className={styles.searchButton}>
-            {isLoading ? '...' : 'Zoek'}
+          <select
+            value={selectedAnwbCity}
+            onChange={(e) => handleDropdownSearch(e, 'anwb')}
+            className={styles.cityDropdown}
+          >
+            <option value="">ANWB steden...</option>
+            {anwbCities.sort().map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <div className={styles.controlRow}>
+          <select
+            value={selectedCapital}
+            onChange={(e) => handleDropdownSearch(e, 'capital')}
+            className={styles.cityDropdown}
+          >
+            <option value="">Hoofdsteden...</option>
+            {capitalCities.sort().map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {/* Button row: Vrij zoeken + Reset collectie */}
+        <div className={styles.buttonRow}>
+          <button onClick={() => setIsFreeSearchVisible(!isFreeSearchVisible)}>
+            {isFreeSearchVisible ? '← Terug' : 'Vrij zoeken'}
+          </button>
+          <button onClick={() => {
+            onResetToCollection();
+            onOpenPhotoGrid(); // AUTO-OPEN MODAL
+          }}>
+            Reset collectie
           </button>
         </div>
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        <div className={styles.photoGrid}>
-          {photos.map(photo => (
-            <div key={photo.id} className={styles.photoThumbnail} onClick={() => onSetBackground(photo.src.large2x)}>
-              <img src={photo.src.tiny} alt={photo.alt} />
+        
+        {/* Vrij zoeken input (alleen als visible) */}
+        {isFreeSearchVisible && (
+          <div className={styles.freeSearchSection}>
+            <div className={styles.controlRow}>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" && query.trim()) {
+                    onSearch(query);
+                    onOpenPhotoGrid();
+                  }
+                }}
+                placeholder="Zoek een achtergrond..."
+                className={styles.searchInput}
+              />
+              <button
+                onClick={() => handleSearchClick()}
+                disabled={isLoading}
+                className={styles.searchButton}
+              >
+                {isLoading ? "..." : "Zoek"}
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
+
+        {error && <p className={styles.errorMessage}>{error}</p>}
       </div>
 
       {/* --- NIEUW: Font Family Dropdown --- */}

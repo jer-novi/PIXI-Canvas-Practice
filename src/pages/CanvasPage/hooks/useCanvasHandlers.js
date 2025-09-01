@@ -41,7 +41,11 @@ export function useCanvasHandlers(canvasState) {
     selectedLines, // <-- Belangrijk voor per-regel logica
     setLineOverrides,
     searchPhotos, // <-- van usePexels
-    setBackgroundImage // <-- van useCanvasState
+    getCollectionPhotos, // <-- van usePexels
+    setBackgroundImage, // <-- van useCanvasState
+    goToNextPage, // <-- Nieuw van usePexels
+    goToPrevPage, // <-- Nieuw van usePexels
+    setPhotoGridVisible, // <-- van useCanvasState
   } = canvasState;
 
   // Line selection handler is nu een simpele doorgever
@@ -311,12 +315,7 @@ export function useCanvasHandlers(canvasState) {
       loadFont("Cormorant Garamond");
       setPendingFontFamily("Cormorant Garamond");
     }
-  }, [
-    lineOverrides,
-    setLineOverrides,
-    loadFont,
-    setPendingFontFamily,
-  ]);
+  }, [lineOverrides, setLineOverrides, loadFont, setPendingFontFamily]);
 
   const handleFontFamilyChange = useCallback(
     (newFontFamily) => {
@@ -345,13 +344,45 @@ export function useCanvasHandlers(canvasState) {
   );
 
   // NIEUWE HANDLERS
-  const handleSearchBackground = useCallback((query) => {
-    searchPhotos(query);
-  }, [searchPhotos]);
+  const handleSearchBackground = useCallback(
+    (query) => {
+      searchPhotos(query);
+    },
+    [searchPhotos]
+  );
 
-  const handleSetBackground = useCallback((imageUrl) => {
-    setBackgroundImage(imageUrl);
-  }, [setBackgroundImage]);
+  const handleSetBackground = useCallback(
+    (imageUrl) => {
+      setBackgroundImage(imageUrl);
+    },
+    [setBackgroundImage]
+  );
+
+  // --- NIEUWE HANDLERS VOOR PAGINERING ---
+  const handleNextPage = useCallback(() => {
+    goToNextPage();
+  }, [goToNextPage]);
+
+  const handlePrevPage = useCallback(() => {
+    goToPrevPage();
+  }, [goToPrevPage]);
+
+  const handleCitySearch = useCallback(
+    (city) => {
+      searchPhotos(`${city} gevel`);
+    },
+    [searchPhotos]
+  );
+
+  // NEW: Handler to reset to default collection
+  const handleResetToCollection = useCallback(() => {
+    getCollectionPhotos();
+  }, [getCollectionPhotos]);
+
+  // NEW: Handler to open photo grid
+  const handleOpenPhotoGrid = useCallback(() => {
+    setPhotoGridVisible(true);
+  }, [setPhotoGridVisible]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -415,5 +446,10 @@ export function useCanvasHandlers(canvasState) {
     handleFontFamilyChange, // <-- Exporteer de nieuwe handlerv
     handleSearchBackground,
     handleSetBackground,
+    handleNextPage, // <-- Exporteren
+    handlePrevPage, // <-- Exporteren
+    handleCitySearch, // <-- Exporteer de nieuwe handler
+    handleResetToCollection, // <-- NEW: Export reset handler
+    handleOpenPhotoGrid, // <-- NEW: Export open photo grid handler
   };
 }

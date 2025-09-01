@@ -15,6 +15,7 @@ export function useCanvasState() {
   const [viewportDragEnabled, setViewportDragEnabled] = useState(false);
   const [lineOverrides, setLineOverrides] = useState({});
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
+  const [photoGridVisible, setPhotoGridVisible] = useState(false); // New state for floating photo grid
 
   // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
   const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
@@ -96,6 +97,8 @@ export function useCanvasState() {
     setLineOverrides,
     isColorPickerActive,
     setIsColorPickerActive,
+    photoGridVisible,
+    setPhotoGridVisible,
 
     // NIEUW: Font-gerelateerde state en functies
     currentFontFamily,

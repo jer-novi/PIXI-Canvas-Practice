@@ -288,7 +288,7 @@
     align-items: stretch;
     gap: 0.3rem;
   }
-  
+
   .resetColorButton {
     align-self: flex-start;
     margin-left: 0;
@@ -323,6 +323,54 @@
   color: #f56565;
   font-size: 0.8rem;
   margin-top: 0.5rem;
+  background: rgba(245, 101, 101, 0.1);
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 101, 101, 0.3);
+}
+
+.errorMessage h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #f56565;
+}
+
+.reloadButton {
+  background: #4a5568;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  transition: all 0.2s ease;
+}
+
+.reloadButton:hover {
+  background: #5a6a7d;
+  transform: translateY(-1px);
+}
+
+.paginationControls {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.paginationControls button {
+  padding: 8px 12px;
+  border: none;
+  background-color: #4a5a6d;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.paginationControls button:disabled {
+  background-color: #2d3748;
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .photoGrid {
@@ -352,4 +400,237 @@
 
 .photoThumbnail:hover img {
   transform: scale(1.1);
+}
+
+
+.cityDropdown {
+  width: 100%;
+  padding: 8px;
+  background-color: #2d3748;
+  color: #e2e8f0;
+  border: 1px solid #4a5568;
+  border-radius: 4px;
+}
+
+.toggleSearchButton {
+  width: 100%;
+  padding: 8px;
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* ========== FLOATING PHOTO GRID STYLES ========== */
+
+.photoGridOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photoGridOverlay.fadeIn {
+  opacity: 1;
+}
+
+.photoGridOverlay.fadeOut {
+  opacity: 0;
+}
+
+.floatingPhotoGrid {
+  background-color: #2d3748;
+  border-radius: 12px;
+  padding: 1.5rem;
+  max-width: 90vw;
+  max-height: 80vh;
+  width: 600px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid #4a5568;
+  transform: scale(0.9) translateY(20px);
+  transition: all 0.3s ease;
+}
+
+.floatingPhotoGrid.slideIn {
+  transform: scale(1) translateY(0);
+}
+
+.floatingPhotoGrid.slideOut {
+  transform: scale(0.9) translateY(20px);
+}
+
+.floatingGridHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #4a5568;
+  padding-bottom: 0.5rem;
+}
+
+.floatingGridHeader h3 {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  line-height: 1;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeButton:hover {
+  background-color: #4a5568;
+  color: #f56565;
+}
+
+.floatingPhotoGridContent {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+  max-height: 400px;
+  padding-right: 4px; /* Voor scrollbar ruimte */
+}
+
+.floatingPhotoThumbnail {
+  position: relative;
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.floatingPhotoThumbnail:hover {
+  border-color: #4299e1;
+  transform: scale(1.05);
+}
+
+.floatingPhotoThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.floatingPaginationControls {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  border-top: 1px solid #4a5568;
+  padding-top: 1rem;
+}
+
+.paginationButton {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  background-color: #4a5a6d;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background-color: #5a6a7d;
+  transform: translateY(-1px);
+}
+
+.paginationButton:disabled {
+  background-color: #2d3748;
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.loadingMessage,
+.noResultsMessage {
+  text-align: center;
+  color: #a0aec0;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* ========== NEW CONTROL BUTTONS ========== */
+
+.chooseBackgroundButton {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #4a5568 0%, #5a6a7d 100%);
+  color: #e2e8f0;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.chooseBackgroundButton:hover {
+  background: linear-gradient(135deg, #5a6a7d 0%, #6a7a8d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.buttonRow {
+  display: flex;
+  gap: 8px;
+  margin-top: 0.5rem;
+}
+
+.buttonRow button {
+  flex: 1;
+  padding: 8px 12px;
+  background-color: #4a5568;
+  color: #e2e8f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.buttonRow button:hover {
+  background-color: #5a6a7d;
+  transform: translateY(-1px);
+}
+
+.freeSearchSection {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #4a5568;
 }
