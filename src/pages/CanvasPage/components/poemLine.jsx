@@ -1,6 +1,7 @@
 // src/pages/CanvasPage/components/PoemLine.jsx
 import React, { useRef, useEffect } from "react";
 import { useLineStyle } from "../hooks/useTextStyles";
+import { useDraggableLine } from "../hooks/useDraggableLine";
 
 const PoemLine = ({
   line,
@@ -14,8 +15,16 @@ const PoemLine = ({
   globalFontFamily, // <-- Deze prop komt ook al binnen
   anchorX = 0.5,
   isColorPickerActive = false,
+  // New props for drag functionality
+  moveMode,
+  index,
+  selectedLines,
+  onDragLineStart,
+  onDragLineMove,
+  onDragLineEnd,
 }) => {
   const textRef = useRef();
+  const containerRef = useRef(); // For line drag functionality
 
   // Use the new useLineStyle hook to compute the final style
   const computedStyle = useLineStyle(
@@ -27,42 +36,65 @@ const PoemLine = ({
     globalFontFamily // <-- Geef de globale font door als fallback
   );
 
+  // Mode-based interaction: only in edit mode
   useEffect(() => {
     const textElement = textRef.current;
     if (!textElement) return;
 
-    // Add native PIXI event listeners
-    const handlePointerDown = (event) => {
-      event.stopPropagation();
-      if (onSelect) {
-        onSelect(event);
-      }
-    };
+    // Only add click events in edit mode
+    if (moveMode === 'edit') {
+      const handlePointerDown = (event) => {
+        // Ctrl/Cmd check first - let viewport handle
+        if (event.ctrlKey || event.metaKey) {
+          return;
+        }
+        
+        event.stopPropagation();
+        if (onSelect) {
+          onSelect(event);
+        }
+      };
 
-    const handlePointerOver = () => {
+      const handlePointerOver = () => {
+        textElement.cursor = "pointer";
+      };
+
+      // Set up event handling
+      textElement.eventMode = "static";
+      textElement.interactive = true;
       textElement.cursor = "pointer";
-    };
-
-    // Set up event handling
-    textElement.eventMode = "static";
-    textElement.interactive = true;
-    textElement.buttonMode = true;
-
-    // Add event listeners
-    textElement.on("pointerdown", handlePointerDown);
-    textElement.on("pointerover", handlePointerOver);
-
-    // Cleanup
-    return () => {
-      if (textElement) {
+      
+      textElement.on("pointerdown", handlePointerDown);
+      textElement.on("pointerover", handlePointerOver);
+      
+      return () => {
         textElement.off("pointerdown", handlePointerDown);
         textElement.off("pointerover", handlePointerOver);
-      }
-    };
-  }, [onSelect]);
+      };
+    } else {
+      // In non-edit modes, no interaction
+      textElement.eventMode = "none";
+      textElement.interactive = false;
+      textElement.cursor = "default";
+    }
+  }, [onSelect, moveMode]);
+
+  // Line drag functionality
+  useDraggableLine(containerRef, {
+    enabled: moveMode === 'line' && selectedLines && selectedLines.has(index),
+    onDragStart: () => onDragLineStart && onDragLineStart(index, selectedLines),
+    onDragMove: (offset) => onDragLineMove && onDragLineMove(index, offset, selectedLines),
+    onDragEnd: onDragLineEnd
+  });
 
   return (
-    <pixiContainer x={x} y={y} eventMode="passive" interactiveChildren={true}>
+    <pixiContainer 
+      ref={containerRef}
+      x={x} 
+      y={y} 
+      eventMode="passive" 
+      interactiveChildren={moveMode === 'edit'}
+    >
       <pixiText
         ref={textRef}
         text={line}

@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useCallback, useRef } from "react";
 import { useApplication } from "@pixi/react";
-import { poems, getPoemById } from "../../../data/testdata";
+import { getPoemById } from "../../../data/testdata";
 import PoemLine from "./poemLine";
 import { useFontLoader } from "../../../hooks/useFontLoader";
 import { useTextStyles } from "../hooks/useTextStyles";
@@ -27,6 +27,7 @@ export function CanvasContent({
   onLineSelect,
   viewportDragEnabled,
   lineOverrides,
+  setLineOverrides, // <-- Add setLineOverrides prop
   isColorPickerActive,
   fontFamily,
   fontStatus,
@@ -104,21 +105,34 @@ export function CanvasContent({
     });
   }, [app, width, height]);
 
-  // Viewport plugin control
+  // Debug logging for drag issues
+  useEffect(() => {
+    console.log('DEBUG CanvasContent:', {
+      contentRef: !!contentRef.current,
+      contentRefType: contentRef.current?.constructor?.name,
+      moveMode: moveMode,
+      appReady: !!app,
+      stageReady: !!app?.stage
+    });
+  }, [contentRef.current, moveMode, app]);
+
+  // Viewport plugin control - mode based
   useEffect(() => {
     if (viewportRef.current) {
       const viewport = viewportRef.current;
 
-      if (viewportDragEnabled) {
+      // Disable viewport drag in line/poem modes (but keep Ctrl+drag)
+      const shouldDisableViewport = moveMode !== 'edit';
+      
+      if (viewportDragEnabled && !shouldDisableViewport) {
         viewport.drag().pinch().wheel().decelerate();
       } else {
         viewport.plugins.remove("drag");
-        viewport.plugins.remove("pinch");
-        viewport.plugins.remove("wheel");
-        viewport.plugins.remove("decelerate");
+        // Keep pinch and wheel for navigation in all modes
+        viewport.pinch().wheel().decelerate();
       }
     }
-  }, [viewportDragEnabled]);
+  }, [viewportDragEnabled, moveMode]);
 
   // Debug manager registration
   useEffect(() => {
@@ -159,7 +173,9 @@ export function CanvasContent({
   );
 
   const originalPoemOffset = useRef(poemOffset);
+  const originalOffsets = useRef(new Map()); // For line drag
 
+  // Poem drag handlers
   const handleDragStart = useCallback(() => {
     if (contentRef.current) {
       originalPoemOffset.current = poemOffset; // Onthoud de startpositie
@@ -184,12 +200,46 @@ export function CanvasContent({
     }
   }, [contentRef]);
 
+  // Line drag handlers
+  const handleLineDragStart = useCallback((index, selectedLines) => {
+    console.log('Line drag start:', index, Array.from(selectedLines));
+    // Store original positions van alle geselecteerde regels
+    selectedLines.forEach(lineIndex => {
+      const currentOffset = lineOverrides[lineIndex]?.offset || { x: 0, y: 0 };
+      originalOffsets.current.set(lineIndex, currentOffset);
+    });
+  }, [lineOverrides]);
+
+  const handleLineDragMove = useCallback((draggedIndex, offset, selectedLines) => {
+    // Update alle geselecteerde regels
+    const updates = {};
+    selectedLines.forEach(lineIndex => {
+      const originalOffset = originalOffsets.current.get(lineIndex) || { x: 0, y: 0 };
+      updates[lineIndex] = {
+        ...lineOverrides[lineIndex],
+        offset: {
+          x: originalOffset.x + offset.x,
+          y: originalOffset.y + offset.y
+        }
+      };
+    });
+    
+    // Update lineOverrides state with all changes at once
+    setLineOverrides && setLineOverrides(prev => ({ ...prev, ...updates }));
+  }, [lineOverrides, setLineOverrides]);
+
+  const handleLineDragEnd = useCallback(() => {
+    console.log('Line drag end');
+    originalOffsets.current.clear();
+  }, []);
+
   // STAP 4: Roep de hook aan en koppel hem aan de contentRef
   // We doen dit alleen als de moveMode 'poem' is!
   useDraggable(contentRef, {
-    onDragStart: moveMode === "poem" ? handleDragStart : undefined,
-    onDragMove: moveMode === "poem" ? handleDragMove : undefined,
-    onDragEnd: moveMode === "poem" ? handleDragEnd : undefined,
+    enabled: moveMode === "poem", // Explicit enabled flag
+    onDragStart: handleDragStart,
+    onDragMove: handleDragMove, 
+    onDragEnd: handleDragEnd
   });
 
   // Loading state
@@ -234,7 +284,8 @@ export function CanvasContent({
         x={textPosition.containerX + poemOffset.x}
         y={textPosition.containerY + poemOffset.y}
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
-        eventMode="passive"
+        eventMode={moveMode === 'poem' ? 'dynamic' : 'passive'}
+        interactive={moveMode === 'poem'}
       >
         <pixiText
           text={currentPoem.title}
@@ -271,6 +322,13 @@ export function CanvasContent({
               onSelect={(event) => onLineSelect(index, event)} // <-- NIEUWE LOGICA: geef event door!
               anchorX={anchorX}
               isColorPickerActive={isColorPickerActive}
+              // New drag props
+              moveMode={moveMode}
+              index={index}
+              selectedLines={selectedLines}
+              onDragLineStart={handleLineDragStart}
+              onDragLineMove={handleLineDragMove}
+              onDragLineEnd={handleLineDragEnd}
             />
           );
         })}

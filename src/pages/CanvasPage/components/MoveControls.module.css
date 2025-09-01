@@ -49,9 +49,32 @@
   color: white;
 }
 
+/* Disabled button styling */
+.buttonGroup button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background-color: #2d3748;
+  color: #4a5568;
+}
+
+.buttonGroup button:disabled:hover {
+  background-color: #2d3748; /* No hover effect when disabled */
+}
+
 .status {
   font-size: 11px;
   color: #a0a9b8;
   text-align: center;
   min-height: 14px;
+}
+
+/* Status indicators */
+.status.ready {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.status.waiting {
+  color: #f59e0b;
+  font-style: italic;
 }

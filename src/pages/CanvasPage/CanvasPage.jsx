@@ -122,6 +122,7 @@ export default function CanvasPage() {
               onFontFamilyChange={handlers.handleFontFamilyChange}
               selectedLines={canvasState.selectedLines} // Was er al
               lineOverrides={canvasState.lineOverrides} // Was er al
+              setLineOverrides={canvasState.setLineOverrides} // Add setLineOverrides
               onLineSelect={handlers.handleLineSelect}
               viewportDragEnabled={canvasState.viewportDragEnabled}
               isColorPickerActive={canvasState.isColorPickerActive}
@@ -145,6 +146,7 @@ export default function CanvasPage() {
             moveMode={canvasState.moveMode}
             setMoveMode={canvasState.setMoveMode}
             selectedLines={canvasState.selectedLines}
+            clearSelection={canvasState.clearSelection}
           />
         }
       />

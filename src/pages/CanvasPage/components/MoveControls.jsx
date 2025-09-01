@@ -2,38 +2,58 @@
 import React from "react";
 import styles from "./MoveControls.module.css";
 
-export default function MoveControls({ moveMode, setMoveMode, selectedLines }) {
+export default function MoveControls({ moveMode, setMoveMode, selectedLines, clearSelection }) {
   const selectionCount = selectedLines.size;
 
-  // Dynamische tekst voor de status
-  let statusText = "Hele gedicht";
-  if (moveMode === "line") {
-    if (selectionCount === 0) {
-      statusText = "Selecteer een regel";
-    } else if (selectionCount === 1) {
-      statusText = "1 regel geselecteerd";
-    } else {
-      statusText = `${selectionCount} regels geselecteerd`;
+  // Handle mode change met escape actie
+  const handleModeChange = (newMode) => {
+    if (newMode === 'poem') {
+      // ESCAPE ACTIE: Clear alle selecties bij poem mode
+      clearSelection();
     }
+    setMoveMode(newMode);
+  };
+
+  // Status logic per mode
+  let statusText = "";
+  if (moveMode === 'edit') {
+    statusText = "Klik regels om te selecteren";
+  } else if (moveMode === 'line') {
+    if (selectionCount === 0) {
+      statusText = "⚠️ Geen regels geselecteerd";
+    } else {
+      statusText = `✓ Sleep ${selectionCount} regel${selectionCount > 1 ? 's' : ''}`;
+    }
+  } else if (moveMode === 'poem') {
+    statusText = "Sleep het hele gedicht";
   }
 
   return (
     <div className={styles.moveControlsContainer}>
-      <div className={styles.moveLabel}>Verplaatsen</div>
+      <div className={styles.moveLabel}>Modus</div>
       <div className={styles.buttonGroup}>
+        {/* Edit mode button */}
         <button
-          className={moveMode === "poem" ? styles.active : ""}
-          onClick={() => setMoveMode("poem")}
-          title="Verplaats het hele gedicht"
+          className={moveMode === "edit" ? styles.active : ""}
+          onClick={() => handleModeChange("edit")}
+          title="Bewerken en selecteren"
         >
-          Gedicht
+          Bewerken
         </button>
         <button
           className={moveMode === "line" ? styles.active : ""}
-          onClick={() => setMoveMode("line")}
+          onClick={() => handleModeChange("line")}
           title="Verplaats geselecteerde regels"
+          disabled={selectionCount === 0} // Disabled als geen selecties
         >
           Regels
+        </button>
+        <button
+          className={moveMode === "poem" ? styles.active : ""}
+          onClick={() => handleModeChange("poem")}
+          title="Verplaats het hele gedicht"
+        >
+          Gedicht
         </button>
       </div>
       <div className={styles.status}>{statusText}</div>

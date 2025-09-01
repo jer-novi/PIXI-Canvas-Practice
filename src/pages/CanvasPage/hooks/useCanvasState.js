@@ -12,7 +12,7 @@ export function useCanvasState() {
 
   // --- NIEUW: State voor Drag-and-Drop ---
   const [poemOffset, setPoemOffset] = useState({ x: 0, y: 0 });
-  const [moveMode, setMoveMode] = useState("poem"); // 'poem' of 'line'
+  const [moveMode, setMoveMode] = useState("edit"); // 'edit', 'poem' or 'line' - default to edit
   // --- Einde nieuwe state ---
 
   // UI State
@@ -96,6 +96,7 @@ export function useCanvasState() {
 
     // UI State
     ...selection, // <-- STAP 2.4: Voeg alle selection state & handlers toe
+    clearSelection: selection.clearSelection, // <-- Explicit clearSelection access
     viewportDragEnabled,
     setViewportDragEnabled,
     lineOverrides,

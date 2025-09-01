@@ -7,6 +7,7 @@ export default function Navigation({
   moveMode,
   setMoveMode,
   selectedLines,
+  clearSelection,
 }) {
   return (
     <div className={styles.navContainer}>
@@ -45,6 +46,7 @@ export default function Navigation({
         moveMode={moveMode}
         setMoveMode={setMoveMode}
         selectedLines={selectedLines}
+        clearSelection={clearSelection}
       />
     </div>
   );
