@@ -11,7 +11,15 @@ export default function XYMoveSliders({
   setLineOverrides,
 }) {
   const selectionCount = selectedLines.size;
-  const selectedLineArray = Array.from(selectedLines);
+  
+  // Sort selected lines by index to find the anchor (topmost line)
+  const sortedSelectedLines = useMemo(() => {
+    return Array.from(selectedLines).sort((a, b) => a - b);
+  }, [selectedLines]);
+
+  const anchorLineIndex = useMemo(() => {
+    return sortedSelectedLines.length > 0 ? sortedSelectedLines[0] : null;
+  }, [sortedSelectedLines]);
 
   // Determine if sliders should be active
   const isActive = useMemo(() => {
@@ -21,124 +29,86 @@ export default function XYMoveSliders({
     return false;
   }, [moveMode, selectionCount]);
 
-  // Get current position values based on mode
+  // Get current position values based on mode and anchor line
   const currentPosition = useMemo(() => {
     if (moveMode === 'poem') {
       return { x: poemOffset.x, y: poemOffset.y };
     }
-    if (moveMode === 'line' && selectionCount > 0) {
-      // For line mode, show position of first selected line
-      const firstLineIndex = selectedLineArray[0];
-      const override = lineOverrides[firstLineIndex];
+    if (moveMode === 'line' && anchorLineIndex !== null) {
+      const override = lineOverrides[anchorLineIndex];
       return { 
         x: override?.xOffset || 0, 
         y: override?.yOffset || 0 
       };
     }
     return { x: 0, y: 0 };
-  }, [moveMode, poemOffset, lineOverrides, selectedLineArray, selectionCount]);
+  }, [moveMode, poemOffset, lineOverrides, anchorLineIndex]);
 
-  // Handle X position change
-  const handleXChange = useCallback((e) => {
-    const newX = parseInt(e.target.value, 10);
-    
+  // --- REFACTORED: Handle position changes with relative offsets ---
+
+  const handlePositionChange = useCallback((axis, newValue) => {
     if (moveMode === 'poem') {
-      setPoemOffset(prev => ({ ...prev, x: newX }));
-    } else if (moveMode === 'line' && selectionCount > 0) {
-      // Apply X offset to all selected lines
+      setPoemOffset(prev => ({ ...prev, [axis]: newValue }));
+      return;
+    }
+
+    if (moveMode === 'line' && anchorLineIndex !== null) {
+      const currentAnchorPos = lineOverrides[anchorLineIndex]?.[`${axis}Offset`] || 0;
+      const delta = newValue - currentAnchorPos;
+
       setLineOverrides(prev => {
         const newOverrides = { ...prev };
-        selectedLineArray.forEach(lineIndex => {
+        sortedSelectedLines.forEach(lineIndex => {
+          const currentOffset = prev[lineIndex]?.[`${axis}Offset`] || 0;
           newOverrides[lineIndex] = {
             ...newOverrides[lineIndex],
-            xOffset: newX
+            [`${axis}Offset`]: currentOffset + delta,
           };
         });
         return newOverrides;
       });
     }
-  }, [moveMode, selectionCount, selectedLineArray, setPoemOffset, setLineOverrides]);
+  }, [moveMode, anchorLineIndex, lineOverrides, setPoemOffset, setLineOverrides, sortedSelectedLines]);
 
-  // Handle Y position change
-  const handleYChange = useCallback((e) => {
-    const newY = parseInt(e.target.value, 10);
-    
+  const handleXChange = (e) => handlePositionChange('x', parseInt(e.target.value, 10));
+  const handleYChange = (e) => handlePositionChange('y', parseInt(e.target.value, 10));
+
+  // --- REFACTORED: Handle resets ---
+
+  const handleReset = useCallback((axis) => {
     if (moveMode === 'poem') {
-      setPoemOffset(prev => ({ ...prev, y: newY }));
-    } else if (moveMode === 'line' && selectionCount > 0) {
-      // Apply Y offset to all selected lines
-      setLineOverrides(prev => {
-        const newOverrides = { ...prev };
-        selectedLineArray.forEach(lineIndex => {
-          newOverrides[lineIndex] = {
-            ...newOverrides[lineIndex],
-            yOffset: newY
-          };
-        });
-        return newOverrides;
-      });
+      if (axis) {
+        setPoemOffset(prev => ({ ...prev, [axis]: 0 }));
+      } else {
+        setPoemOffset({ x: 0, y: 0 });
+      }
+      return;
     }
-  }, [moveMode, selectionCount, selectedLineArray, setPoemOffset, setLineOverrides]);
 
-  // Reset to center
-  const handleResetX = useCallback(() => {
-    if (moveMode === 'poem') {
-      setPoemOffset(prev => ({ ...prev, x: 0 }));
-    } else if (moveMode === 'line' && selectionCount > 0) {
+    if (moveMode === 'line' && selectionCount > 0) {
       setLineOverrides(prev => {
         const newOverrides = { ...prev };
-        selectedLineArray.forEach(lineIndex => {
+        sortedSelectedLines.forEach(lineIndex => {
           if (newOverrides[lineIndex]) {
-            newOverrides[lineIndex] = {
-              ...newOverrides[lineIndex],
-              xOffset: 0
-            };
+            if (axis) {
+              newOverrides[lineIndex][`${axis}Offset`] = 0;
+            } else {
+              newOverrides[lineIndex].xOffset = 0;
+              newOverrides[lineIndex].yOffset = 0;
+            }
+          } else if (!axis) {
+            // Ensure override object exists for reset all
+            newOverrides[lineIndex] = { xOffset: 0, yOffset: 0 };
           }
         });
         return newOverrides;
       });
     }
-  }, [moveMode, selectionCount, selectedLineArray, setPoemOffset, setLineOverrides]);
+  }, [moveMode, selectionCount, sortedSelectedLines, setPoemOffset, setLineOverrides]);
 
-  const handleResetY = useCallback(() => {
-    if (moveMode === 'poem') {
-      setPoemOffset(prev => ({ ...prev, y: 0 }));
-    } else if (moveMode === 'line' && selectionCount > 0) {
-      setLineOverrides(prev => {
-        const newOverrides = { ...prev };
-        selectedLineArray.forEach(lineIndex => {
-          if (newOverrides[lineIndex]) {
-            newOverrides[lineIndex] = {
-              ...newOverrides[lineIndex],
-              yOffset: 0
-            };
-          }
-        });
-        return newOverrides;
-      });
-    }
-  }, [moveMode, selectionCount, selectedLineArray, setPoemOffset, setLineOverrides]);
-
-  // Reset both X and Y to center
-  const handleResetBoth = useCallback(() => {
-    if (moveMode === 'poem') {
-      setPoemOffset({ x: 0, y: 0 });
-    } else if (moveMode === 'line' && selectionCount > 0) {
-      setLineOverrides(prev => {
-        const newOverrides = { ...prev };
-        selectedLineArray.forEach(lineIndex => {
-          if (newOverrides[lineIndex]) {
-            newOverrides[lineIndex] = {
-              ...newOverrides[lineIndex],
-              xOffset: 0,
-              yOffset: 0
-            };
-          }
-        });
-        return newOverrides;
-      });
-    }
-  }, [moveMode, selectionCount, selectedLineArray, setPoemOffset, setLineOverrides]);
+  const handleResetX = () => handleReset('x');
+  const handleResetY = () => handleReset('y');
+  const handleResetBoth = () => handleReset(null);
 
   // Status text
   const statusText = useMemo(() => {
@@ -151,12 +121,12 @@ export default function XYMoveSliders({
     if (moveMode === 'line') {
       if (selectionCount === 0) {
         return "⚠️ Select lines first to enable movement";
-      } else {
-        return `Move ${selectionCount} line${selectionCount > 1 ? 's' : ''}: x: ${currentPosition.x}, y: ${currentPosition.y}`;
       }
+      const anchorType = anchorLineIndex === -2 ? 'Title' : anchorLineIndex === -1 ? 'Author' : `Line ${anchorLineIndex + 1}`;
+      return `Move ${selectionCount} item(s) (Anchor: ${anchorType}): x: ${currentPosition.x}, y: ${currentPosition.y}`;
     }
     return "";
-  }, [moveMode, selectionCount, currentPosition]);
+  }, [moveMode, selectionCount, currentPosition, anchorLineIndex]);
 
   return (
     <div className={styles.xyMoveContainer}>

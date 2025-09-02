@@ -1,6 +1,7 @@
 import { Application, extend } from "@pixi/react";
 import { Text, Container, Graphics } from "pixi.js";
 import { Viewport } from "pixi-viewport";
+import { useEffect } from "react";
 
 // CRITICAL: extend() MUST be called at module level, outside components
 extend({ Text, Container, Graphics, Viewport });
@@ -33,6 +34,23 @@ export default function CanvasPage() {
     canvasState.lineHeight,
     [] // baseline; poem selection and exact lines are handled in CanvasContent
   );
+
+  // Add Escape key listener to deselect and return to edit mode
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        canvasState.clearSelection();
+        canvasState.setMoveMode("edit");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [canvasState.clearSelection, canvasState.setMoveMode]); // Dependencies
 
   return (
     <>

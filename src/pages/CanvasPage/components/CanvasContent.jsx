@@ -203,10 +203,15 @@ export function CanvasContent({
   }, [contentRef]);
 
   // Line drag handlers
-  const handleLineDragStart = useCallback((index, selectedLines) => {
-    console.log('Line drag start:', index, Array.from(selectedLines));
-    // Store original positions van alle geselecteerde regels
-    selectedLines.forEach(lineIndex => {
+  const handleLineDragStart = useCallback((draggedIndex, selectedLines) => {
+    console.log('Line drag start:', draggedIndex, Array.from(selectedLines));
+    const sortedLines = Array.from(selectedLines).sort((a, b) => a - b);
+    const anchorIndex = sortedLines[0];
+
+    originalOffsets.current.clear(); // Clear previous drag data
+    originalOffsets.current.set('anchorIndex', anchorIndex);
+
+    sortedLines.forEach(lineIndex => {
       const currentXOffset = lineOverrides[lineIndex]?.xOffset || 0;
       const currentYOffset = lineOverrides[lineIndex]?.yOffset || 0;
       originalOffsets.current.set(lineIndex, { x: currentXOffset, y: currentYOffset });
@@ -214,7 +219,9 @@ export function CanvasContent({
   }, [lineOverrides]);
 
   const handleLineDragMove = useCallback((draggedIndex, dragOffset, selectedLines) => {
-    // Update alle geselecteerde regels
+    const anchorIndex = originalOffsets.current.get('anchorIndex');
+    if (anchorIndex === undefined) return;
+
     const updates = {};
     selectedLines.forEach(lineIndex => {
       const originalOffset = originalOffsets.current.get(lineIndex) || { x: 0, y: 0 };
@@ -225,7 +232,6 @@ export function CanvasContent({
       };
     });
     
-    // Update lineOverrides state with all changes at once
     setLineOverrides && setLineOverrides(prev => ({ ...prev, ...updates }));
   }, [lineOverrides, setLineOverrides]);
 
@@ -290,8 +296,8 @@ export function CanvasContent({
       >
         <PoemTitle
           title={currentPoem.title}
-          x={0}
-          y={0}
+          x={lineOverrides[-2]?.xOffset || 0}
+          y={lineOverrides[-2]?.yOffset || 0}
           baseStyle={titleStyle}
           lineOverrides={lineOverrides[-2]}
           isSelected={selectedLines.has(-2)}
@@ -310,8 +316,8 @@ export function CanvasContent({
 
         <PoemAuthor
           author={currentPoem.author}
-          x={0}
-          y={textPosition.authorY}
+          x={lineOverrides[-1]?.xOffset || 0}
+          y={textPosition.authorY + (lineOverrides[-1]?.yOffset || 0)}
           baseStyle={authorStyle}
           lineOverrides={lineOverrides[-1]}
           isSelected={selectedLines.has(-1)}
