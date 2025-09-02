@@ -14,6 +14,7 @@ export default function Controls({
   lineHeightMultiplier,
   onLineHeightMultiplierChange,
   onLineLetterSpacingChange, // <-- DEZE ONTBRAK!
+  onLineFontSizeChange, // <-- NIEUW: Voor fontSize van geselecteerde regels
   onResetLineHeight,
   textAlign,
   onTextAlignChange,
@@ -63,24 +64,30 @@ export default function Controls({
   const selectionCount = selectedLines.size;
   const hasSelection = selectionCount > 0;
   const singleSelectedLineIndex =
-    selectionCount === 1 ? selectedLines.values().next().value : null;
+    selectionCount === 1 ? Array.from(selectedLines)[0] : null;
 
   // Bepaal welke kleur getoond wordt
   const displayedColor =
     singleSelectedLineIndex !== null
-      ? lineOverrides[singleSelectedLineIndex]?.fillColor ?? fillColor
+      ? lineOverrides[String(singleSelectedLineIndex)]?.fillColor ?? fillColor
       : fillColor;
 
   // Bepaal welke letterafstand getoond wordt
   const displayedLetterSpacing =
     singleSelectedLineIndex !== null
-      ? lineOverrides[singleSelectedLineIndex]?.letterSpacing ?? letterSpacing
+      ? lineOverrides[String(singleSelectedLineIndex)]?.letterSpacing ?? letterSpacing
       : letterSpacing;
+
+  // Bepaal welke lettergrootte getoond wordt voor geselecteerde regel
+  const displayedFontSize =
+    singleSelectedLineIndex !== null
+      ? lineOverrides[String(singleSelectedLineIndex)]?.fontSize ?? fontSize
+      : fontSize;
 
   // ✅ CORRECT: Bepaal hier welk lettertype getoond wordt
   const displayedFontFamily =
     singleSelectedLineIndex !== null
-      ? lineOverrides[singleSelectedLineIndex]?.fontFamily ?? fontFamily
+      ? lineOverrides[String(singleSelectedLineIndex)]?.fontFamily ?? fontFamily
       : fontFamily;
 
   // De handleColorInput functie wordt weer simpel
@@ -253,6 +260,24 @@ export default function Controls({
         />
         <span>{fontSize}px</span>
       </div>
+
+      {/* NIEUW: Conditionale fontSize slider voor geselecteerde regels */}
+      {hasSelection && (
+        <div className={styles.controlRow}>
+          <label htmlFor="lineFontSize">
+            Lettergrootte ({selectionCount} {selectionCount === 1 ? "regel" : "regels"})
+          </label>
+          <input
+            type="range"
+            id="lineFontSize"
+            min="12"
+            max="72" 
+            value={displayedFontSize}
+            onChange={(e) => onLineFontSizeChange(Number(e.target.value))}
+          />
+          <span>{displayedFontSize}px</span>
+        </div>
+      )}
 
       {/* --- Color Picker met Multi-Select Support --- */}
       <div

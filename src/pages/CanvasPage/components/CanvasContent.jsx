@@ -3,6 +3,8 @@ import { useEffect, useMemo, useCallback, useRef } from "react";
 import { useApplication } from "@pixi/react";
 import { getPoemById } from "../../../data/testdata";
 import PoemLine from "./poemLine";
+import PoemTitle from "./PoemTitle";
+import PoemAuthor from "./PoemAuthor";
 import { useFontLoader } from "../../../hooks/useFontLoader";
 import { useTextStyles } from "../hooks/useTextStyles";
 import { useResponsiveTextPosition } from "../hooks/useResponsiveTextPosition";
@@ -286,20 +288,44 @@ export function CanvasContent({
         eventMode={moveMode === 'poem' ? 'dynamic' : 'passive'}
         interactive={moveMode === 'poem'}
       >
-        <pixiText
-          text={currentPoem.title}
+        <PoemTitle
+          title={currentPoem.title}
           x={0}
-          anchor={{ x: anchorX, y: 0 }}
           y={0}
-          style={titleStyle}
+          baseStyle={titleStyle}
+          lineOverrides={lineOverrides[-2]}
+          isSelected={selectedLines.has(-2)}
+          onSelect={(event) => onLineSelect(-2, event)}
+          fontStatus={fontStatus}
+          globalFontFamily={fontFamily}
+          anchorX={anchorX}
+          isColorPickerActive={isColorPickerActive}
+          moveMode={moveMode}
+          index={-2}
+          selectedLines={selectedLines}
+          onDragLineStart={handleLineDragStart}
+          onDragLineMove={handleLineDragMove}
+          onDragLineEnd={handleLineDragEnd}
         />
 
-        <pixiText
-          text={currentPoem.author}
+        <PoemAuthor
+          author={currentPoem.author}
           x={0}
-          anchor={{ x: anchorX, y: 0 }}
           y={textPosition.authorY}
-          style={authorStyle}
+          baseStyle={authorStyle}
+          lineOverrides={lineOverrides[-1]}
+          isSelected={selectedLines.has(-1)}
+          onSelect={(event) => onLineSelect(-1, event)}
+          fontStatus={fontStatus}
+          globalFontFamily={fontFamily}
+          anchorX={anchorX}
+          isColorPickerActive={isColorPickerActive}
+          moveMode={moveMode}
+          index={-1}
+          selectedLines={selectedLines}
+          onDragLineStart={handleLineDragStart}
+          onDragLineMove={handleLineDragMove}
+          onDragLineEnd={handleLineDragEnd}
         />
 
         {currentPoem.lines.map((line, index) => {

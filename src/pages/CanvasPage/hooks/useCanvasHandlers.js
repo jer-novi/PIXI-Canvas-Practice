@@ -166,9 +166,27 @@ export function useCanvasHandlers(canvasState) {
         setLineOverrides((prev) => {
           const newOverrides = { ...prev };
           selectedLines.forEach((index) => {
-            newOverrides[index] = {
-              ...newOverrides[index],
+            newOverrides[String(index)] = {
+              ...newOverrides[String(index)],
               letterSpacing: spacing,
+            };
+          });
+          return newOverrides;
+        });
+      }
+    },
+    [selectedLines, setLineOverrides]
+  );
+
+  const handleLineFontSizeChange = useCallback(
+    (size) => {
+      if (selectedLines.size > 0) {
+        setLineOverrides((prev) => {
+          const newOverrides = { ...prev };
+          selectedLines.forEach((index) => {
+            newOverrides[String(index)] = {
+              ...newOverrides[String(index)],
+              fontSize: size,
             };
           });
           return newOverrides;
@@ -428,6 +446,7 @@ export function useCanvasHandlers(canvasState) {
     handleLineSelect,
     handleLineColorChange,
     handleLineLetterSpacingChange,
+    handleLineFontSizeChange, // <-- NIEUW: fontSize handler
     handleResetSelectedLines, // <-- Hernoemd voor duidelijkheid
     handleViewportToggle,
     handleColorPickerActiveChange,

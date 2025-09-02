@@ -58,6 +58,7 @@ export default function CanvasPage() {
             selectedLines={canvasState.selectedLines}
             onLineColorChange={handlers.handleLineColorChange}
             onLineLetterSpacingChange={handlers.handleLineLetterSpacingChange}
+            onLineFontSizeChange={handlers.handleLineFontSizeChange}
             handleResetSelectedLines={handlers.handleResetSelectedLines}
             onApplyGlobalLetterSpacing={handlers.handleApplyGlobalLetterSpacing}
             lineOverrides={canvasState.lineOverrides}
