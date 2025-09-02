@@ -1,6 +1,5 @@
 import styles from "./Navigation.module.css";
 import MoveControls from "./MoveControls"; 
-import XYMoveSliders from "./XYMoveSliders";
 
 export default function Navigation({
   onSyncAllColorsToGlobal,
@@ -9,10 +8,6 @@ export default function Navigation({
   setMoveMode,
   selectedLines,
   clearSelection,
-  poemOffset,
-  setPoemOffset,
-  lineOverrides,
-  setLineOverrides,
 }) {
   return (
     <div className={styles.navContainer}>
@@ -52,16 +47,6 @@ export default function Navigation({
         setMoveMode={setMoveMode}
         selectedLines={selectedLines}
         clearSelection={clearSelection}
-      />
-
-      {/* XY Move Sliders */}
-      <XYMoveSliders
-        moveMode={moveMode}
-        selectedLines={selectedLines}
-        poemOffset={poemOffset}
-        setPoemOffset={setPoemOffset}
-        lineOverrides={lineOverrides}
-        setLineOverrides={setLineOverrides}
       />
     </div>
   );

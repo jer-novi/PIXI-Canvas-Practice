@@ -1,11 +1,23 @@
 /* src/pages/CanvasPage/components/XYMoveSliders.module.css */
 
 .xyMoveContainer {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  margin-top: 10px;
-  background-color: #f9f9f9;
+  position: fixed;
+  bottom: 20px;
+  left: 360px; /* Position next to controls panel */
+  width: 320px;
+  padding: 16px;
+  background: rgba(249, 249, 249, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(221, 221, 221, 0.8);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.xyMoveContainer:hover {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .moveLabel {
@@ -169,9 +181,20 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 400px) {
+@media (max-width: 1200px) {
   .xyMoveContainer {
-    padding: 8px;
+    left: 20px; /* Move to left side on smaller screens */
+    width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .xyMoveContainer {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    width: auto;
+    padding: 12px;
   }
   
   .sliderLabel {

@@ -14,6 +14,7 @@ import { CanvasContent } from "./components/CanvasContent";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
 import FloatingPhotoGrid from "./components/FloatingPhotoGrid";
+import XYMoveSliders from "./components/XYMoveSliders";
 
 // Main component that manages state
 export default function CanvasPage() {
@@ -147,10 +148,6 @@ export default function CanvasPage() {
             setMoveMode={canvasState.setMoveMode}
             selectedLines={canvasState.selectedLines}
             clearSelection={canvasState.clearSelection}
-            poemOffset={canvasState.poemOffset}
-            setPoemOffset={canvasState.setPoemOffset}
-            lineOverrides={canvasState.lineOverrides}
-            setLineOverrides={canvasState.setLineOverrides}
           />
         }
       />
@@ -168,6 +165,18 @@ export default function CanvasPage() {
           onPrevPage={handlers.handlePrevPage}
           hasNextPage={canvasState.hasNextPage}
           hasPrevPage={canvasState.hasPrevPage}
+        />
+      )}
+
+      {/* Floating XY Move Sliders - Only show in poem/line modes */}
+      {(canvasState.moveMode === 'poem' || canvasState.moveMode === 'line') && (
+        <XYMoveSliders
+          moveMode={canvasState.moveMode}
+          selectedLines={canvasState.selectedLines}
+          poemOffset={canvasState.poemOffset}
+          setPoemOffset={canvasState.setPoemOffset}
+          lineOverrides={canvasState.lineOverrides}
+          setLineOverrides={canvasState.setLineOverrides}
         />
       )}
 
