@@ -147,6 +147,10 @@ export default function CanvasPage() {
             setMoveMode={canvasState.setMoveMode}
             selectedLines={canvasState.selectedLines}
             clearSelection={canvasState.clearSelection}
+            poemOffset={canvasState.poemOffset}
+            setPoemOffset={canvasState.setPoemOffset}
+            lineOverrides={canvasState.lineOverrides}
+            setLineOverrides={canvasState.setLineOverrides}
           />
         }
       />

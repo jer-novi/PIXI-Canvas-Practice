@@ -17,15 +17,15 @@ export default function MoveControls({ moveMode, setMoveMode, selectedLines, cle
   // Status logic per mode
   let statusText = "";
   if (moveMode === 'edit') {
-    statusText = "Klik regels om te selecteren";
+    statusText = "Click lines to select them";
   } else if (moveMode === 'line') {
     if (selectionCount === 0) {
-      statusText = "⚠️ Geen regels geselecteerd";
+      statusText = "⚠️ No lines selected";
     } else {
-      statusText = `✓ Sleep ${selectionCount} regel${selectionCount > 1 ? 's' : ''}`;
+      statusText = `✓ Moving ${selectionCount} line${selectionCount > 1 ? 's' : ''}`;
     }
   } else if (moveMode === 'poem') {
-    statusText = "Sleep het hele gedicht";
+    statusText = "Moving entire poem";
   }
 
   return (
@@ -36,24 +36,24 @@ export default function MoveControls({ moveMode, setMoveMode, selectedLines, cle
         <button
           className={moveMode === "edit" ? styles.active : ""}
           onClick={() => handleModeChange("edit")}
-          title="Bewerken en selecteren"
+          title="Edit and select individual lines"
         >
-          Bewerken
+          Edit/Select Mode
         </button>
         <button
           className={moveMode === "line" ? styles.active : ""}
           onClick={() => handleModeChange("line")}
-          title="Verplaats geselecteerde regels"
-          disabled={selectionCount === 0} // Disabled als geen selecties
+          title="Move selected lines"
+          disabled={selectionCount === 0} // Disabled when no selections
         >
-          Regels
+          Line Move
         </button>
         <button
           className={moveMode === "poem" ? styles.active : ""}
           onClick={() => handleModeChange("poem")}
-          title="Verplaats het hele gedicht"
+          title="Move entire poem"
         >
-          Gedicht
+          Poem Move
         </button>
       </div>
       <div className={styles.status}>{statusText}</div>

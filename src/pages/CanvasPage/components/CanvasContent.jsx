@@ -205,22 +205,21 @@ export function CanvasContent({
     console.log('Line drag start:', index, Array.from(selectedLines));
     // Store original positions van alle geselecteerde regels
     selectedLines.forEach(lineIndex => {
-      const currentOffset = lineOverrides[lineIndex]?.offset || { x: 0, y: 0 };
-      originalOffsets.current.set(lineIndex, currentOffset);
+      const currentXOffset = lineOverrides[lineIndex]?.xOffset || 0;
+      const currentYOffset = lineOverrides[lineIndex]?.yOffset || 0;
+      originalOffsets.current.set(lineIndex, { x: currentXOffset, y: currentYOffset });
     });
   }, [lineOverrides]);
 
-  const handleLineDragMove = useCallback((draggedIndex, offset, selectedLines) => {
+  const handleLineDragMove = useCallback((draggedIndex, dragOffset, selectedLines) => {
     // Update alle geselecteerde regels
     const updates = {};
     selectedLines.forEach(lineIndex => {
       const originalOffset = originalOffsets.current.get(lineIndex) || { x: 0, y: 0 };
       updates[lineIndex] = {
         ...lineOverrides[lineIndex],
-        offset: {
-          x: originalOffset.x + offset.x,
-          y: originalOffset.y + offset.y
-        }
+        xOffset: originalOffset.x + dragOffset.x,
+        yOffset: originalOffset.y + dragOffset.y
       };
     });
     
@@ -304,14 +303,16 @@ export function CanvasContent({
         />
 
         {currentPoem.lines.map((line, index) => {
-          const lineOffset = lineOverrides[index]?.offset || { x: 0, y: 0 };
+          // Use xOffset and yOffset from lineOverrides (compatible with XYMoveSliders)
+          const xOffset = lineOverrides[index]?.xOffset || 0;
+          const yOffset = lineOverrides[index]?.yOffset || 0;
 
           return (
             <PoemLine
               key={index}
               line={line}
-              x={0 + lineOffset.x}
-              y={textPosition.poemStartY + index * lineHeight + lineOffset.y}
+              x={0 + xOffset}
+              y={textPosition.poemStartY + index * lineHeight + yOffset}
               baseStyle={lineStyle}
               lineOverrides={lineOverrides[index]}
               //isSelected={selectedLine === index} // <-- OUDE LOGICA
