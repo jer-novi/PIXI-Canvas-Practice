@@ -4,7 +4,8 @@ import { useState, useCallback } from "react";
 
 /**
  * Custom hook for managing multi-selection state for poem lines.
- * Handles single click, Ctrl/Cmd-click for toggling, and Shift-click for range selection.
+ * Handles single click, Ctrl/Cmd-click for toggling, Shift-click for range selection,
+ * and Alt+Shift-click for non-adjacent individual line selection.
  */
 export function useSelection() {
   const [selectedLines, setSelectedLines] = useState(new Set());
@@ -14,7 +15,11 @@ export function useSelection() {
     (index, event) => {
       const newSelection = new Set(selectedLines);
 
-      if (event?.shiftKey && lastSelectedLine !== null) {
+      if (event?.altKey && event?.shiftKey) {
+        // Alt+Shift: Add individual line to existing selection (non-adjacent)
+        newSelection.add(index);
+        setLastSelectedLine(index);
+      } else if (event?.shiftKey && lastSelectedLine !== null) {
         // Range selection
         const start = Math.min(lastSelectedLine, index);
         const end = Math.max(lastSelectedLine, index);
