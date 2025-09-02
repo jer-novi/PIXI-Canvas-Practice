@@ -1,7 +1,7 @@
 // src/pages/CanvasPage/components/PoemAuthor.jsx
 import React, { useRef, useEffect } from "react";
 import { useLineStyle } from "../hooks/useTextStyles";
-import { useDraggableLine } from "../hooks/useDraggableLine";
+// import { useDraggableLine } from "../hooks/useDraggableLine"; // REMOVED: Will use viewport-level event handling
 
 const PoemAuthor = ({
   author,
@@ -79,13 +79,13 @@ const PoemAuthor = ({
     }
   }, [onSelect, moveMode]);
 
-  // Author drag functionality (identical to PoemLine)
-  useDraggableLine(containerRef, {
-    enabled: moveMode === 'line' && selectedLines && selectedLines.has(index),
-    onDragStart: () => onDragLineStart && onDragLineStart(index, selectedLines),
-    onDragMove: (offset) => onDragLineMove && onDragLineMove(index, offset, selectedLines),
-    onDragEnd: onDragLineEnd
-  });
+  // REMOVED: Author drag functionality - will use viewport-level event handling
+  // useDraggableLine(containerRef, {
+  //   enabled: moveMode === 'line' && selectedLines && selectedLines.has(index),
+  //   onDragStart: () => onDragLineStart && onDragLineStart(index, selectedLines),
+  //   onDragMove: (offset) => onDragLineMove && onDragLineMove(index, offset, selectedLines),
+  //   onDragEnd: onDragLineEnd
+  // });
 
   return (
     <pixiContainer 

@@ -1,7 +1,7 @@
 // src/pages/CanvasPage/components/PoemLine.jsx
 import React, { useRef, useEffect } from "react";
 import { useLineStyle } from "../hooks/useTextStyles";
-import { useDraggableLine } from "../hooks/useDraggableLine";
+// import { useDraggableLine } from "../hooks/useDraggableLine"; // REMOVED: Will use viewport-level event handling
 
 const PoemLine = ({
   line,
@@ -79,13 +79,13 @@ const PoemLine = ({
     }
   }, [onSelect, moveMode]);
 
-  // Line drag functionality
-  useDraggableLine(containerRef, {
-    enabled: moveMode === 'line' && selectedLines && selectedLines.has(index),
-    onDragStart: () => onDragLineStart && onDragLineStart(index, selectedLines),
-    onDragMove: (offset) => onDragLineMove && onDragLineMove(index, offset, selectedLines),
-    onDragEnd: onDragLineEnd
-  });
+  // REMOVED: Line drag functionality - will use viewport-level event handling
+  // useDraggableLine(containerRef, {
+  //   enabled: moveMode === 'line' && selectedLines && selectedLines.has(index),
+  //   onDragStart: () => onDragLineStart && onDragLineStart(index, selectedLines),
+  //   onDragMove: (offset) => onDragLineMove && onDragLineMove(index, offset, selectedLines),
+  //   onDragEnd: onDragLineEnd
+  // });
 
   return (
     <pixiContainer 

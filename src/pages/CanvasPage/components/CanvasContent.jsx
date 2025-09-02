@@ -1,5 +1,5 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect, useMemo, useCallback, useRef } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState } from "react";
 import { useApplication } from "@pixi/react";
 import { getPoemById } from "../../../data/testdata";
 import PoemLine from "./poemLine";
@@ -12,7 +12,7 @@ import { usePixiAutoRender } from "../hooks/usePixiAutoRender";
 import { useAutoRecenter } from "../hooks/useAutoRecenter";
 import { debugManager } from "../../../debug/DebugManager";
 import BackgroundImage from "./BackgroundImage"; // <-- Importeren
-import { useDraggable } from "../hooks/useDraggable"; // <-- STAP 1: Importeer de hook
+// import { useDraggable } from "../hooks/useDraggable"; // <-- REMOVED: Will use viewport-level event handling
 
 export function CanvasContent({
   canvasWidth,
@@ -118,23 +118,261 @@ export function CanvasContent({
     });
   }, [contentRef.current, moveMode, app]);
 
-  // Viewport plugin control - mode based
-  useEffect(() => {
-    if (viewportRef.current) {
-      const viewport = viewportRef.current;
+  // Use refs for drag state to prevent useEffect dependency cycles
+  const isDraggingRef = useRef(false);
+  const dragModeRef = useRef(null); // 'viewport', 'poem', 'line'
+  const dragStartPos = useRef(null);
+  
+  // Helper functions to update drag state
+  const setIsDragging = useCallback((value) => {
+    isDraggingRef.current = value;
+  }, []);
+  
+  const setDragMode = useCallback((value) => {
+    dragModeRef.current = value;
+  }, []);
 
-      // Disable viewport drag in line/poem modes (but keep Ctrl+drag)
-      const shouldDisableViewport = moveMode !== 'edit';
+  // Stable memoized utility functions
+  const checkIfOverPoemContent = useCallback((event) => {
+    if (!contentRef.current || !viewportRef.current) return false;
+    
+    try {
+      // Get event position in viewport coordinates
+      const localPos = event.data.getLocalPosition(viewportRef.current);
       
-      if (viewportDragEnabled && !shouldDisableViewport) {
-        viewport.drag().pinch().wheel().decelerate();
+      // Get content container bounds
+      const contentBounds = contentRef.current.getBounds();
+      
+      // Check if position is within poem content bounds using proper PIXI bounds check
+      const isOver = (
+        localPos.x >= contentBounds.x &&
+        localPos.x <= contentBounds.x + contentBounds.width &&
+        localPos.y >= contentBounds.y &&
+        localPos.y <= contentBounds.y + contentBounds.height
+      );
+      
+      console.log('Bounds check:', {
+        cursorPos: { x: localPos.x, y: localPos.y },
+        bounds: {
+          x: contentBounds.x,
+          y: contentBounds.y,
+          width: contentBounds.width,
+          height: contentBounds.height
+        },
+        isOver
+      });
+      
+      return isOver;
+    } catch (error) {
+      console.warn('Error checking poem bounds:', error);
+      return false;
+    }
+  }, []); // No dependencies to prevent re-creation
+
+  // Check if pointer is over any selected lines
+  const checkIfOverSelectedLines = useCallback((event) => {
+    if (!contentRef.current || !viewportRef.current || !selectedLines || selectedLines.size === 0) {
+      return false;
+    }
+    
+    try {
+      // Get event position in viewport coordinates
+      const localPos = event.data.getLocalPosition(viewportRef.current);
+      
+      // Check each selected line's bounds
+      for (const lineIndex of selectedLines) {
+        // Get the child container for this line index
+        // contentRef.current has children in this order:
+        // 0: PoemTitle (index -2)
+        // 1: PoemAuthor (index -1) 
+        // 2+: PoemLines (index 0, 1, 2, etc.)
+        
+        let childContainer = null;
+        if (lineIndex === -2) {
+          // PoemTitle is first child (index 0)
+          childContainer = contentRef.current.children[0];
+        } else if (lineIndex === -1) {
+          // PoemAuthor is second child (index 1)
+          childContainer = contentRef.current.children[1];
+        } else if (lineIndex >= 0) {
+          // PoemLines start at child index 2
+          childContainer = contentRef.current.children[2 + lineIndex];
+        }
+        
+        if (childContainer) {
+          const lineBounds = childContainer.getBounds();
+          
+          // Check if position is within this line's bounds
+          const isOverLine = (
+            localPos.x >= lineBounds.x &&
+            localPos.x <= lineBounds.x + lineBounds.width &&
+            localPos.y >= lineBounds.y &&
+            localPos.y <= lineBounds.y + lineBounds.height
+          );
+          
+          if (isOverLine) {
+            console.log('Cursor over selected line:', lineIndex, {
+              cursorPos: { x: localPos.x, y: localPos.y },
+              lineBounds: {
+                x: lineBounds.x,
+                y: lineBounds.y,
+                width: lineBounds.width,
+                height: lineBounds.height
+              }
+            });
+            return true;
+          }
+        }
+      }
+      
+      return false;
+    } catch (error) {
+      console.warn('Error checking selected lines bounds:', error);
+      return false;
+    }
+  }, [selectedLines]); // Include selectedLines as dependency
+
+  // Stable cursor update function
+  const updateCursorForMode = useCallback((event) => {
+    if (!viewportRef.current) return;
+    
+    const viewport = viewportRef.current;
+    
+    try {
+      if (event.ctrlKey || event.metaKey) {
+        // Ctrl+drag always shows viewport cursor
+        viewport.cursor = 'grab';
+      } else if (moveMode === 'poem') {
+        // Check if hovering over poem content
+        const isOverPoem = checkIfOverPoemContent(event);
+        viewport.cursor = isOverPoem ? 'grab' : 'default';
+        console.log('Poem mode - cursor set to:', viewport.cursor);
+      } else if (moveMode === 'line') {
+        // Check if hovering over selected lines
+        const isOverSelectedLine = checkIfOverSelectedLines(event);
+        viewport.cursor = isOverSelectedLine ? 'grab' : 'default';
+        console.log('Line mode - cursor set to:', viewport.cursor, 'isOverSelectedLine:', isOverSelectedLine);
       } else {
-        viewport.plugins.remove("drag");
-        // Keep pinch and wheel for navigation in all modes
-        viewport.pinch().wheel().decelerate();
+        // Edit mode only
+        viewport.cursor = 'default';
+      }
+    } catch (error) {
+      console.warn('Error updating cursor:', error);
+    }
+  }, [moveMode, checkIfOverPoemContent, checkIfOverSelectedLines]); // Include both check functions
+
+  // Stable memoized event handlers using refs to prevent dependency cycles
+  const handlePointerDown = useCallback((event) => {
+    console.log('Viewport pointer down:', { moveMode, ctrlKey: event.ctrlKey });
+    
+    // CTRL+Drag = Viewport camera drag (in all modes)
+    if (event.ctrlKey || event.metaKey) {
+      console.log('Starting viewport drag');
+      setDragMode('viewport');
+      setIsDragging(true);
+      dragStartPos.current = { x: event.data.global.x, y: event.data.global.y };
+      // Enable viewport drag for this operation
+      if (viewportRef.current) {
+        viewportRef.current.drag();
+      }
+      return;
+    }
+    
+    // Route to appropriate mode handler
+    if (moveMode === 'poem') {
+      console.log('Starting poem drag');
+      setDragMode('poem');
+      setIsDragging(true);
+      dragStartPos.current = { x: event.data.global.x, y: event.data.global.y };
+    } else if (moveMode === 'line') {
+      console.log('Starting line drag (if over selected line)');
+      // TODO: Check if over selected line, then start line drag
+    } else if (moveMode === 'edit') {
+      console.log('Edit mode - handle line selection');
+      // TODO: Handle line selection
+    }
+  }, [moveMode, setDragMode, setIsDragging]); // Only stable dependencies
+
+  const handlePointerMove = useCallback((event) => {
+    // Update cursor based on mode and hover state
+    if (!isDraggingRef.current) {
+      updateCursorForMode(event);
+    }
+    
+    // Handle active drag operations using refs
+    if (isDraggingRef.current) {
+      if (dragModeRef.current === 'viewport') {
+        // Let viewport handle its own drag when enabled
+        return;
+      } else if (dragModeRef.current === 'poem') {
+        // TODO: Handle poem drag movement
+        console.log('Poem drag move');
+      } else if (dragModeRef.current === 'line') {
+        // TODO: Handle line drag movement
+        console.log('Line drag move');
       }
     }
-  }, [viewportDragEnabled, moveMode]);
+  }, [updateCursorForMode]); // Only stable dependencies
+
+  const handlePointerUp = useCallback((event) => {
+    console.log('Viewport pointer up:', { 
+      isDragging: isDraggingRef.current, 
+      dragMode: dragModeRef.current 
+    });
+    
+    if (isDraggingRef.current) {
+      if (dragModeRef.current === 'viewport') {
+        // Disable viewport drag after operation
+        if (viewportRef.current) {
+          viewportRef.current.plugins.remove("drag");
+        }
+      }
+      
+      // Reset drag state
+      setIsDragging(false);
+      setDragMode(null);
+      dragStartPos.current = null;
+    }
+  }, [setIsDragging, setDragMode]); // Only stable dependencies
+
+  // Viewport event delegation system
+  useEffect(() => {
+    console.log('=== VIEWPORT EVENT SETUP ===');
+    console.log('viewportRef.current exists:', !!viewportRef.current);
+    
+    if (!viewportRef.current) {
+      console.log('No viewport ref, skipping event setup');
+      return;
+    }
+    
+    const viewport = viewportRef.current;
+    console.log('Setting up events on viewport:', viewport.constructor.name);
+    console.log('Current moveMode:', moveMode);
+    
+    // Always remove default drag plugin - we handle manually
+    viewport.plugins.remove("drag");
+    viewport.pinch().wheel().decelerate();
+
+    // Attach to viewport
+    viewport.eventMode = 'static';
+    viewport.on('pointerdown', handlePointerDown);
+    viewport.on('pointermove', handlePointerMove);  
+    viewport.on('pointerup', handlePointerUp);
+    viewport.on('pointerupoutside', handlePointerUp);
+    
+    console.log('Event handlers attached to viewport');
+    console.log('Viewport eventMode set to:', viewport.eventMode);
+
+    return () => {
+      console.log('Cleaning up viewport event handlers');
+      if (viewport && typeof viewport.off === 'function') {
+        viewport.off('pointerdown', handlePointerDown);
+        viewport.off('pointermove', handlePointerMove);
+        viewport.off('pointerup', handlePointerUp);
+        viewport.off('pointerupoutside', handlePointerUp);
+      }
+    };
+  }, [handlePointerDown, handlePointerMove, handlePointerUp]); // Memoized handlers as dependencies
 
   // Debug manager registration
   useEffect(() => {
@@ -240,14 +478,13 @@ export function CanvasContent({
     originalOffsets.current.clear();
   }, []);
 
-  // STAP 4: Roep de hook aan en koppel hem aan de contentRef
-  // We doen dit alleen als de moveMode 'poem' is!
-  useDraggable(contentRef, {
-    enabled: moveMode === "poem", // Explicit enabled flag
-    onDragStart: handleDragStart,
-    onDragMove: handleDragMove, 
-    onDragEnd: handleDragEnd
-  });
+  // REMOVED: useDraggable hook - will use viewport-level event handling
+  // useDraggable(contentRef, {
+  //   enabled: moveMode === "poem",
+  //   onDragStart: handleDragStart,
+  //   onDragMove: handleDragMove, 
+  //   onDragEnd: handleDragEnd
+  // });
 
   // Loading state
   if (!fontLoaded || !currentPoem) {
