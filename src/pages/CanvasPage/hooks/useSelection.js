@@ -10,6 +10,16 @@ import { useState, useCallback } from "react";
 export function useSelection() {
   const [selectedLines, setSelectedLines] = useState(new Set());
   const [lastSelectedLine, setLastSelectedLine] = useState(null);
+  
+  // Function to restore a specific selection set
+  const restoreSelection = useCallback((selectionSet) => {
+    if (selectionSet && selectionSet.size > 0) {
+      setSelectedLines(new Set(selectionSet));
+      // Set lastSelectedLine to the highest index for range selection continuity
+      const maxIndex = Math.max(...Array.from(selectionSet));
+      setLastSelectedLine(maxIndex);
+    }
+  }, []);
 
   const handleSelect = useCallback(
     (index, event) => {
@@ -79,6 +89,7 @@ export function useSelection() {
     handleSelect,
     clearSelection,
     selectAll, // NEW: Add selectAll to the hook interface
+    restoreSelection, // NEW: Add restoreSelection to the hook interface
     isSelected,
   };
 }

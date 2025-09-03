@@ -19,12 +19,14 @@ import { useEffect, useRef } from "react";
  * @param {React.RefObject} config.viewportRef - Reference to PIXI Viewport instance
  * @param {React.RefObject} config.contentRef - Reference to content container
  * @param {Array} config.deps - Dependency array for triggering re-centering
+ * @param {Object} config.poemOffset - Current poem offset for move detection
+ * @param {Object} config.lineOverrides - Line overrides for move detection
  *
  * @description
  * Key improvements in this version:
  * - Uses getLocalBounds() for stability (not affected by world transforms)
  * - Stable X positioning using container coordinates
- * - Aspect-ratio aware Y positioning (20% from top instead of center)
+ * - Only auto-centers when no moves have been made (respects user positioning)
  * - Comprehensive safety checks to prevent runtime errors
  * - requestAnimationFrame optimization for smooth performance
  *
@@ -32,10 +34,12 @@ import { useEffect, useRef } from "react";
  * useAutoRecenter({
  *   viewportRef,
  *   contentRef,
+ *   poemOffset,
+ *   lineOverrides,
  *   deps: [width, height, fontSize, textAlign] // triggers re-center when changed
  * });
  */
-export function useAutoRecenter({ viewportRef, contentRef, deps }) {
+export function useAutoRecenter({ viewportRef, contentRef, poemOffset, lineOverrides, deps }) {
   /**
    * RAF ID storage for cleanup and preventing animation stutter
    * @type {React.MutableRefObject<number>}
@@ -51,6 +55,29 @@ export function useAutoRecenter({ viewportRef, contentRef, deps }) {
      * or when refs haven't been assigned yet.
      */
     if (!viewportRef.current || !contentRef.current) return;
+
+    /**
+     * Check if any moves have been made - if so, don't auto-center
+     *
+     * @description
+     * Auto-centering should only happen when content is in its default position.
+     * If the user has moved the poem or individual lines, respect their positioning.
+     */
+    const hasPoemMoves = poemOffset && (poemOffset.x !== 0 || poemOffset.y !== 0);
+    const hasLineMoves = lineOverrides && Object.keys(lineOverrides).some(index => {
+      const override = lineOverrides[index];
+      return override && (override.xOffset || override.yOffset);
+    });
+
+    if (hasPoemMoves || hasLineMoves) {
+      console.log('Skipping auto-recenter: moves detected', { 
+        hasPoemMoves, 
+        hasLineMoves,
+        poemOffset,
+        lineOverrideCount: Object.keys(lineOverrides || {}).length
+      });
+      return;
+    }
 
     /**
      * Cancel any previous animation request to prevent stutter

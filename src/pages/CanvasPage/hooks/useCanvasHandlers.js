@@ -402,6 +402,9 @@ export function useCanvasHandlers(canvasState) {
     setPhotoGridVisible(true);
   }, [setPhotoGridVisible]);
 
+  // Get moveMode from canvasState for CTRL+drag logic
+  const { moveMode } = canvasState;
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -417,13 +420,17 @@ export function useCanvasHandlers(canvasState) {
         }
       }
 
-      if (event.ctrlKey && !viewportDragEnabled) {
+      // CTRL key in Edit mode enables viewport dragging
+      if ((event.ctrlKey || event.metaKey) && moveMode === 'edit' && !viewportDragEnabled) {
+        console.log('CTRL pressed in edit mode - enabling viewport drag');
         setViewportDragEnabled(true);
       }
     };
 
     const handleKeyUp = (event) => {
-      if (!event.ctrlKey && viewportDragEnabled) {
+      // CTRL key release in Edit mode disables viewport dragging
+      if (!(event.ctrlKey || event.metaKey) && moveMode === 'edit' && viewportDragEnabled) {
+        console.log('CTRL released in edit mode - disabling viewport drag');
         setViewportDragEnabled(false);
       }
     };
@@ -440,6 +447,7 @@ export function useCanvasHandlers(canvasState) {
     selectAll,
     currentPoem,
     setViewportDragEnabled,
+    moveMode, // Add moveMode as dependency
   ]);
 
   return {

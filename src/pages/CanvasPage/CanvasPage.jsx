@@ -2,15 +2,17 @@ import { Application, extend } from "@pixi/react";
 import { Text, Container, Graphics } from "pixi.js";
 import { Viewport } from "pixi-viewport";
 import { useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
+import { getPoemById } from "../../data/testdata";
 
 // CRITICAL: extend() MUST be called at module level, outside components
 extend({ Text, Container, Graphics, Viewport });
 
 import Controls from "./Controls";
 import { useResponsiveCanvas } from "./hooks/useResponsiveCanvas";
-import { useResponsiveTextPosition } from "./hooks/useResponsiveTextPosition";
 import { useCanvasState } from "./hooks/useCanvasState";
 import { useCanvasHandlers } from "./hooks/useCanvasHandlers";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { CanvasContent } from "./components/CanvasContent";
 import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
@@ -19,38 +21,48 @@ import XYMoveSliders from "./components/XYMoveSliders";
 
 // Main component that manages state
 export default function CanvasPage() {
+  // Get current poem data for keyboard shortcuts
+  const [searchParams] = useSearchParams();
+  const poemId = searchParams.get("poemId") ?? "123";
+  const currentPoem = poemId ? getPoemById(poemId) : null;
+
   // Use custom hooks for state and handlers
   const canvasState = useCanvasState();
   const handlers = useCanvasHandlers(canvasState);
 
+  // Use keyboard shortcuts hook for mode cycling and selection management
+  const keyboardShortcuts = useKeyboardShortcuts({
+    moveMode: canvasState.moveMode,
+    setMoveMode: canvasState.setMoveMode,
+    selectedLines: canvasState.selectedLines,
+    clearSelection: canvasState.clearSelection,
+    selectAll: canvasState.selectAll,
+    currentPoem
+  });
+
   // Use responsive canvas hook
   const layout = useResponsiveCanvas();
 
-  // Text positioning hook for debug info
-  const textPosition = useResponsiveTextPosition(
-    layout.canvasWidth,
-    layout.canvasHeight,
-    canvasState.fontSize,
-    canvasState.lineHeight,
-    [] // baseline; poem selection and exact lines are handled in CanvasContent
-  );
+  // Text positioning hook for debug info - commented out as not currently used
+  // const textPosition = useResponsiveTextPosition(
+  //   layout.canvasWidth,
+  //   layout.canvasHeight,
+  //   canvasState.fontSize,
+  //   canvasState.lineHeight,
+  //   [] // baseline; poem selection and exact lines are handled in CanvasContent
+  // );
 
-  // Add Escape key listener to deselect and return to edit mode
+  // Handle selection restoration when switching modes
   useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        canvasState.clearSelection();
-        canvasState.setMoveMode("edit");
+    // When switching to line mode from edit mode with no current selection,
+    // restore the previous selection if it exists
+    if (canvasState.moveMode === 'line' && canvasState.selectedLines.size === 0) {
+      const previousSelection = keyboardShortcuts.restorePreviousSelection();
+      if (previousSelection.size > 0) {
+        canvasState.restoreSelection(previousSelection);
       }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-
-    // Cleanup the event listener on component unmount
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [canvasState.clearSelection, canvasState.setMoveMode]); // Dependencies
+    }
+  }, [canvasState.moveMode, canvasState.selectedLines.size, keyboardShortcuts, canvasState]);
 
   return (
     <>

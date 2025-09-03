@@ -88,10 +88,12 @@ export function CanvasContent({
     }
   }, [width, height, app]);
 
-  // Auto-recenter viewport
+  // Auto-recenter viewport (only when no moves have been made)
   useAutoRecenter({
     viewportRef,
     contentRef,
+    poemOffset,
+    lineOverrides,
     deps: [width, height, poemId, textAlign],
   });
 
@@ -241,9 +243,12 @@ export function CanvasContent({
     const viewport = viewportRef.current;
 
     try {
-      if (event.ctrlKey || event.metaKey) {
-        // Ctrl+drag always shows viewport cursor
+      // CTRL+hover in Edit mode shows camera cursor
+      if ((event.ctrlKey || event.metaKey) && moveMode === 'edit') {
         viewport.cursor = 'grab';
+      } else if (moveMode === 'edit') {
+        // Edit mode without CTRL: default cursor (allow line selection)
+        viewport.cursor = 'default';
       } else if (moveMode === 'poem') {
         const isOverPoem = checkIfOverPoemContent(event);
         viewport.cursor = isOverPoem ? 'grab' : 'default';
@@ -260,23 +265,34 @@ export function CanvasContent({
 
   // Stable memoized event handlers using refs to prevent dependency cycles
   const handlePointerDown = useCallback((event) => {
-    // console.log('Viewport pointer down:', { moveMode, ctrlKey: event.ctrlKey });
+    console.log('Viewport pointer down:', { 
+      moveMode, 
+      ctrlKey: event.ctrlKey, 
+      viewportDragEnabled,
+      isEditMode: moveMode === 'edit'
+    });
 
-    // CTRL+Drag = Viewport camera drag (in all modes)
-    if (event.ctrlKey || event.metaKey) {
-      console.log('Starting viewport drag');
+    // CTRL+Drag in Edit mode = Viewport camera drag (highest priority)
+    if ((event.ctrlKey || event.metaKey) && moveMode === 'edit') {
+      console.log('Starting CTRL+drag camera control in edit mode');
+      event.stopPropagation(); // Prevent line selection
       setDragMode('viewport');
       setIsDragging(true);
-      // Let the viewport plugin handle the drag logic from here
-      if (viewportRef.current) {
-        viewportRef.current.drag();
-      }
+      // The viewport drag plugin should already be enabled by the useEffect above
       return;
     }
 
-    // Route to appropriate mode handler
+    // Edit mode without CTRL: allow line selection (don't interfere)
+    if (moveMode === 'edit' && !event.ctrlKey && !event.metaKey) {
+      console.log('Edit mode: allowing line selection');
+      // Don't set any drag mode, let line selection handlers work
+      return;
+    }
+
+    // Route to appropriate move mode handler
     if (moveMode === 'poem' && checkIfOverPoemContent(event)) {
       console.log('Starting poem drag');
+      event.stopPropagation();
       setDragMode('poem');
       setIsDragging(true);
       dragStartPos.current = { x: event.data.global.x, y: event.data.global.y };
@@ -284,6 +300,7 @@ export function CanvasContent({
       if (contentRef.current) contentRef.current.alpha = 0.5; // Visual feedback
     } else if (moveMode === 'line' && checkIfOverSelectedLines(event)) {
       console.log('Starting line drag');
+      event.stopPropagation();
       setDragMode('line');
       setIsDragging(true);
       dragStartPos.current = { x: event.data.global.x, y: event.data.global.y };
@@ -300,7 +317,7 @@ export function CanvasContent({
       dragStartLineOffsets.current = initialOffsets;
       if (contentRef.current) contentRef.current.alpha = 0.5; // Visual feedback
     }
-  }, [moveMode, poemOffset, lineOverrides, selectedLines, checkIfOverPoemContent, checkIfOverSelectedLines, setDragMode, setIsDragging, contentRef, viewportRef]);
+  }, [moveMode, viewportDragEnabled, poemOffset, lineOverrides, selectedLines, checkIfOverPoemContent, checkIfOverSelectedLines, setDragMode, setIsDragging, contentRef, viewportRef]);
 
   const handlePointerMove = useCallback((event) => {
     // Update cursor based on mode and hover state, but only if not dragging
@@ -364,25 +381,42 @@ export function CanvasContent({
     }
   }, [setIsDragging, setDragMode, contentRef, viewportRef]);
 
-  // Viewport event delegation system
+  // Viewport plugins and camera control system
   useEffect(() => {
-    console.log('=== VIEWPORT EVENT SETUP ===');
+    console.log('=== VIEWPORT SETUP ===');
     console.log('viewportRef.current exists:', !!viewportRef.current);
+    console.log('Current moveMode:', moveMode);
+    console.log('viewportDragEnabled:', viewportDragEnabled);
     
     if (!viewportRef.current) {
-      console.log('No viewport ref, skipping event setup');
+      console.log('No viewport ref, skipping setup');
       return;
     }
     
     const viewport = viewportRef.current;
-    console.log('Setting up events on viewport:', viewport.constructor.name);
-    console.log('Current moveMode:', moveMode);
+    console.log('Setting up viewport:', viewport.constructor.name);
     
-    // Always remove default drag plugin - we handle manually
-    viewport.plugins.remove("drag");
-    viewport.pinch().wheel().decelerate();
+    // Configure viewport plugins based on mode and CTRL state
+    if (moveMode === 'edit') {
+      // Edit mode: Enable camera controls when CTRL is held or viewportDragEnabled is true
+      if (viewportDragEnabled) {
+        console.log('Enabling camera controls in edit mode');
+        viewport.drag().pinch().wheel().decelerate();
+      } else {
+        console.log('Disabling camera controls in edit mode, enabling line selection');
+        viewport.plugins.remove("drag");
+        viewport.pinch().wheel().decelerate(); // Keep zoom and wheel
+      }
+    } else {
+      // Move modes: Disable all camera controls
+      console.log('Move mode active, disabling all camera controls');
+      viewport.plugins.remove("drag");
+      viewport.plugins.remove("pinch");
+      viewport.plugins.remove("wheel");
+      viewport.plugins.remove("decelerate");
+    }
 
-    // Attach to viewport
+    // Set up event mode
     viewport.eventMode = 'static';
     viewport.on('pointerdown', handlePointerDown);
     viewport.on('pointermove', handlePointerMove);  
@@ -390,7 +424,6 @@ export function CanvasContent({
     viewport.on('pointerupoutside', handlePointerUp);
     
     console.log('Event handlers attached to viewport');
-    console.log('Viewport eventMode set to:', viewport.eventMode);
 
     return () => {
       console.log('Cleaning up viewport event handlers');
@@ -401,7 +434,7 @@ export function CanvasContent({
         viewport.off('pointerupoutside', handlePointerUp);
       }
     };
-  }, [handlePointerDown, handlePointerMove, handlePointerUp]); // Memoized handlers as dependencies
+  }, [moveMode, viewportDragEnabled, handlePointerDown, handlePointerMove, handlePointerUp]); // Include moveMode and viewportDragEnabled
 
   // Debug manager registration
   useEffect(() => {
@@ -491,6 +524,7 @@ export function CanvasContent({
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
         eventMode={moveMode === 'poem' ? 'dynamic' : 'passive'}
         interactive={moveMode === 'poem'}
+        interactiveChildren={moveMode === 'edit'}
       >
         <PoemTitle
           title={currentPoem.title}
