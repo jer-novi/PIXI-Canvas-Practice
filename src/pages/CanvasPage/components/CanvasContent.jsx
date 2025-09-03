@@ -133,14 +133,14 @@ export function CanvasContent({
   // Stable memoized utility functions
   const checkIfOverPoemContent = useCallback((event) => {
     if (!contentRef.current || !viewportRef.current) return false;
-    
+
     try {
       // Get event position in viewport coordinates
       const localPos = event.data.getLocalPosition(viewportRef.current);
-      
+
       // Get content container bounds
       const contentBounds = contentRef.current.getBounds();
-      
+
       // Check if position is within poem content bounds using proper PIXI bounds check
       const isOver = (
         localPos.x >= contentBounds.x &&
@@ -148,43 +148,43 @@ export function CanvasContent({
         localPos.y >= contentBounds.y &&
         localPos.y <= contentBounds.y + contentBounds.height
       );
-      
-      console.log('Bounds check:', {
-        cursorPos: { x: localPos.x, y: localPos.y },
-        bounds: {
-          x: contentBounds.x,
-          y: contentBounds.y,
-          width: contentBounds.width,
-          height: contentBounds.height
-        },
-        isOver
-      });
-      
+
+      // console.log('Bounds check:', {
+      //   cursorPos: { x: localPos.x, y: localPos.y },
+      //   bounds: {
+      //     x: contentBounds.x,
+      //     y: contentBounds.y,
+      //     width: contentBounds.width,
+      //     height: contentBounds.height
+      //   },
+      //   isOver
+      // });
+
       return isOver;
     } catch (error) {
       console.warn('Error checking poem bounds:', error);
       return false;
     }
-  }, []); // No dependencies to prevent re-creation
+  }, [contentRef, viewportRef]); // No dependencies to prevent re-creation
 
   // Check if pointer is over any selected lines
   const checkIfOverSelectedLines = useCallback((event) => {
     if (!contentRef.current || !viewportRef.current || !selectedLines || selectedLines.size === 0) {
       return false;
     }
-    
+
     try {
       // Get event position in viewport coordinates
       const localPos = event.data.getLocalPosition(viewportRef.current);
-      
+
       // Check each selected line's bounds
       for (const lineIndex of selectedLines) {
         // Get the child container for this line index
         // contentRef.current has children in this order:
         // 0: PoemTitle (index -2)
-        // 1: PoemAuthor (index -1) 
+        // 1: PoemAuthor (index -1)
         // 2+: PoemLines (index 0, 1, 2, etc.)
-        
+
         let childContainer = null;
         if (lineIndex === -2) {
           // PoemTitle is first child (index 0)
@@ -196,10 +196,10 @@ export function CanvasContent({
           // PoemLines start at child index 2
           childContainer = contentRef.current.children[2 + lineIndex];
         }
-        
+
         if (childContainer) {
           const lineBounds = childContainer.getBounds();
-          
+
           // Check if position is within this line's bounds
           const isOverLine = (
             localPos.x >= lineBounds.x &&
