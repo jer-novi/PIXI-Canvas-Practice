@@ -119,7 +119,11 @@ export function CanvasContent({
   }, [contentRef.current, moveMode, app]);
 
   // Use refs for drag state to prevent useEffect dependency cycles
-  
+  const isDraggingRef = useRef(false);
+  const dragModeRef = useRef(null); // Can be 'poem', 'line', or 'viewport'
+  const dragStartPos = useRef({ x: 0, y: 0 });
+  const dragStartPoemOffset = useRef({ x: 0, y: 0 });
+  const dragStartLineOffsets = useRef(new Map());
 
   // Helper functions to update drag state
   const setIsDragging = useCallback((value) => {
