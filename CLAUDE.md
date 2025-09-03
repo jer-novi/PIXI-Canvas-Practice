@@ -16,11 +16,23 @@ The project features a sophisticated responsive layout system with fixed-width c
 - **Custom Font Loading**: `useFontLoader` hook that loads WOFF2 fonts and manages loading state to prevent Flash of Unstyled Text
 - **Interactive Styling Controls**: Controls component built using "Lifting State Up" pattern with working sliders and inputs for fontSize, fillColor, letterSpacing, and lineHeight, including smart logic that scales lineHeight with fontSize until manually adjusted
 - **Camera System**: `pixi-viewport` integration for pan and zoom functionality with custom `useAutoRecenter` hook for smooth automatic re-centering when canvas or text changes size
+- **Font Synchronization**: "Sync All Fonts" button that resets all line-level font overrides and applies Montserrat as fallback font
+- **Pexels Background System**: Complete integration with Pexels API for searchable background images, including responsive thumbnail grid and real-time background application using modern PIXI v8+ Assets.load() pattern
+- **Floating Photo Grid**: Modal-style photo selector with smooth animations, pagination controls, and overlay system for better UX
+- **Advanced Selection System**: Multi-line selection with Ctrl/Cmd+click for non-adjacent lines, Shift+click for range selection, and Escape key for deselection
+- **Drag-and-Drop System**: Modern PIXI v8+ drag-and-drop implementation with three interaction modes (Edit/Select, Line Move, Global Move) using proper event delegation and state synchronization
+
+**Current Features:**
+- **Three-Mode Interaction System**: 
+  - Edit/Select Mode: Click to select individual lines or ranges
+  - Line Move Mode: Drag selected lines independently with conditional slider controls
+  - Global Move Mode: Move entire poem with unified controls
+- **Advanced Event Handling**: Modern PIXI.js v8+ federated event system with proper conflict prevention between viewport camera and drag operations
+- **State Management**: Sophisticated `lineOverrides` system for per-line customization (fonts, colors, positioning, etc.)
+- **Performance Optimizations**: Direct PIXI updates during drag operations, memoized calculations, and efficient re-render patterns
 
 **Planned Features:**
-- **Text Styling Completion**: Text alignment (left, center, right), font style (bold, italic), and possibly justified text
-- **Selection System**: Mechanism to select individual poem lines or entire poem
-- **Background System**: Method to load and manage background images (building facades) on canvas
+- **Text Styling Completion**: Text alignment (left, center, right), font style (bold, italic), and justified text
 - **Display Strategies**: Logic for different display modes (FIT, SCROLL, PAGINATE) based on poem length
 
 ## Development Commands
@@ -99,6 +111,8 @@ Located in `src/pages/CanvasPage/hooks/useResponsiveCanvas.js`, this hook implem
 #### Utility Hooks
 - `useTextStyles()`: Text style state management
 - `useSelection()`: Text selection functionality
+- `usePexels()`: Pexels API integration with search, loading states, and error handling
+- `useDirectDrag()`: Modern PIXI v8+ drag-and-drop implementation with proper event handling
 
 ### State Management Patterns
 
@@ -163,3 +177,70 @@ Located in `src/pages/CanvasPage/hooks/useResponsiveCanvas.js`, this hook implem
 - Modern browser features (ResizeObserver, CSS Grid as fallback)
 - Web font loading API usage
 - PIXI.js hardware acceleration support
+
+## Advanced Features Implementation
+
+### Font Management System
+- **Global Font Synchronization**: `handleSyncAllFontsToGlobal` function in `useCanvasHandlers.js:267-321` provides one-click reset of all line-level font overrides with automatic Montserrat fallback
+- **Per-Line Font Overrides**: Individual lines can have custom fonts via the `lineOverrides` system while maintaining global font inheritance
+- **Font Loading Integration**: Proper integration with existing `useFontManager` and `useFontLoader` systems for seamless font switching
+
+### Background Image System
+- **Pexels API Integration**: Full-featured search system using `VITE_PEXELS_API_KEY` environment variable
+- **Modern Asset Loading**: Uses PIXI v8+ `Assets.load()` instead of deprecated `Texture.fromURL()` 
+- **Background Rendering**: `BackgroundImage.jsx` component implements cover-style scaling with proper aspect ratio preservation
+- **Error Handling**: Comprehensive error states for API failures, network issues, and texture loading problems
+
+### Selection and Interaction System
+- **Multi-Selection Patterns**: 
+  - **Single Selection**: Standard click behavior
+  - **Range Selection**: Shift+click for selecting consecutive lines
+  - **Toggle Selection**: Ctrl/Cmd+click for non-adjacent multi-line selection
+  - **Keyboard Shortcuts**: Escape key for clearing all selections
+- **Visual Feedback**: Selected lines receive visual highlighting and cursor changes based on interaction mode
+- **State Persistence**: Selection state maintained across mode switches and UI interactions
+
+### Drag-and-Drop Architecture
+- **Three-Mode System**: 
+  - `edit`: Selection-only mode with no dragging, sliders inactive
+  - `line`: Selected lines dragging with line-specific X/Y sliders
+  - `poem`: Global poem movement with unified positioning controls
+- **Event Delegation**: Viewport-level event handling prevents conflicts with camera controls
+- **Modern PIXI Patterns**: Uses `eventMode: 'dynamic'` and proper event propagation with `event.stopPropagation()`
+- **Performance Optimization**: Direct PIXI position updates during drag operations to maintain 60fps
+
+### UI/UX Enhancements
+- **Floating Photo Grid**: Modal overlay system with smooth CSS animations (fade in/out, slide transforms)
+- **Conditional UI Elements**: Dynamic slider behavior based on current mode and selection state
+- **Responsive Grid Layout**: Thumbnail grid with `repeat(auto-fill, minmax(80px, 1fr))` pattern
+- **Loading States**: Comprehensive loading indicators for API requests and image loading operations
+
+### Technical Patterns and Solutions
+
+#### PIXI.js v8+ Compatibility
+- **Asset Loading**: Modern `Assets.load(imageUrl)` pattern replacing deprecated texture methods
+- **Event System**: New federated event system with proper `eventMode` settings
+- **Conflict Prevention**: Ctrl/Cmd modifier keys prioritize viewport camera controls over drag operations
+
+#### State Management Architecture
+- **lineOverrides System**: Centralized per-line customization supporting fonts, colors, positioning offsets
+- **Conditional Rendering**: Mode-based UI component visibility and functionality
+- **Bidirectional Synchronization**: Drag operations sync with UI sliders in real-time
+
+#### Performance Considerations
+- **Memory Management**: Proper texture cleanup and component unmounting
+- **Re-render Prevention**: Strategic use of `useCallback`, `useMemo`, and dependency arrays
+- **Event Optimization**: Throttled pointer move events and efficient bounds checking
+
+## Error Handling and Debugging
+
+### Common Issues and Solutions
+- **Circular Dependency Prevention**: Use refs for frequently changing values in event handlers
+- **Texture Loading Failures**: Graceful fallbacks to `Texture.EMPTY` with error logging
+- **Event Conflicts**: Proper event propagation management between viewport and drag systems
+- **API Limitations**: User-friendly error messages for Pexels API rate limits and network issues
+
+### Development Tools Integration
+- **React DevTools**: Component state inspection and performance profiling
+- **Browser Performance Tools**: Frame rate monitoring during drag operations
+- **Console Debugging**: Structured logging for event flow and state changes
