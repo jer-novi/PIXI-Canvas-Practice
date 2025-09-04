@@ -26,8 +26,6 @@ export function useCanvasState() {
     // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
     const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
     const {fontStatus, loadFont, availableFonts} = useFontManager();
-    const pexels = usePexels(); // <-- De nieuwe hook aanroepen
-    const flickr = useFlickr(); // <-- NIEUW: Voeg de Flickr hook toe
 
     // Text Styling State
     const [currentFontFamily, setCurrentFontFamily] =
@@ -36,6 +34,10 @@ export function useCanvasState() {
 
     // Nieuwe state voor de achtergrond
     const [backgroundImage, setBackgroundImage] = useState(null); // URL van de gekozen afbeelding
+    
+    // Initialize hooks that depend on state (AFTER state declaration)
+    const pexels = usePexels(setBackgroundImage); // <-- Auto-set foto 2 als default achtergrond
+    const flickr = useFlickr(); // <-- NIEUW: Voeg de Flickr hook toe
 
     // Search context state voor photo modal titel
     const [searchContext, setSearchContext] = useState({

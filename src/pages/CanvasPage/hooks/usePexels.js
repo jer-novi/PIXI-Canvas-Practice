@@ -7,7 +7,7 @@ const COLLECTION_ID = import.meta.env.VITE_PEXELS_COLLECTION_ID;
 const SEARCH_URL = "https://api.pexels.com/v1/search";
 const COLLECTION_URL = `https://api.pexels.com/v1/collections/${COLLECTION_ID}`;
 
-export function usePexels() {
+export function usePexels(onDefaultBackground = null) {
     const [photos, setPhotos] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -47,7 +47,7 @@ export function usePexels() {
             }
 
             setPhotos(photosData);
-            
+
             // Set mode voor paginering logic
             setIsCollectionMode(isCollection);
 
@@ -58,7 +58,13 @@ export function usePexels() {
                 const hasMore = photosData.length === perPage;
                 setNextPageUrl(hasMore ? 'manual_next' : null);
                 setPrevPageUrl(currentPage > 1 ? 'manual_prev' : null);
-                
+
+                // Auto-set foto 5 (index 4) als default achtergrond bij eerste collection load
+                if (!collectionLoadedRef.current && onDefaultBackground && photosData.length >= 5) {
+                    const defaultPhoto = photosData[4]; // Foto 5 (4-indexed)
+                    onDefaultBackground(defaultPhoto.src.large2x);
+                }
+
                 collectionLoadedRef.current = true;
             } else {
                 // Search mode: gebruik API's next_page/prev_page URLs
@@ -96,7 +102,7 @@ export function usePexels() {
 
     const goToNextPage = useCallback(() => {
         if (!nextPageUrl) return;
-        
+
         if (isCollectionMode) {
             // Collection mode: handmatige page increment
             getCollectionPhotos(currentPage + 1);
@@ -108,7 +114,7 @@ export function usePexels() {
 
     const goToPrevPage = useCallback(() => {
         if (!prevPageUrl) return;
-        
+
         if (isCollectionMode) {
             // Collection mode: handmatige page decrement
             getCollectionPhotos(currentPage - 1);
