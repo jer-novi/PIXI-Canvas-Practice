@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"; // <-- useState importeren
 import styles from "./CanvasPage.module.css";
-import { anwbCities, capitalCities } from "../../data/searchData"; // <-- Importeer steden
+import { anwbCities, capitalCities, cityDisplayNames } from "../../data/searchData"; // <-- Importeer steden
 
 export default function Controls({
   fontSize,
@@ -153,7 +153,7 @@ export default function Controls({
             <option value="">ANWB steden...</option>
             {anwbCities.sort().map((city) => (
               <option key={city} value={city}>
-                {city}
+                {cityDisplayNames[city] || city}
               </option>
             ))}
           </select>
@@ -168,7 +168,7 @@ export default function Controls({
             <option value="">Hoofdsteden...</option>
             {capitalCities.sort().map((city) => (
               <option key={city} value={city}>
-                {city}
+                {cityDisplayNames[city] || city}
               </option>
             ))}
           </select>

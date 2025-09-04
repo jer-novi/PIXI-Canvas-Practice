@@ -201,7 +201,7 @@ const geoJsonData = {
             }
         },
         {
-            "type": "Feature", 
+            "type": "Feature",
             "properties": {"id": "NL311518", "CNTR_CODE": "NL", "NAME_ASCI": "Den Haag", "NSI_CODE": "GM0518", "NAME_NSI": "Den Haag", "NAME_LATN": "Den Haag"},
             "bbox": [4.2409, 52.0367, 4.3370, 52.1186],
             "geometry": {
@@ -268,6 +268,15 @@ Het gebruikt de haversine-formule, die rekening houdt met de kromming van de aar
  */
 
 export const getGeoDataByCity = (cityName) => {
+    // Speciale optimalisatie voor Baden-Baden met exacte Wikipedia coördinaten
+    if (cityName === 'Baden-Baden') {
+        return {
+            lat: 48.7667,   // 48° 46′ NB
+            lon: 8.2333,    // 08° 14′ OL  
+            radius: 32      // Bredere radius voor meer zoekresultaten
+        };
+    }
+
     const city = cityData[cityName];
     if (!city) return null;
 

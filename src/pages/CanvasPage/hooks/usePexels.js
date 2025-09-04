@@ -15,6 +15,11 @@ export function usePexels() {
     const [nextPageUrl, setNextPageUrl] = useState(null);
     const [prevPageUrl, setPrevPageUrl] = useState(null);
 
+    // --- NIEUW: Collection paginering state ---
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isCollectionMode, setIsCollectionMode] = useState(false);
+    const [perPage] = useState(15); // Standaard per_page waarde
+
     // --- NIEUW: Vlag om te zorgen dat de collectie maar één keer laadt ---
     const collectionLoadedRef = useRef(false);
 
@@ -42,12 +47,23 @@ export function usePexels() {
             }
 
             setPhotos(photosData);
-            setNextPageUrl(response.data.next_page || null);
-            setPrevPageUrl(response.data.prev_page || null);
+            
+            // Set mode voor paginering logic
+            setIsCollectionMode(isCollection);
 
-            // Als de collectie succesvol is geladen, zet de vlag.
             if (isCollection) {
+                // Collection mode: handmatige paginering
+                // hasNextPage = true als we exact perPage foto's hebben (mogelijk meer pagina's)
+                // hasNextPage = false als we minder dan perPage hebben (laatste pagina)
+                const hasMore = photosData.length === perPage;
+                setNextPageUrl(hasMore ? 'manual_next' : null);
+                setPrevPageUrl(currentPage > 1 ? 'manual_prev' : null);
+                
                 collectionLoadedRef.current = true;
+            } else {
+                // Search mode: gebruik API's next_page/prev_page URLs
+                setNextPageUrl(response.data.next_page || null);
+                setPrevPageUrl(response.data.prev_page || null);
             }
 
         } catch (err) {
@@ -55,20 +71,23 @@ export function usePexels() {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [currentPage, perPage]);
 
-    const getCollectionPhotos = useCallback(() => {
+    const getCollectionPhotos = useCallback((page = 1) => {
         if (!COLLECTION_ID) {
             setError("Pexels Collectie ID ontbreekt.");
             return;
         }
-        const collectionUrl = `${COLLECTION_URL}?per_page=15`;
+        setCurrentPage(page);
+        const collectionUrl = `${COLLECTION_URL}?per_page=${perPage}&page=${page}`;
         fetchPexelsData(collectionUrl, true);
-    }, [fetchPexelsData]);
+    }, [fetchPexelsData, perPage]);
 
     const searchPhotos = useCallback(
         (query) => {
             setCurrentQuery(query);
+            setCurrentPage(1); // Reset page voor nieuwe zoekopdracht
+            setIsCollectionMode(false); // Ga uit collection mode
             const initialUrl = `${SEARCH_URL}?query=${encodeURIComponent(query)}&per_page=15&orientation=landscape`;
             fetchPexelsData(initialUrl);
         },
@@ -76,16 +95,28 @@ export function usePexels() {
     );
 
     const goToNextPage = useCallback(() => {
-        if (nextPageUrl) {
+        if (!nextPageUrl) return;
+        
+        if (isCollectionMode) {
+            // Collection mode: handmatige page increment
+            getCollectionPhotos(currentPage + 1);
+        } else {
+            // Search mode: gebruik next_page URL
             fetchPexelsData(nextPageUrl);
         }
-    }, [nextPageUrl, fetchPexelsData]);
+    }, [nextPageUrl, isCollectionMode, currentPage, getCollectionPhotos, fetchPexelsData]);
 
     const goToPrevPage = useCallback(() => {
-        if (prevPageUrl) {
+        if (!prevPageUrl) return;
+        
+        if (isCollectionMode) {
+            // Collection mode: handmatige page decrement
+            getCollectionPhotos(currentPage - 1);
+        } else {
+            // Search mode: gebruik prev_page URL
             fetchPexelsData(prevPageUrl);
         }
-    }, [prevPageUrl, fetchPexelsData]);
+    }, [prevPageUrl, isCollectionMode, currentPage, getCollectionPhotos, fetchPexelsData]);
 
     useEffect(() => {
         // Laad de collectie alleen als deze nog NIET geladen is.

@@ -18,6 +18,13 @@ export const anwbCities = [
   "Goes",
 ];
 
+// Mapping voor custom display namen in de dropdown
+export const cityDisplayNames = {
+  "Baden-Baden": "Baden-Baden (regio)",
+  // Voeg hier meer custom names toe indien nodig
+  // "Monschau": "Monschau (Duitsland)",
+};
+
 export const capitalCities = [
   "Amsterdam", // Landelijke hoofdstad
   "Assen",

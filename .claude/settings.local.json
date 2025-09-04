@@ -4,7 +4,14 @@
       "Webfetch",
       "Bash",
       "Websearch",
-      "WebSearch"
+      "WebSearch",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\pages\\CanvasPage\\hooks/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\data/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\data/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\pages\\CanvasPage\\hooks/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\data/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\pages\\CanvasPage/**)",
+      "Read(/C:\\CODING PROJECTS and WEBSITES\\GITHUB-NOVI-USER\\pixi-canvas-practice\\src\\pages\\CanvasPage\\hooks/**)"
     ],
     "deny": [],
     "ask": []

@@ -44,13 +44,13 @@ export function useFlickr() {
         const minUploadDate = Math.floor(twentyYearsAgo.getTime() / 1000);
 
         // Bepaal de juiste zoekterm op basis van de stad
-        const germanCities = ['baden-baden', 'berlin', 'münchen', 'hamburg', 'köln', 'frankfurt', 'dresden', 'düsseldorf'];
-        const isGermanCity = germanCities.some(germanCity => 
-            searchParams.city.toLowerCase().includes(germanCity) || germanCity.includes(searchParams.city.toLowerCase())
+        const germanCities = ['Baden-Baden', 'Berlin', 'München', 'Hamburg', 'Köln', 'Frankfurt', 'Dresden', 'Düsseldorf'];
+        const isGermanCity = germanCities.some(germanCity =>
+            searchParams.city.toLowerCase().includes(germanCity.toLowerCase()) || germanCity.toLowerCase().includes(searchParams.city.toLowerCase())
         );
-        
-        const searchTerm = isGermanCity ? 
-            `${searchParams.city} Fassaden` : 
+
+        const searchTerm = isGermanCity ?
+            `Fassade` :
             `${searchParams.city} gevel`;
 
         const params = {
@@ -71,7 +71,7 @@ export function useFlickr() {
         };
 
         console.log("📡 FLICKR QUERY VERZONDEN:", {
-            url: FLICKR_API_URL, 
+            url: FLICKR_API_URL,
             params,
             city: searchParams.city,
             searchTerm,
