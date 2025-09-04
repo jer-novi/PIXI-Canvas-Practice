@@ -59,9 +59,9 @@ export function usePexels(onDefaultBackground = null) {
                 setNextPageUrl(hasMore ? 'manual_next' : null);
                 setPrevPageUrl(currentPage > 1 ? 'manual_prev' : null);
 
-                // Auto-set foto 5 (index 4) als default achtergrond bij eerste collection load
-                if (!collectionLoadedRef.current && onDefaultBackground && photosData.length >= 5) {
-                    const defaultPhoto = photosData[4]; // Foto 5 (4-indexed)
+                // Auto-set foto 14 (index 13) als default achtergrond bij eerste collection load
+                if (!collectionLoadedRef.current && onDefaultBackground && photosData.length >= 14) {
+                    const defaultPhoto = photosData[13]; // Foto 14 (13-indexed)
                     onDefaultBackground(defaultPhoto.src.large2x);
                 }
 

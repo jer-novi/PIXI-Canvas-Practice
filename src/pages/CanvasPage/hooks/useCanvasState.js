@@ -12,7 +12,7 @@ export function useCanvasState() {
     const contentRef = useRef(null);
 
     // --- NIEUW: State voor Drag-and-Drop ---
-    const [poemOffset, setPoemOffset] = useState({x: 0, y: 0});
+    const [poemOffset, setPoemOffset] = useState({x: 170, y: 0});
     const [moveMode, setMoveMode] = useState("edit"); // 'edit', 'poem' or 'line' - default to edit
     // --- Einde nieuwe state ---
 
@@ -34,7 +34,7 @@ export function useCanvasState() {
 
     // Nieuwe state voor de achtergrond
     const [backgroundImage, setBackgroundImage] = useState(null); // URL van de gekozen afbeelding
-    
+
     // Initialize hooks that depend on state (AFTER state declaration)
     const pexels = usePexels(setBackgroundImage); // <-- Auto-set foto 2 als default achtergrond
     const flickr = useFlickr(); // <-- NIEUW: Voeg de Flickr hook toe
@@ -64,8 +64,8 @@ export function useCanvasState() {
     ]); // De dependency array
 
     // Text Styling State (Zet deze bovenaan de styling state)
-    const [fontSize, setFontSize] = useState(36);
-    const [fillColor, setFillColor] = useState("#ffffff");
+    const [fontSize, setFontSize] = useState(26); //TODO fallback fontsizes in useFontManager aanpassen.
+    const [fillColor, setFillColor] = useState("#000000");
     const [letterSpacing, setLetterSpacing] = useState(0);
 
     // Hierarchical color system: null means use global color, otherwise use override
@@ -73,10 +73,10 @@ export function useCanvasState() {
     const [authorColorOverride, setAuthorColorOverride] = useState(null);
 
     // Deprecated: keeping for backward compatibility, will be removed
-    const [titleColor, setTitleColor] = useState("#ffffff");
-    const [authorColor, setAuthorColor] = useState("#cccccc");
+    const [titleColor, setTitleColor] = useState("#000000");
+    const [authorColor, setAuthorColor] = useState("#000000");
 
-    const [lineHeight, setLineHeight] = useState(36 * 1.4);
+    const [lineHeight, setLineHeight] = useState(24 * 1.4);
     const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
     const [textAlign, setTextAlign] = useState("center");
 
@@ -132,7 +132,7 @@ export function useCanvasState() {
 
         // Flickr-gerelateerde state en functies
         ...flickr, // <-- NIEUW
-        
+
         // Achtergrond state
         backgroundImage,
         setBackgroundImage,
