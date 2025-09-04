@@ -29,7 +29,7 @@ export function useCanvasState() {
 
     // Text Styling State
     const [currentFontFamily, setCurrentFontFamily] =
-        useState("Cormorant Garamond");
+        useState("Lato");
     const [pendingFontFamily, setPendingFontFamily] = useState(null);
 
     // Nieuwe state voor de achtergrond
@@ -64,7 +64,7 @@ export function useCanvasState() {
     ]); // De dependency array
 
     // Text Styling State (Zet deze bovenaan de styling state)
-    const [fontSize, setFontSize] = useState(26); //TODO fallback fontsizes in useFontManager aanpassen.
+    const [fontSize, setFontSize] = useState(20); //TODO fallback fontsizes in useFontManager aanpassen.
     const [fillColor, setFillColor] = useState("#000000");
     const [letterSpacing, setLetterSpacing] = useState(0);
 
