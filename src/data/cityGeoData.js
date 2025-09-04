@@ -201,6 +201,15 @@ const geoJsonData = {
             }
         },
         {
+            "type": "Feature", 
+            "properties": {"id": "NL311518", "CNTR_CODE": "NL", "NAME_ASCI": "Den Haag", "NSI_CODE": "GM0518", "NAME_NSI": "Den Haag", "NAME_LATN": "Den Haag"},
+            "bbox": [4.2409, 52.0367, 4.3370, 52.1186],
+            "geometry": {
+                "type": "MultiPolygon",
+                "coordinates": [[[[4.2409, 52.0367], [4.3370, 52.0367], [4.3370, 52.1186], [4.2409, 52.1186], [4.2409, 52.0367]]]]
+            }
+        },
+        {
             "type": "Feature",
             "properties": {"id": "NL310935", "CNTR_CODE": "NL", "NAME_ASCI": "Maastricht", "NSI_CODE": "GM0935", "NAME_NSI": "Maastricht", "NAME_LATN": "Maastricht"},
             "bbox": [5.639813, 50.804281, 5.762745, 50.911141],
@@ -262,7 +271,7 @@ export const getGeoDataByCity = (cityName) => {
     const city = cityData[cityName];
     if (!city) return null;
 
-    const [minLon, minLat, maxLon, maxLat] = city.bbox;
+    const [_minLon, _minLat, maxLon, maxLat] = city.bbox;
     // Bereken de afstand van het centrum tot de hoek van de bounding box
     const radius = getDistanceFromLatLonInKm(city.lat, city.lon, maxLat, maxLon);
 

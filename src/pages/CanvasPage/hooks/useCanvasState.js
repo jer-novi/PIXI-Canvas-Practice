@@ -37,6 +37,13 @@ export function useCanvasState() {
     // Nieuwe state voor de achtergrond
     const [backgroundImage, setBackgroundImage] = useState(null); // URL van de gekozen afbeelding
 
+    // Search context state voor photo modal titel
+    const [searchContext, setSearchContext] = useState({
+        type: 'collection', // 'collection', 'pexels_search', 'flickr_city', 'pexels_fallback'
+        query: '',
+        source: 'pexels' // 'pexels' or 'flickr'
+    });
+
     // Deze 'watcher' reageert als een font klaar is met laden
     useEffect(() => {
         // 1. Is er een font in de wachtrij ÉN is de status daarvan 'loaded'?
@@ -127,6 +134,10 @@ export function useCanvasState() {
         // Achtergrond state
         backgroundImage,
         setBackgroundImage,
+
+        // Search context state
+        searchContext,
+        setSearchContext,
 
         // Text Styling State
         fontSize,

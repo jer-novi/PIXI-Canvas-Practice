@@ -1,636 +1,636 @@
 /* Basisstijl voor alle control-knoppen */
 .buttonGroup button,
 .resetButton {
-  background-color: transparent;
-  border: none;
-  color: #a0aec0;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+    background-color: transparent;
+    border: none;
+    color: #a0aec0;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
 }
 
 /* Hover-staat delen */
 .buttonGroup button:hover,
 .resetButton:hover {
-  background-color: #4a5568;
+    background-color: #4a5568;
 }
 
 /* Active-staat delen — voeg ook .active als losse class toe (zie hieronder) */
 .buttonGroup button.active,
 .resetButton.active {
-  background-color: #02690b;
-  color: white;
+    background-color: #02690b;
+    color: white;
 }
 
 /* Alleen voor groep-knoppen (scheidingslijnen en container rounding) */
 .buttonGroup {
-  display: flex;
-  border: 1px solid #4a5568;
-  border-radius: 5px;
-  overflow: hidden;
+    display: flex;
+    border: 1px solid #4a5568;
+    border-radius: 5px;
+    overflow: hidden;
 }
 
 .buttonGroup button {
-  border-left: 1px solid #4a5568;
+    border-left: 1px solid #4a5568;
 }
 
 .buttonGroup button:first-child {
-  border-left: none;
+    border-left: none;
 }
 
 .canvasContainer {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
+    display: flex;
+    width: 100vw;
+    height: 100vh;
 }
 
 .canvasWrapper {
-  flex: 1;
-  height: 100%;
-  min-width: 0;
+    flex: 1;
+    height: 100%;
+    min-width: 0;
 }
 
 .controlsWrapper {
-  width: 100%;
-  height: 100%;
-  background-color: #272d37;
-  color: #cfd4db;
-  padding: 1rem;
-  overflow-y: auto;
-  box-sizing: border-box;
-  border-right: 1px solid #3d4a5c;
+    width: 100%;
+    height: 100%;
+    background-color: #272d37;
+    color: #cfd4db;
+    padding: 1rem;
+    overflow-y: auto;
+    box-sizing: border-box;
+    border-right: 1px solid #3d4a5c;
 }
 
 .controlRow {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  max-width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    max-width: 100%;
 }
 
 .controlRow label {
-  flex-shrink: 0;
-  min-width: 80px;
-  font-size: 0.9rem;
+    flex-shrink: 0;
+    min-width: 80px;
+    font-size: 0.9rem;
 }
 
 .controlRow input[type="range"] {
-  flex: 1;
-  min-width: 0;
+    flex: 1;
+    min-width: 0;
 }
 
 .controlRow input[type="color"] {
-  width: 40px;
-  height: 30px;
-  border: none;
-  border-radius: 4px;
+    width: 40px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
 }
 
 .controlRow span {
-  flex-shrink: 0;
-  min-width: 40px;
-  text-align: right;
-  font-size: 0.85rem;
+    flex-shrink: 0;
+    min-width: 40px;
+    text-align: right;
+    font-size: 0.85rem;
 }
 
 /* Vertical layout for wide sliders under the label */
 .controlGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
 }
 
 .controlGroup label {
-  font-size: 0.9rem;
+    font-size: 0.9rem;
 }
 
 .fullWidthRange {
-  width: 100%;
+    width: 100%;
 }
 
 .valueRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
 }
 
 .selectionInfo {
-  background: rgba(255, 204, 0, 0.1);
-  border: 1px solid #ffcc00;
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 16px;
+    background: rgba(255, 204, 0, 0.1);
+    border: 1px solid #ffcc00;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 16px;
 }
 
 .modeToggle {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
 }
 
 .clearButton {
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 12px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
 }
 
 /* Vertical layout for color controls when a line is selected */
 .controlColumn {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem !important;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem !important;
 }
 
 .controlColumn .colorControls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
-  padding-left: 0.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    padding-left: 0.25rem;
 }
 
 .controlColumn .lineControls {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
 }
 
 .controlColumn .hintText {
-  font-size: 0.8rem !important;
-  color: #a0aec0 !important;
-  margin: 0.25rem 0;
+    font-size: 0.8rem !important;
+    color: #a0aec0 !important;
+    margin: 0.25rem 0;
 }
 
 .controlColumn .resetButton {
-  align-self: flex-start;
-  margin: 0 !important;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid #4a5568;
-  border-radius: 4px;
+    align-self: flex-start;
+    margin: 0 !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.85rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #4a5568;
+    border-radius: 4px;
 }
 
 .controlColumn .resetButton:hover {
-  background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Hierarchical Color System Styling */
 .controlSection {
-  margin: 1.5rem 0;
-  padding: 1rem;
-  border: 1px solid #4a5568;
-  border-radius: 6px;
-  background-color: rgba(0, 0, 0, 0.2);
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 .controlSection h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1rem;
-  color: #e2e8f0;
-  font-weight: 600;
+    margin: 0 0 0.75rem 0;
+    font-size: 1rem;
+    color: #e2e8f0;
+    font-weight: 600;
 }
 
 .syncButton {
-  background: linear-gradient(135deg, #4299e1, #3182ce);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .syncButton:hover {
-  background: linear-gradient(135deg, #3182ce, #2c5aa0);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #3182ce, #2c5aa0);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .syncButton:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 /* Color control label styling */
 .labelText {
-  display: inline-block;
-  margin-right: 0.5rem;
+    display: inline-block;
+    margin-right: 0.5rem;
 }
 
 .colorIndicator {
-  display: inline-block;
-  font-size: 0.8rem;
+    display: inline-block;
+    font-size: 0.8rem;
 }
 
 .overrideActive {
-  color: #f6ad55;
-  filter: drop-shadow(0 0 2px rgba(246, 173, 85, 0.3));
+    color: #f6ad55;
+    filter: drop-shadow(0 0 2px rgba(246, 173, 85, 0.3));
 }
 
 .globalActive {
-  color: #68d391;
-  filter: drop-shadow(0 0 2px rgba(104, 211, 145, 0.3));
+    color: #68d391;
+    filter: drop-shadow(0 0 2px rgba(104, 211, 145, 0.3));
 }
 
 /* Color controls container */
 .colorControls {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 /* Reset color button styling */
 .resetColorButton {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: bold;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
 }
 
 .resetColorButton:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.5);
-  transform: rotate(-180deg);
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: rotate(-180deg);
 }
 
 .resetColorButton:active {
-  transform: rotate(-180deg) scale(0.95);
+    transform: rotate(-180deg) scale(0.95);
 }
 
 /* Enhanced tooltips styling */
 .controlRow [title]:hover {
-  position: relative;
+    position: relative;
 }
 
 /* Responsive adjustments for color controls */
 @media (max-width: 400px) {
-  .colorControls {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.3rem;
-  }
+    .colorControls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.3rem;
+    }
 
-  .resetColorButton {
-    align-self: flex-start;
-    margin-left: 0;
-  }
+    .resetColorButton {
+        align-self: flex-start;
+        margin-left: 0;
+    }
 }
 
 /* Pexels Background Search Styling */
 .searchInput {
-  flex-grow: 1;
-  padding: 8px;
-  border: 1px solid #4a5568;
-  background-color: #2d3748;
-  color: #e2e8f0;
-  border-radius: 4px;
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #4a5568;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border-radius: 4px;
 }
 
 .searchButton {
-  padding: 8px 12px;
-  border: none;
-  background-color: #4299e1;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+    padding: 8px 12px;
+    border: none;
+    background-color: #4299e1;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .searchButton:disabled {
-  background-color: #4a5568;
-  cursor: not-allowed;
+    background-color: #4a5568;
+    cursor: not-allowed;
 }
 
 .errorMessage {
-  color: #f56565;
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  background: rgba(245, 101, 101, 0.1);
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid rgba(245, 101, 101, 0.3);
+    color: #f56565;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    background: rgba(245, 101, 101, 0.1);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid rgba(245, 101, 101, 0.3);
 }
 
 .errorMessage h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.9rem;
-  color: #f56565;
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: #f56565;
 }
 
 .reloadButton {
-  background: #4a5568;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  transition: all 0.2s ease;
+    background: #4a5568;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    transition: all 0.2s ease;
 }
 
 .reloadButton:hover {
-  background: #5a6a7d;
-  transform: translateY(-1px);
+    background: #5a6a7d;
+    transform: translateY(-1px);
 }
 
 .paginationControls {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
 }
 
 .paginationControls button {
-  padding: 8px 12px;
-  border: none;
-  background-color: #4a5a6d;
-  color: white;
-  border-radius: 4px;
-  cursor: pointer;
+    padding: 8px 12px;
+    border: none;
+    background-color: #4a5a6d;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
 .paginationControls button:disabled {
-  background-color: #2d3748;
-  cursor: not-allowed;
-  opacity: 0.5;
+    background-color: #2d3748;
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .photoGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-  gap: 8px;
-  margin-top: 1rem;
-  max-height: 200px;
-  overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    margin-top: 1rem;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .photoThumbnail {
-  position: relative;
-  cursor: pointer;
-  border-radius: 4px;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
+    position: relative;
+    cursor: pointer;
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
 }
 
 .photoThumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  transition: transform 0.2s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.2s ease;
 }
 
 .photoThumbnail:hover img {
-  transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 .cityDropdown {
-  width: 100%;
-  padding: 8px;
-  background-color: #2d3748;
-  color: #e2e8f0;
-  border: 1px solid #4a5568;
-  border-radius: 4px;
+    width: 100%;
+    padding: 8px;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 4px;
 }
 
 .toggleSearchButton {
-  width: 100%;
-  padding: 8px;
-  background-color: #4a5568;
-  color: #e2e8f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: center;
+    width: 100%;
+    padding: 8px;
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
 }
 
 /* ========== FLOATING PHOTO GRID STYLES ========== */
 
 .photoGridOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
 .photoGridOverlay.fadeIn {
-  opacity: 1;
+    opacity: 1;
 }
 
 .photoGridOverlay.fadeOut {
-  opacity: 0;
+    opacity: 0;
 }
 
 .floatingPhotoGrid {
-  background-color: #2d3748;
-  border-radius: 12px;
-  padding: 1.5rem;
-  max-width: 90vw;
-  max-height: 80vh;
-  width: 600px;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  border: 1px solid #4a5568;
-  transform: scale(0.9) translateY(20px);
-  transition: all 0.3s ease;
+    background-color: #2d3748;
+    border-radius: 12px;
+    padding: 1.5rem;
+    max-width: 90vw;
+    max-height: 80vh;
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 1px solid #4a5568;
+    transform: scale(0.9) translateY(20px);
+    transition: all 0.3s ease;
 }
 
 .floatingPhotoGrid.slideIn {
-  transform: scale(1) translateY(0);
+    transform: scale(1) translateY(0);
 }
 
 .floatingPhotoGrid.slideOut {
-  transform: scale(0.9) translateY(20px);
+    transform: scale(0.9) translateY(20px);
 }
 
 .floatingGridHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #4a5568;
-  padding-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #4a5568;
+    padding-bottom: 0.5rem;
 }
 
 .floatingGridHeader h3 {
-  margin: 0;
-  color: #e2e8f0;
-  font-size: 1.1rem;
-  font-weight: 600;
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 .closeButton {
-  background: none;
-  border: none;
-  color: #a0aec0;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  line-height: 1;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    background: none;
+    border: none;
+    color: #a0aec0;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .closeButton:hover {
-  background-color: #4a5568;
-  color: #f56565;
+    background-color: #4a5568;
+    color: #f56565;
 }
 
 .floatingPhotoGridContent {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 12px;
-  flex: 1;
-  overflow-y: auto;
-  margin-bottom: 1rem;
-  max-height: 400px;
-  padding: 4px; /* Voor scrollbar ruimte en voorkomen overflow on hover van foto's 
-  */
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 1rem;
+    max-height: 400px;
+    padding: 4px;
+    /* Voor scrollbar ruimte en voorkomen overflow on hover van foto's
+     */
 }
 
 .floatingPhotoThumbnail {
-  position: relative;
-  cursor: pointer;
-  border-radius: 6px;
-  overflow: hidden;
-  aspect-ratio: 16 / 9;
-  border: 2px solid transparent;
-  transition: all 0.2s ease;
+    position: relative;
+    cursor: pointer;
+    border-radius: 6px;
+    overflow: hidden;
+    aspect-ratio: 16 / 9;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .floatingPhotoThumbnail:hover {
-  border-color: #4299e1;
-  transform: scale(1.05);
+    border-color: #4299e1;
+    transform: scale(1.05);
 }
 
 .floatingPhotoThumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .floatingPaginationControls {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: auto;
-  border-top: 1px solid #4a5568;
-  padding-top: 1rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: auto;
+    border-top: 1px solid #4a5568;
+    padding-top: 1rem;
 }
 
 .paginationButton {
-  flex: 1;
-  padding: 0.75rem 1rem;
-  border: none;
-  background-color: #4a5a6d;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    background-color: #4a5a6d;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
 }
 
 .paginationButton:hover:not(:disabled) {
-  background-color: #5a6a7d;
-  transform: translateY(-1px);
+    background-color: #5a6a7d;
+    transform: translateY(-1px);
 }
 
 .paginationButton:disabled {
-  background-color: #2d3748;
-  cursor: not-allowed;
-  opacity: 0.5;
-  transform: none;
+    background-color: #2d3748;
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
 }
 
 .loadingMessage,
 .noResultsMessage {
-  text-align: center;
-  color: #a0aec0;
-  padding: 2rem;
-  font-style: italic;
+    text-align: center;
+    color: #a0aec0;
+    font-style: italic;
 }
 
 /* ========== NEW CONTROL BUTTONS ========== */
 
 .chooseBackgroundButton {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #4a5568 0%, #5a6a7d 100%);
-  color: #e2e8f0;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 1rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #4a5568 0%, #5a6a7d 100%);
+    color: #e2e8f0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .chooseBackgroundButton:hover {
-  background: linear-gradient(135deg, #5a6a7d 0%, #6a7a8d 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #5a6a7d 0%, #6a7a8d 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .buttonRow {
-  display: flex;
-  gap: 8px;
-  margin-top: 0.5rem;
+    display: flex;
+    gap: 8px;
+    margin-top: 0.5rem;
 }
 
 .buttonRow button {
-  flex: 1;
-  padding: 8px 12px;
-  background-color: #4a5568;
-  color: #e2e8f0;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
+    flex: 1;
+    padding: 8px 12px;
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 .buttonRow button:hover {
-  background-color: #5a6a7d;
-  transform: translateY(-1px);
+    background-color: #5a6a7d;
+    transform: translateY(-1px);
 }
 
 .freeSearchSection {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #4a5568;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #4a5568;
 }

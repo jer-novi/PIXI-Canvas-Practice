@@ -118,6 +118,9 @@ export default function Controls({
         setSelectedCapital(city);
       }
 
+      // Verberg vrij zoeken balk bij dropdown selectie
+      setIsFreeSearchVisible(false);
+
       // Zoek EN open modal
       onCitySearch(city);
       onOpenPhotoGrid();
@@ -191,6 +194,7 @@ export default function Controls({
             onClick={() => {
               setSelectedAnwbCity(""); // Reset ANWB dropdown
               setSelectedCapital(""); // Reset hoofdsteden dropdown
+              setIsFreeSearchVisible(false); // Verberg vrij zoeken balk
               onResetToCollection();
               onOpenPhotoGrid();
             }}
