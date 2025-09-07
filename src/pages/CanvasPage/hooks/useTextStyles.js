@@ -6,6 +6,8 @@ export function useTextStyles(fontLoaded, globalStyles, fontStatus) {
     const baseFillColor = globalStyles?.fillColor || "white";
     const baseFontSize = globalStyles?.fontSize || 32;
     const baseLetterSpacing = globalStyles?.letterSpacing || 0;
+    const baseFontWeight = globalStyles?.fontWeight || "normal";
+    const baseFontStyle = globalStyles?.fontStyle || "normal";
 
     // Hierarchical color system: use override if exists, otherwise use global color
     const baseTitleColor = globalStyles?.effectiveTitleColor || baseFillColor;
@@ -51,6 +53,8 @@ export function useTextStyles(fontLoaded, globalStyles, fontStatus) {
           fontFamily: "Arial",
           lineHeight: baseFontSize + 12,
           letterSpacing: baseLetterSpacing,
+          fontWeight: baseFontWeight,
+          fontStyle: baseFontStyle,
         }),
       };
     }
@@ -74,6 +78,8 @@ export function useTextStyles(fontLoaded, globalStyles, fontStatus) {
         fontFamily: fontFamily,
         lineHeight: baseFontSize + 12,
         letterSpacing: baseLetterSpacing,
+        fontWeight: baseFontWeight,
+        fontStyle: baseFontStyle,
       }),
     };
   }, [fontLoaded, globalStyles, fontStatus]);
@@ -98,6 +104,8 @@ export function useLineStyle(
       fontFamily: baseStyle.fontFamily,
       lineHeight: baseStyle.lineHeight,
       letterSpacing: baseStyle.letterSpacing,
+      fontWeight: baseStyle.fontWeight,
+      fontStyle: baseStyle.fontStyle,
     };
 
     // Check if line has color override
@@ -123,6 +131,12 @@ export function useLineStyle(
       }
       if (lineOverrides.letterSpacing) {
         styleProps.letterSpacing = lineOverrides.letterSpacing;
+      }
+      if (lineOverrides.fontWeight) {
+        styleProps.fontWeight = lineOverrides.fontWeight;
+      }
+      if (lineOverrides.fontStyle) {
+        styleProps.fontStyle = lineOverrides.fontStyle;
       }
       // DE FIX: Vervang de simpele override met de slimme fallback-logica
       if (lineOverrides.fontFamily) {
