@@ -187,6 +187,36 @@ export function useCanvasHandlers(canvasState) {
         [selectedLines, setLineOverrides]
     );
 
+    // Font style handlers
+    const handleFontWeightChange = useCallback(
+        (weight) => {
+            canvasState.setFontWeight(weight);
+        },
+        [canvasState]
+    );
+
+    const handleFontStyleChange = useCallback(
+        (style) => {
+            canvasState.setFontStyle(style);
+        },
+        [canvasState]
+    );
+
+    // Skew handlers
+    const handleSkewXChange = useCallback(
+        (skewX) => {
+            canvasState.setSkewX(skewX);
+        },
+        [canvasState]
+    );
+
+    const handleSkewYChange = useCallback(
+        (skewY) => {
+            canvasState.setSkewY(skewY);
+        },
+        [canvasState]
+    );
+
     const handleLineFontSizeChange = useCallback(
         (size) => {
             if (selectedLines.size > 0) {
@@ -527,6 +557,15 @@ export function useCanvasHandlers(canvasState) {
         handleSyncAllColorsToGlobal,
         handleSyncAllFontsToGlobal,
         handleFontFamilyChange, // <-- Exporteer de nieuwe handlerv
+
+        // Font style handlers
+        handleFontWeightChange,
+        handleFontStyleChange,
+
+        // Skew handlers
+        handleSkewXChange,
+        handleSkewYChange,
+
         handleSearchBackground,
         handleSetBackground,
         handleNextPage, // <-- Exporteren

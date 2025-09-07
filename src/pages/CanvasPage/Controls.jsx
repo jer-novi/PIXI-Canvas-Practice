@@ -38,6 +38,18 @@ export default function Controls({
   onFontFamilyChange,
   availableFonts,
 
+  // Font style props
+  fontWeight,
+  onFontWeightChange,
+  fontStyle,
+  onFontStyleChange,
+
+  // Skew props
+  skewX,
+  onSkewXChange,
+  skewY,
+  onSkewYChange,
+
   // Pexels background props
   photos,
   isLoading,
@@ -249,6 +261,25 @@ export default function Controls({
             </option>
           ))}
         </select>
+      </div>
+
+      {/* Font Style Controls (Bold/Italic) */}
+      <div className={styles.controlRow}>
+        <label>Tekststijl</label>
+        <div className={styles.buttonGroup}>
+          <button
+            className={fontWeight === "bold" ? styles.active : ""}
+            onClick={() => onFontWeightChange(fontWeight === "bold" ? "normal" : "bold")}
+          >
+            <strong>B</strong>
+          </button>
+          <button
+            className={fontStyle === "italic" ? styles.active : ""}
+            onClick={() => onFontStyleChange(fontStyle === "italic" ? "normal" : "italic")}
+          >
+            <em>I</em>
+          </button>
+        </div>
       </div>
 
       {/* ... (fontSize, letterSpacing, etc. blijven hetzelfde voor nu) ... */}
@@ -509,6 +540,33 @@ export default function Controls({
             Disabled
           </button>
         </div>
+      </div>
+
+      {/* Skew Controls */}
+      <div className={styles.controlRow}>
+        <label htmlFor="skewX">Horizontale scheefstand</label>
+        <input
+          type="range"
+          id="skewX"
+          min="-45"
+          max="45"
+          value={skewX}
+          onChange={(e) => onSkewXChange(Number(e.target.value))}
+        />
+        <span>{skewX}°</span>
+      </div>
+
+      <div className={styles.controlRow}>
+        <label htmlFor="skewY">Verticale scheefstand</label>
+        <input
+          type="range"
+          id="skewY"
+          min="-45"
+          max="45"
+          value={skewY}
+          onChange={(e) => onSkewYChange(Number(e.target.value))}
+        />
+        <span>{skewY}°</span>
       </div>
     </div>
   );

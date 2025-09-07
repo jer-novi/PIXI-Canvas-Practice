@@ -79,6 +79,14 @@ export function useCanvasState() {
     const [lineHeight, setLineHeight] = useState(24 * 1.4);
     const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
     const [textAlign, setTextAlign] = useState("center");
+    
+    // Font style state
+    const [fontWeight, setFontWeight] = useState("normal");
+    const [fontStyle, setFontStyle] = useState("normal");
+    
+    // Skew state
+    const [skewX, setSkewX] = useState(0);
+    const [skewY, setSkewY] = useState(0);
 
     // Internal State
     const [userHasAdjusted, setUserHasAdjusted] = useState(false);
@@ -173,6 +181,18 @@ export function useCanvasState() {
         setLineHeightMultiplier,
         textAlign,
         setTextAlign,
+
+        // Font style state
+        fontWeight,
+        setFontWeight,
+        fontStyle,
+        setFontStyle,
+
+        // Skew state
+        skewX,
+        setSkewX,
+        skewY,
+        setSkewY,
 
         poemOffset,
         setPoemOffset,

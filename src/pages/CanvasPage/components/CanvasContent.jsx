@@ -33,6 +33,10 @@ export function CanvasContent({
   isColorPickerActive,
   fontFamily,
   fontStatus,
+  fontWeight,
+  fontStyle,
+  skewX,
+  skewY,
   backgroundImage, // <-- De nieuwe prop
   contentRef,
   poemOffset,
@@ -466,6 +470,8 @@ export function CanvasContent({
     effectiveTitleColor: titleColor,
     effectiveAuthorColor: authorColor,
     fontFamily, // <-- 2. Voeg de prop hier toe aan het object
+    fontWeight,
+    fontStyle,
   };
 
   const { titleStyle, authorStyle, lineStyle } = useTextStyles(
@@ -522,6 +528,7 @@ export function CanvasContent({
         x={textPosition.containerX + poemOffset.x}
         y={textPosition.containerY + poemOffset.y}
         scale={{ x: textPosition.scaleFactor, y: textPosition.scaleFactor }}
+        skew={{ x: (skewX * Math.PI) / 180, y: (skewY * Math.PI) / 180 }}
         eventMode={moveMode === 'poem' ? 'dynamic' : 'passive'}
         interactive={moveMode === 'poem'}
         interactiveChildren={moveMode === 'edit'}

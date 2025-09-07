@@ -136,6 +136,19 @@ export default function CanvasPage() {
                         availableFonts={canvasState.availableFonts}
                         fontFamily={canvasState.fontFamily}
                         onFontFamilyChange={handlers.handleFontFamilyChange}
+
+                        // Font style props
+                        fontWeight={canvasState.fontWeight}
+                        onFontWeightChange={handlers.handleFontWeightChange}
+                        fontStyle={canvasState.fontStyle}
+                        onFontStyleChange={handlers.handleFontStyleChange}
+
+                        // Skew props
+                        skewX={canvasState.skewX}
+                        onSkewXChange={handlers.handleSkewXChange}
+                        skewY={canvasState.skewY}
+                        onSkewYChange={handlers.handleSkewYChange}
+
                         // Pexels background props
                         photos={canvasState.photos}
                         isLoading={canvasState.isLoading}
@@ -177,6 +190,10 @@ export default function CanvasPage() {
                             contentRef={canvasState.contentRef}
                             fontFamily={canvasState.fontFamily}
                             fontStatus={canvasState.fontStatus}
+                            fontWeight={canvasState.fontWeight}
+                            fontStyle={canvasState.fontStyle}
+                            skewX={canvasState.skewX}
+                            skewY={canvasState.skewY}
                             onFontFamilyChange={handlers.handleFontFamilyChange}
                             selectedLines={canvasState.selectedLines} // Was er al
                             lineOverrides={canvasState.lineOverrides} // Was er al
