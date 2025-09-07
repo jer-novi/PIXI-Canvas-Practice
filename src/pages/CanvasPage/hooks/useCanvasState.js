@@ -17,7 +17,6 @@ export function useCanvasState() {
     // --- Einde nieuwe state ---
 
     // UI State
-
     const [viewportDragEnabled, setViewportDragEnabled] = useState(false);
     const [lineOverrides, setLineOverrides] = useState({});
     const [isColorPickerActive, setIsColorPickerActive] = useState(false);
