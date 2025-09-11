@@ -21,6 +21,8 @@ export function useCanvasState() {
     const [lineOverrides, setLineOverrides] = useState({});
     const [isColorPickerActive, setIsColorPickerActive] = useState(false);
     const [photoGridVisible, setPhotoGridVisible] = useState(false); // New state for floating photo grid
+    const [isDragging, setIsDragging] = useState(false); // Voor XYMoveSliders synchronisatie
+    const [xySlidersVisible, setXySlidersVisible] = useState(true);
 
     // const [selectedLine, setSelectedLine] = useState(null); // <-- STAP 2.2: VERWIJDER DEZE
     const selection = useSelection(); // <-- STAP 2.3: Gebruik de nieuwe hook
@@ -78,11 +80,11 @@ export function useCanvasState() {
     const [lineHeight, setLineHeight] = useState(24 * 1.4);
     const [lineHeightMultiplier, setLineHeightMultiplier] = useState(1.4);
     const [textAlign, setTextAlign] = useState("center");
-    
+
     // Font style state
     const [fontWeight, setFontWeight] = useState("normal");
     const [fontStyle, setFontStyle] = useState("normal");
-    
+
     // Skew state
     const [skewX, setSkewX] = useState(0);
     const [skewY, setSkewY] = useState(0);
@@ -123,7 +125,11 @@ export function useCanvasState() {
         setIsColorPickerActive,
         photoGridVisible,
         setPhotoGridVisible,
-
+        isDragging,
+        setIsDragging,
+        xySlidersVisible,
+        setXySlidersVisible,
+        
         // NIEUW: Font-gerelateerde state en functies
         currentFontFamily,
         setCurrentFontFamily,

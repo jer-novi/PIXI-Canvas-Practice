@@ -295,6 +295,171 @@
     }
 }
 
+/* Collapsible Section Styles */
+.controlSection {
+    margin-bottom: 1.5rem;
+    border: 1px solid #4a5568;
+    border-radius: 8px;
+    background-color: #2d3748;
+    overflow: hidden;
+}
+
+.sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background-color: #3d4a5c;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    border: none;
+    color: #e2e8f0;
+    width: 100%;
+    text-align: left;
+}
+
+.sectionHeader:hover {
+    background-color: #4a5568;
+}
+
+.sectionHeader h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.sectionToggle {
+    font-size: 1.2rem;
+    transition: transform 0.2s ease;
+    color: #a0aec0;
+}
+
+.sectionToggle.collapsed {
+    transform: rotate(-90deg);
+}
+
+.sectionContent {
+    padding: 1rem;
+    background-color: #272d37;
+}
+
+.sectionContent.collapsed {
+    display: none;
+}
+
+/* Subsection styles */
+.subsection {
+    margin: 1rem 0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    background-color: rgba(45, 55, 72, 0.5);
+    overflow: hidden;
+}
+
+.subsectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    background-color: rgba(61, 74, 92, 0.7);
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+    border: none;
+    color: #cbd5e0;
+    width: 100%;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.subsectionHeader:hover {
+    background-color: rgba(74, 85, 104, 0.7);
+}
+
+.subsectionContent {
+    padding: 0.75rem;
+}
+
+.subsectionContent.collapsed {
+    display: none;
+}
+
+/* Styling for choice background button */
+.chooseBackgroundButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    width: 100%;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.chooseBackgroundButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    background: linear-gradient(135deg, #5a67d8 0%, #667eea 100%);
+}
+
+.chooseBackgroundButton:active {
+    transform: translateY(0);
+}
+
+/* Button row styling */
+.buttonRow {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+}
+
+.buttonRow button {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
+}
+
+.buttonRow button:hover {
+    background-color: #2d3748;
+}
+
+/* City dropdown styling */
+.cityDropdown {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #4a5568;
+    border-radius: 5px;
+    background-color: #2d3748;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+
+.cityDropdown:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Free search section styling */
+.freeSearchSection {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: rgba(45, 55, 72, 0.7);
+    border-radius: 6px;
+    border: 1px solid #4a5568;
+}
+
 /* Pexels Background Search Styling */
 .searchInput {
     flex-grow: 1;

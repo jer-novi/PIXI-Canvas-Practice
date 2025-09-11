@@ -20,7 +20,9 @@ export function useKeyboardShortcuts({
   selectedLines,
   clearSelection,
   selectAll,
-  currentPoem
+  currentPoem,
+  xySlidersVisible,
+  setXySlidersVisible
 }) {
   // Keep track of previous selection to restore when returning to edit/line mode
   const previousSelectionRef = useRef(new Set());
@@ -103,6 +105,14 @@ export function useKeyboardShortcuts({
             }
           }
           break;
+
+        case 'h':
+        case 'H':
+          if (event.altKey) {
+            event.preventDefault();
+            setXySlidersVisible(prev => !prev);
+          }
+          break;
       }
     };
 
@@ -113,7 +123,7 @@ export function useKeyboardShortcuts({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [moveMode, selectedLines, currentPoem, setMoveMode, clearSelection, selectAll, cycleModes, resetToEditMode]);
+  }, [moveMode, selectedLines, currentPoem, setMoveMode, clearSelection, selectAll, cycleModes, resetToEditMode, setXySlidersVisible]);
 
   // Return function to restore previous selection (to be used by parent component)
   const restorePreviousSelection = () => {

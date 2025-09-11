@@ -37,7 +37,9 @@ export default function CanvasPage() {
         selectedLines: canvasState.selectedLines,
         clearSelection: canvasState.clearSelection,
         selectAll: canvasState.selectAll,
-        currentPoem
+        currentPoem,
+        xySlidersVisible: canvasState.xySlidersVisible,
+        setXySlidersVisible: canvasState.setXySlidersVisible
     });
 
     // Use responsive canvas hook
@@ -46,8 +48,8 @@ export default function CanvasPage() {
     // --- NIEUWE LOGICA ---
     // Bepaal welke data we aan de fotogalerij moeten tonen.
     // We checken de search context om te bepalen welke bron actief is.
-    const isFlickrActive = canvasState.searchContext?.source === 'flickr' && 
-                          (canvasState.isFlickrLoading || (canvasState.flickrPhotos && canvasState.flickrPhotos.length > 0));
+    const isFlickrActive = canvasState.searchContext?.source === 'flickr' &&
+        (canvasState.isFlickrLoading || (canvasState.flickrPhotos && canvasState.flickrPhotos.length > 0));
     const photosToShow = isFlickrActive ? canvasState.flickrPhotos : canvasState.photos;
     const isLoading = canvasState.isFlickrLoading || canvasState.isLoading;
     const error = canvasState.flickrError || canvasState.error;
@@ -211,6 +213,8 @@ export default function CanvasPage() {
                             poemOffset={canvasState.poemOffset}
                             setPoemOffset={canvasState.setPoemOffset}
                             moveMode={canvasState.moveMode}
+                            isDragging={canvasState.isDragging}           // <-- NIEUW
+                            setIsDragging={canvasState.setIsDragging}     // <-- NIEUW
                         />
                     </Application>
                 }
@@ -243,7 +247,7 @@ export default function CanvasPage() {
             )}
 
             {/* Floating XY Move Sliders - Only show in poem/line modes */}
-            {(canvasState.moveMode === 'poem' || canvasState.moveMode === 'line') && (
+            {(canvasState.moveMode === 'poem' || canvasState.moveMode === 'line') && canvasState.xySlidersVisible && (
                 <XYMoveSliders
                     moveMode={canvasState.moveMode}
                     selectedLines={canvasState.selectedLines}
@@ -251,6 +255,11 @@ export default function CanvasPage() {
                     setPoemOffset={canvasState.setPoemOffset}
                     lineOverrides={canvasState.lineOverrides}
                     setLineOverrides={canvasState.setLineOverrides}
+                    isDragging={canvasState.isDragging}
+                    canvasWidth={layout.canvasWidth}
+                    canvasHeight={layout.canvasHeight}
+                    isVisible={canvasState.xySlidersVisible}
+                    setIsVisible={canvasState.setXySlidersVisible}
                 />
             )}
 
