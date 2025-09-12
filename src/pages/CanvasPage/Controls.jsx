@@ -5,6 +5,7 @@ import styles from "./CanvasPage.module.css";
 import {anwbCities, capitalCities, cityDisplayNames} from "../../data/searchData"; // <-- Importeer steden
 
 export default function Controls({
+                                     toggle, // <-- NEW: For collapsing the panel
                                      fontSize,
                                      onFontSizeChange,
                                      fillColor,
@@ -150,7 +151,10 @@ export default function Controls({
 
     return (
         <div className={styles.controlsWrapper}>
-            <h2>Styling Controls</h2>
+            <div className={styles.panelHeader}>
+                <h2>Styling Controls</h2>
+                <button onClick={toggle} className={styles.closeButton} aria-label="Collapse Controls">✕</button>
+            </div>
 
             {/* --- ACHTERGROND SECTIE --- */}
             <div className={styles.controlSection}>

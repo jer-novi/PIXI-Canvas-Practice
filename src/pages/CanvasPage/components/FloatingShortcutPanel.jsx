@@ -1,5 +1,5 @@
 // src/pages/CanvasPage/components/FloatingShortcutPanel.jsx
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useMemo} from 'react';
 import {createPortal} from 'react-dom';
 import styles from './FloatingShortcutPanel.module.css';
 
@@ -66,7 +66,8 @@ export default function FloatingShortcutPanel({
                                                   moveMode = 'edit',
                                                   selectedLines = new Set(),
                                                   activeShortcut = null,
-                                                  xySlidersVisible = false
+                                                  xySlidersVisible = false,
+                                                  navWidth,
                                               }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [otherShortcutsExpanded, setOtherShortcutsExpanded] = useState(false);
@@ -149,6 +150,10 @@ export default function FloatingShortcutPanel({
     };
 
     const {active, other} = filterShortcutsByMode(shortcuts, moveMode, selectedLines.size > 0, xySlidersVisible);
+
+    const containerStyle = useMemo(() => ({
+        right: `${navWidth}px`,
+    }), [navWidth]);
 
     // Keyboard shortcut to toggle panel (Alt + ?)
     useEffect(() => {
@@ -268,7 +273,7 @@ export default function FloatingShortcutPanel({
     );
 
     return createPortal(
-        <div className={styles.floatingContainer}>
+        <div className={styles.floatingContainer} style={containerStyle}>
             {toggleButton}
             {panelContent}
         </div>,

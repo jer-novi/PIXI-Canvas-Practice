@@ -1,8 +1,8 @@
 .navContainer {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    padding: 16px 8px;
+    gap: 6px;
+    padding: 8px;
     background-color: transparent;
     height: 100%;
     overflow: hidden;
@@ -29,11 +29,11 @@
 
 /* Smart positioning based on XY sliders visibility */
 .syncSection.withXySlidersHidden {
-    margin-top: 16px; /* Near top when XY sliders not visible */
+    margin-top: 2px; /* Near top when XY sliders not visible */
 }
 
 .syncSection.withXySlidersVisible {
-    margin-top: 240px; /* Push down when XY sliders are visible - leaves room for positioning */
+    margin-top: 290px; /* Push down when XY sliders are visible - leaves room for positioning */
 }
 
 .syncLabel {
@@ -67,3 +67,33 @@
     background-color: #5a6a7d;
 }
 
+/* --- Added for consistency with Controls.jsx --- */
+.panelHeader {
+    position: relative; /* For absolute positioning of the button */
+    padding: 16px;
+    padding-top: 28px; /* Extra padding on top for the button */
+    border-bottom: 1px solid #3d4a5c;
+}
+
+.panelHeader h2, .panelHeader h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.closeButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: none;
+    border: none;
+    color: #a0a9b8;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    user-select: none; /* Prevents caret on click */
+}
+
+.closeButton:hover {
+    color: white;
+}

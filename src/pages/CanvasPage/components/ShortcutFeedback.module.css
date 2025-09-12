@@ -3,7 +3,7 @@
 .feedbackContainer {
   position: fixed;
   bottom: 20px;
-  right: 140px; /* Offset from Navigation column (120px + 20px margin) */
+  left: 20px; /* Offset from the left edge of the screen */
   z-index: 9998; /* Below FloatingShortcutPanel but above canvas */
   pointer-events: none; /* Don't interfere with interactions */
 }
@@ -58,7 +58,7 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .feedbackContainer {
-    right: 20px;
+    left: 20px;
     bottom: 20px;
   }
   
@@ -78,7 +78,7 @@
 
 @media (max-width: 480px) {
   .feedbackContainer {
-    right: 10px;
+    left: 10px;
     bottom: 15px;
   }
   

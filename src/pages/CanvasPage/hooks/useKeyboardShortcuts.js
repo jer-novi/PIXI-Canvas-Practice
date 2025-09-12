@@ -50,40 +50,35 @@ export function useKeyboardShortcuts({
 
   // Cycle through modes: edit -> line (if selection exists) -> poem -> edit
   const cycleModes = useCallback(() => {
-    const hasSelection = selectedLines.size > 0;
-    const hasPreviousSelection = previousSelectionRef.current.size > 0;
-    
-    switch (moveMode) {
-      case 'edit':
-        if (hasSelection) {
-          // Go to line mode if there's a current selection
-          setMoveMode('line');
-        } else if (hasPreviousSelection) {
-          // Restore previous selection and go to line mode
-          setMoveMode('line');
-          // Note: Selection restoration will be handled by the parent component
-        } else {
-          // Skip line mode if no selection exists, go directly to poem
-          setMoveMode('poem');
-        }
-        break;
+    setMoveMode(prevMode => {
+      const hasSelection = selectedLines.size > 0;
+      const hasPreviousSelection = previousSelectionRef.current.size > 0;
+
+      switch (prevMode) {
+        case 'edit':
+          setXySlidersVisible(true); // Sliders should become visible for line/poem mode
+          if (hasSelection) {
+            return 'line';
+          } else if (hasPreviousSelection) {
+            return 'line';
+          } else {
+            return 'poem';
+          }
         
-      case 'line':
-        // Always go to poem mode from line mode
-        setMoveMode('poem');
-        break;
-        
-      case 'poem':
-        // Return to edit mode and potentially restore selection
-        setMoveMode('edit');
-        break;
-        
-      default:
-        // Fallback to edit mode
-        setMoveMode('edit');
-        break;
-    }
-  }, [moveMode, selectedLines, setMoveMode]);
+        case 'line':
+          setXySlidersVisible(true); // Sliders remain visible for poem mode
+          return 'poem';
+          
+        case 'poem':
+          setXySlidersVisible(false); // Sliders hide when returning to edit mode
+          return 'edit';
+          
+        default:
+          setXySlidersVisible(false);
+          return 'edit';
+      }
+    });
+  }, [setMoveMode, setXySlidersVisible, selectedLines.size]);
 
   // Reset to edit mode and clear selection
   const resetToEditMode = useCallback(() => {

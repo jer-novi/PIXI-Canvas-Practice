@@ -2,7 +2,7 @@
 
 .xyMoveContainer {
     position: fixed;
-    top: 20px;
+    top: 85px;
     right: 20px;
     width: 320px; /* Vaste breedte - geen responsieve verandering */
     min-width: 280px; /* Minimum voor zeer kleine schermen */

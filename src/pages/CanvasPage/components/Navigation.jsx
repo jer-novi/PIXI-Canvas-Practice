@@ -3,6 +3,7 @@ import MoveControls from "./MoveControls";
 import FloatingShortcutPanel from "./FloatingShortcutPanel";
 
 export default function Navigation({
+                                       toggle,
                                        onSyncAllColorsToGlobal,
                                        onSyncAllFontsToGlobal,
                                        moveMode,
@@ -11,14 +12,24 @@ export default function Navigation({
                                        clearSelection,
                                        activeShortcut,
                                        xySlidersVisible,
+                                       navWidth,
                                    }) {
-    // Determine sync section class based on XY sliders visibility
-    const syncSectionClass = xySlidersVisible 
+    // The XY sliders are only truly visible when the mode is 'poem' or 'line' AND the visibility flag is set.
+    // This ensures the navigation layout syncs perfectly with the actual visibility of the sliders.
+    const areSlidersEffectivelyVisible = (moveMode === 'poem' || moveMode === 'line') && xySlidersVisible;
+
+    // Determine sync section class based on the effective visibility of the XY sliders
+    const syncSectionClass = areSlidersEffectivelyVisible
         ? `${styles.syncSection} ${styles.withXySlidersVisible}`
         : `${styles.syncSection} ${styles.withXySlidersHidden}`;
 
     return (
         <div className={styles.navContainer}>
+            <div className={styles.panelHeader}>
+                <h3>Navigation</h3>
+                <button onClick={toggle} className={styles.closeButton} aria-label="Collapse Navigation">✕</button>
+            </div>
+
             {/* Sync Actions - dynamically positioned based on XY sliders visibility */}
             <div className={syncSectionClass}>
                 <div className={styles.syncLabel}>Sync</div>
@@ -55,6 +66,7 @@ export default function Navigation({
                 selectedLines={selectedLines}
                 activeShortcut={activeShortcut}
                 xySlidersVisible={xySlidersVisible}
+                navWidth={navWidth}
             />
         </div>
     );

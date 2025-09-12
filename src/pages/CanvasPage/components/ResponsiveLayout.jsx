@@ -6,54 +6,65 @@ const ResponsiveLayout = memo(({
   controls, 
   canvas,
   navigation,
-  previewState = 'normal'  // NEW: 'normal' | 'dimmed' | 'preview'
+  previewState = 'normal'
 }) => {
 
-  // Determine CSS class based on preview state
   const getLayoutClass = () => {
     let className = styles.layoutContainer;
-    
-    if (previewState === 'dimmed') {
-      className += ` ${styles.dimmed}`;
-    } else if (previewState === 'preview') {
-      className += ` ${styles.preview}`;
-    }
-    
+    if (previewState === 'dimmed') className += ` ${styles.dimmed}`;
+    else if (previewState === 'preview') className += ` ${styles.preview}`;
     return className;
   };
+
+  const controlsPanelClass = `${styles.controlsPanel} ${!layout.controlsVisible ? styles.collapsed : ''}`;
+  const navPanelClass = `${styles.navPanel} ${!layout.navVisible ? styles.collapsed : ''}`;
 
   return (
     <div className={getLayoutClass()}>
       {/* Left Controls Panel */}
-      {layout.controlsVisible && (
-        <div 
-          className={styles.controlsPanel}
-          style={{ width: layout.controlsWidth }}
-        >
-          {controls}
-        </div>
-      )}
+      <div 
+        className={controlsPanelClass}
+        style={{ width: layout.controlsWidth }}
+      >
+        {React.cloneElement(controls, { toggle: layout.toggleControls })}
+      </div>
 
       {/* Main Canvas - takes remaining space */}
-      <div 
-        className={styles.canvasWrapper}
-        style={{
-          width: layout.canvasWidth,
-          height: layout.canvasHeight,
-        }}
-      >
+      <div className={styles.canvasWrapper}>
         {canvas}
+
+        {/* Open Buttons - Rendered on top of the canvas */}
+        {!layout.controlsVisible && (
+          <button 
+            className={`${styles.openButton} ${styles.openControlsButton}`}
+            onClick={layout.toggleControls}
+            aria-label="Expand Controls"
+          >
+            ☰
+          </button>
+        )}
+
+        {!layout.navVisible && (
+          <button 
+            className={`${styles.openButton} ${styles.openNavButton}`}
+            onClick={layout.toggleNav}
+            aria-label="Expand Navigation"
+          >
+            ☰
+          </button>
+        )}
       </div>
 
       {/* Right Navigation Panel */}
-      {layout.navVisible && (
-        <div 
-          className={styles.navPanel}
-          style={{ width: layout.navWidth }}
-        >
-          {navigation}
-        </div>
-      )}
+      <div
+        className={navPanelClass}
+        style={{ width: layout.navWidth }}
+      >
+        {React.cloneElement(navigation, { 
+          navWidth: layout.navWidth,
+          toggle: layout.toggleNav 
+        })}
+      </div>
     </div>
   );
 });
