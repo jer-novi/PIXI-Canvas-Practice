@@ -60,6 +60,17 @@
   flex-direction: column;
 }
 
+/* Photo preview states for layout container */
+.layoutContainer.dimmed {
+  filter: brightness(0.3) contrast(0.7);
+  transition: filter 0.3s ease;
+}
+
+.layoutContainer.preview {
+  filter: none;
+  transition: filter 0.2s ease;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .controlsPanel {

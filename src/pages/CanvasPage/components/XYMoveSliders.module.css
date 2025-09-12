@@ -2,7 +2,7 @@
 
 .xyMoveContainer {
     position: fixed;
-    bottom: 20px;
+    top: 20px;
     right: 20px;
     width: 320px; /* Vaste breedte - geen responsieve verandering */
     min-width: 280px; /* Minimum voor zeer kleine schermen */
@@ -244,5 +244,130 @@
         width: 28px;
         height: 28px;
         font-size: 10px;
+    }
+}
+
+/* ========================================
+   FOCUS OVERLAY SYSTEEM voor Alt+J
+   - Cursor: none op hele pagina tijdens focus
+   - Alleen cursor zichtbaar op XY container
+   - Voorkomt thumbnail hovers tijdens positionering
+   ======================================== */
+
+/* Globale cursor overlay - verbergt cursor overal behalve op XY container */
+.globalCursorOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    z-index: 999; /* Onder XY container maar boven content */
+    pointer-events: none;
+    cursor: none; /* Verberg cursor overal */
+    transition: opacity 0.2s ease;
+}
+
+/* Focus active state voor XY container */
+.xyMoveContainer.focusActive {
+    z-index: 1001 !important; /* Boven overlay */
+    box-shadow: 0 0 0 3px #007bff,
+    0 0 0 6px rgba(0, 123, 255, 0.25),
+    0 8px 32px rgba(0, 0, 0, 0.15) !important;
+    border-color: #007bff !important;
+    cursor: pointer !important; /* Alleen hier cursor zichtbaar */
+    pointer-events: auto !important;
+    animation: focusPulse 1.5s ease-in-out;
+}
+
+/* Focus pulse animatie */
+@keyframes focusPulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7),
+        0 0 0 3px #007bff,
+        0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+    70% {
+        box-shadow: 0 0 0 20px rgba(0, 123, 255, 0),
+        0 0 0 6px rgba(0, 123, 255, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+    100% {
+        box-shadow: 0 0 0 20px rgba(0, 123, 255, 0),
+        0 0 0 3px #007bff,
+        0 8px 32px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* Zorg dat child elements ook focus styling krijgen */
+.xyMoveContainer.focusActive * {
+    cursor: inherit !important; /* Erf cursor van parent */
+}
+
+/* Overlay fade-in animatie */
+.globalCursorOverlay.fadeIn {
+    opacity: 1;
+}
+
+/* Responsive aanpassingen voor focus state */
+@media (max-width: 768px) {
+    .xyMoveContainer.focusActive {
+        box-shadow: 0 0 0 2px #007bff,
+        0 0 0 4px rgba(0, 123, 255, 0.2),
+        0 4px 16px rgba(0, 0, 0, 0.2) !important;
+        right: 5px !important;
+        bottom: 5px !important;
+        transform: none !important; /* Voorkom conflicts met andere transforms */
+    }
+
+    .globalCursorOverlay {
+        /* Op mobiel minder restrictief - touch-based interaction */
+        cursor: auto;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .xyMoveContainer.focusActive {
+        box-shadow: 0 0 0 3px #4dabf7,
+        0 0 0 6px rgba(77, 171, 247, 0.25),
+        0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    @keyframes focusPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(77, 171, 247, 0.7),
+            0 0 0 3px #4dabf7,
+            0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        70% {
+            box-shadow: 0 0 0 20px rgba(77, 171, 247, 0),
+            0 0 0 6px rgba(77, 171, 247, 0.25),
+            0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        100% {
+            box-shadow: 0 0 0 20px rgba(77, 171, 247, 0),
+            0 0 0 3px #4dabf7,
+            0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .xyMoveContainer.focusActive {
+        border-width: 2px !important;
+        box-shadow: 0 0 0 4px #007bff,
+        0 0 0 8px rgba(0, 123, 255, 0.3) !important;
+    }
+}
+
+/* Print styles - verwijder focus effects */
+@media print {
+    .globalCursorOverlay,
+    .xyMoveContainer.focusActive {
+        box-shadow: none !important;
+        border-color: inherit !important;
+        z-index: auto !important;
     }
 }

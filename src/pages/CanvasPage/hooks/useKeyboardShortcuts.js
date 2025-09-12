@@ -22,7 +22,10 @@ export function useKeyboardShortcuts({
   selectAll,
   currentPoem,
   xySlidersVisible,
-  setXySlidersVisible
+  setXySlidersVisible,
+  onXyFocusRequest, // Callback om focus handler van XYMoveSliders te ontvangen
+  setHoverFreezeActive, // NEW: Callback to activate hover freeze
+  setActiveShortcut, // NEW: Callback to show shortcut visualization
 }) {
   // Keep track of previous selection to restore when returning to edit/line mode
   const previousSelectionRef = useRef(new Set());
@@ -33,6 +36,17 @@ export function useKeyboardShortcuts({
       previousSelectionRef.current = new Set(selectedLines);
     }
   }, [moveMode, selectedLines]);
+
+  // Helper function to show shortcut feedback
+  const showShortcutFeedback = (shortcutId, description) => {
+    if (setActiveShortcut) {
+      setActiveShortcut(description);
+      // Auto-clear after 6 seconds (3x longer than before)
+      setTimeout(() => {
+        setActiveShortcut(null);
+      }, 6000);
+    }
+  };
 
   // Cycle through modes: edit -> line (if selection exists) -> poem -> edit
   const cycleModes = useCallback(() => {
@@ -78,52 +92,253 @@ export function useKeyboardShortcuts({
     setMoveMode('edit');
   }, [clearSelection, setMoveMode]);
 
+  // Helper functie om muiscursor te simuleren naar container centrum
+  const moveMouseToContainer = useCallback((container) => {
+    if (!container) {
+      console.warn('🖱️ moveMouseToContainer: No container provided');
+      return false;
+    }
+
+    try {
+      const rect = container.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      console.log(`🖱️ moveMouseToContainer: Moving to center (${centerX.toFixed(0)}, ${centerY.toFixed(0)}) of container`, {
+        width: rect.width,
+        height: rect.height,
+        position: rect
+      });
+
+      // Simuleer mouse move event naar het centrum van de container
+      const mouseMoveEvent = new MouseEvent('mousemove', {
+        clientX: centerX,
+        clientY: centerY,
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+
+      // Dispatch het event op de container zelf (voor hover effects)
+      container.dispatchEvent(mouseMoveEvent);
+
+      // Optioneel: Dispatch ook op document.body voor globale mouse tracking
+      document.dispatchEvent(new MouseEvent('mousemove', {
+        clientX: centerX,
+        clientY: centerY,
+        bubbles: true,
+        cancelable: true
+      }));
+
+      console.log('🖱️ moveMouseToContainer: Mouse move events dispatched successfully');
+      return true;
+    } catch (error) {
+      console.error('🖱️ moveMouseToContainer: Error simulating mouse movement:', error);
+      return false;
+    }
+  }, []);
+
+  // Verbeterde focus functie met ref callback, retry logic en muis verplaatsing
+  const focusXyMoveSliders = useCallback(() => {
+    console.log('🎛️ Alt+J: Focus+Mouse sequence initiated', {
+      currentMode: moveMode,
+      currentlyVisible: xySlidersVisible
+    });
+
+    // Switch to poem mode if not already active
+    if (moveMode !== 'poem') {
+      console.log('🎛️ Alt+J: Switching to poem mode');
+      setMoveMode('poem');
+    }
+    
+    // Show XY sliders if not visible
+    if (!xySlidersVisible) {
+      console.log('🎛️ Alt+J: Making sliders visible');
+      setXySlidersVisible(true);
+    }
+
+    // Wacht tot rendering voltooid is (250ms totaal voor state + render + focus)
+    setTimeout(() => {
+      console.log('🎛️ Alt+J: Starting focus+mouse sequence after render delay');
+      
+      // Probeer eerst ref callback (primair pad)
+      if (onXyFocusRequest) {
+        console.log('🎛️ Alt+J: Attempting ref callback focus + mouse move');
+        const focusSuccess = onXyFocusRequest();
+        
+        if (focusSuccess) {
+          console.log('🎛️ Alt+J: Ref focus successful, now moving mouse');
+          // Wacht kort voor focus settling, dan mouse move
+          setTimeout(() => {
+            const container = document.querySelector('[data-testid="xy-move-container"]') ||
+                            document.querySelector('[class*="xyMoveContainer"]');
+            if (container) {
+              moveMouseToContainer(container);
+            } else {
+              console.warn('🖱️ Alt+J: Container not found after ref focus for mouse move');
+            }
+          }, 50);
+          return;
+        } else {
+          console.log('🎛️ Alt+J: Ref callback failed, trying fallback');
+        }
+      } else {
+        console.log('🎛️ Alt+J: No ref callback, using direct fallback');
+      }
+
+      // Fallback: Direct querySelector met retry en mouse move
+      const maxRetries = 3;
+      let retryCount = 0;
+      
+      const attemptFocusAndMouse = () => {
+        retryCount++;
+        console.log(`🔄 Alt+J: Fallback attempt ${retryCount}/${maxRetries} (focus+mouse)`);
+        
+        const selectors = [
+          '[data-testid="xy-move-container"]',
+          '[class*="xyMoveContainer"]'
+        ];
+        
+        let xyContainer = null;
+        for (const selector of selectors) {
+          xyContainer = document.querySelector(selector);
+          if (xyContainer) {
+            console.log(`🎛️ Alt+J: Found container with selector: ${selector}`);
+            break;
+          }
+        }
+        
+        if (xyContainer) {
+          try {
+            // Eerst focus
+            xyContainer.focus({ preventScroll: true });
+            console.log('🎛️ Alt+J: Focus successful via fallback');
+            
+            // Dan mouse move naar centrum
+            setTimeout(() => {
+              moveMouseToContainer(xyContainer);
+            }, 50); // Korte delay voor focus settling
+            
+            console.log('🎛️ Alt+J: Complete sequence successful (focus + mouse move)');
+            return true;
+          } catch (error) {
+            console.error('🎛️ Alt+J: Error in focus+mouse sequence:', error);
+          }
+        } else {
+          console.warn(`🎛️ Alt+J: Container not found on attempt ${retryCount}`);
+        }
+        
+        if (retryCount < maxRetries) {
+          const delay = 150 * retryCount; // 150ms, 300ms, 450ms
+          setTimeout(attemptFocusAndMouse, delay);
+        } else {
+          console.error('🎛️ Alt+J: All focus+mouse attempts failed');
+          console.log('💡 Alt+J Troubleshooting:');
+          console.log('   - Verify XYMoveSliders renders (moveMode="poem" && xySlidersVisible=true)');
+          console.log('   - Check console for rendering errors');
+          console.log('   - Inspect DOM for [data-testid="xy-move-container"]');
+          console.log('   - Ensure no CSS hides the container (display: none, visibility: hidden)');
+        }
+      };
+
+      attemptFocusAndMouse();
+    }, 250); // Langere totale delay voor volledige render cycle
+  }, [moveMode, setMoveMode, xySlidersVisible, setXySlidersVisible, onXyFocusRequest, moveMouseToContainer]);
+
   useEffect(() => {
+    console.log('⌨️ KeyboardShortcuts: Hook mounted');
+    
     const handleKeyDown = (event) => {
-      // Prevent shortcuts when user is typing in input fields
+      console.log('⌨️ Keydown:', { key: event.key, altKey: event.altKey, target: event.target.tagName });
+      
       if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
         return;
       }
 
-      switch (event.key) {
-        case ' ': // SPACEBAR
-          event.preventDefault();
-          cycleModes();
-          break;
-          
-        case 'Escape':
-          event.preventDefault();
-          resetToEditMode();
-          break;
-          
-        case 'a':
-        case 'A':
-          if (event.altKey) {
-            event.preventDefault();
-            if (currentPoem?.lines) {
-              selectAll(currentPoem.lines.length);
-            }
-          }
-          break;
+      // SPACEBAR: Mode cycling
+      if (event.key === ' ' && !event.altKey && !event.ctrlKey && !event.shiftKey) {
+        event.preventDefault();
+        console.log('🔄 SPACE: Cycling modes');
+        showShortcutFeedback('space', 'Space: Cycle modes');
+        cycleModes();
+        return;
+      }
 
-        case 'h':
-        case 'H':
-          if (event.altKey) {
-            event.preventDefault();
-            setXySlidersVisible(prev => !prev);
+      // ESCAPE: Reset to edit mode
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        console.log('⚡ ESC: Reset to edit mode');
+        showShortcutFeedback('escape', 'Esc: Clear selection and return to Edit mode');
+        resetToEditMode();
+        return;
+      }
+
+      // ALT+A: Select all (edit mode only)
+      if (event.key.toLowerCase() === 'a' && event.altKey && !event.ctrlKey && !event.shiftKey) {
+        if (moveMode === 'edit' && selectAll && currentPoem?.lines?.length > 0) {
+          event.preventDefault();
+          console.log('📝 Alt+A: Select all lines');
+          showShortcutFeedback('alta', 'Alt+A: Select all lines');
+          selectAll();
+        }
+        return;
+      }
+
+      // ALT+H: Toggle XY sliders visibility
+      if (event.key.toLowerCase() === 'h' && event.altKey && !event.ctrlKey && !event.shiftKey) {
+        if (moveMode === 'line' || moveMode === 'poem') {
+          event.preventDefault();
+          console.log('🎛️ Alt+H: Toggle XY sliders');
+          showShortcutFeedback('alth', 'Alt+H: Toggle XY sliders visibility');
+          setXySlidersVisible(!xySlidersVisible);
+        }
+        return;
+      }
+
+      // ALT+J: Focus XY sliders
+      if (event.key.toLowerCase() === 'j' && event.altKey && !event.ctrlKey && !event.shiftKey) {
+        event.preventDefault();
+        console.log('🎛️ Alt+J: Focus XY sliders + hover freeze');
+        
+        showShortcutFeedback('altj', 'Alt+J: Focus XY sliders + 5s hover freeze');
+        
+        // Activate 5-second hover freeze
+        if (setHoverFreezeActive) {
+          setHoverFreezeActive(true);
+          console.log('🚫 Alt+J: Hover freeze activated for 5 seconds');
+        }
+        
+        // Switch to poem mode if not already active
+        if (moveMode !== 'poem') {
+          console.log('🎛️ Alt+J: Switching to poem mode');
+          setMoveMode('poem');
+        }
+        
+        // Show XY sliders if not visible
+        if (!xySlidersVisible) {
+          console.log('🎛️ Alt+J: Making sliders visible');
+          setXySlidersVisible(true);
+        }
+        
+        // Focus XY sliders container
+        setTimeout(() => {
+          const container = document.querySelector('[data-testid="xy-move-container"]') ||
+                           document.querySelector('[class*="xyMoveContainer"]');
+          if (container) {
+            container.focus();
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            console.log('🎛️ Alt+J: Focus and scroll successful');
+          } else {
+            console.error('🎛️ Alt+J: Container not found');
           }
-          break;
+        }, 200);
+        return;
       }
     };
 
-    // Add event listener
     document.addEventListener('keydown', handleKeyDown);
-    
-    // Cleanup
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [moveMode, selectedLines, currentPoem, setMoveMode, clearSelection, selectAll, cycleModes, resetToEditMode, setXySlidersVisible]);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [moveMode, setMoveMode, xySlidersVisible, setXySlidersVisible, setHoverFreezeActive, setActiveShortcut, cycleModes, resetToEditMode, selectAll, currentPoem]);
 
   // Return function to restore previous selection (to be used by parent component)
   const restorePreviousSelection = () => {

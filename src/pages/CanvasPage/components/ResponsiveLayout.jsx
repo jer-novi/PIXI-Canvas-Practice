@@ -5,12 +5,25 @@ const ResponsiveLayout = memo(({
   layout,
   controls, 
   canvas,
-  navigation
+  navigation,
+  previewState = 'normal'  // NEW: 'normal' | 'dimmed' | 'preview'
 }) => {
 
+  // Determine CSS class based on preview state
+  const getLayoutClass = () => {
+    let className = styles.layoutContainer;
+    
+    if (previewState === 'dimmed') {
+      className += ` ${styles.dimmed}`;
+    } else if (previewState === 'preview') {
+      className += ` ${styles.preview}`;
+    }
+    
+    return className;
+  };
 
   return (
-    <div className={styles.layoutContainer}>
+    <div className={getLayoutClass()}>
       {/* Left Controls Panel */}
       {layout.controlsVisible && (
         <div 

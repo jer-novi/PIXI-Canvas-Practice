@@ -2,6 +2,7 @@
 
 import React, {useState, useEffect} from "react";
 import styles from "../CanvasPage.module.css";
+import { usePhotoPreview } from "../hooks/usePhotoPreview";
 
 export default function FloatingPhotoGrid({
                                               photos,
@@ -13,9 +14,43 @@ export default function FloatingPhotoGrid({
                                               onPrevPage,
                                               hasNextPage,
                                               hasPrevPage,
-                                              searchContext
+                                              searchContext,
+                                              currentBackground,     // NEW: Current background to preserve
+                                              onPreviewChange,       // NEW: Callback for preview state changes
+                                              hoverFreezeActive      // NEW: Hover freeze state to block thumbnail hovers
                                           }) {
     const [isVisible, setIsVisible] = useState(false);
+    
+    // Photo preview functionality
+    const photoPreview = usePhotoPreview();
+
+    // Initialize preview system when grid opens
+    useEffect(() => {
+        console.log('🖼️ FloatingPhotoGrid mounted, opening preview system');
+        photoPreview.openGrid(currentBackground);
+        
+        // Cleanup when component unmounts
+        return () => {
+            console.log('🖼️ FloatingPhotoGrid unmounting, closing preview system');
+            const backgroundToRestore = photoPreview.closeGrid();
+            
+            // Only restore background if it's different from current
+            if (backgroundToRestore && backgroundToRestore !== currentBackground) {
+                onSetBackground(backgroundToRestore);
+            }
+        };
+    }, []); // Only run on mount/unmount
+
+    // Update parent when preview state changes
+    useEffect(() => {
+        if (onPreviewChange) {
+            onPreviewChange({
+                previewMode: photoPreview.previewMode,
+                previewImage: photoPreview.previewImage,
+                hasHovered: photoPreview.hasHovered
+            });
+        }
+    }, [photoPreview.previewMode, photoPreview.previewImage, photoPreview.hasHovered, onPreviewChange]);
 
     // Debug logging
     useEffect(() => {
@@ -54,9 +89,22 @@ export default function FloatingPhotoGrid({
     }, []);
 
     const handleClose = () => {
+        console.log('🖼️ Closing FloatingPhotoGrid');
+        
+        // Clean up preview system and get background to restore
+        const backgroundToRestore = photoPreview.closeGrid();
+        
         setIsVisible(false);
+        
         // Wait for animation before actually closing
-        setTimeout(onClose, 300);
+        setTimeout(() => {
+            // Restore background if needed
+            if (backgroundToRestore && backgroundToRestore !== currentBackground) {
+                console.log('🖼️ Restoring background:', backgroundToRestore);
+                onSetBackground(backgroundToRestore);
+            }
+            onClose();
+        }, 300);
     };
 
     const handleBackgroundClick = (e) => {
@@ -83,13 +131,25 @@ export default function FloatingPhotoGrid({
                             Foto's laden...
                         </div>
                     )}
-                    <button
-                        className={styles.closeButton}
-                        onClick={handleClose}
-                        aria-label="Sluit foto grid"
-                    >
-                        ✕
-                    </button>
+                    <div className={styles.headerButtons}>
+                        {/* Reset Preview button - only show if user has hovered */}
+                        {photoPreview.hasHovered && (
+                            <button
+                                className={styles.resetButton}
+                                onClick={photoPreview.resetPreview}
+                                title="Reset preview naar dimmed achtergrond"
+                            >
+                                ↺
+                            </button>
+                        )}
+                        <button
+                            className={styles.closeButton}
+                            onClick={handleClose}
+                            aria-label="Sluit foto grid"
+                        >
+                            ✕
+                        </button>
+                    </div>
 
                 </div>
 
@@ -115,10 +175,21 @@ export default function FloatingPhotoGrid({
                             key={photo.id}
                             className={styles.floatingPhotoThumbnail}
                             onClick={() => {
+                                console.log('🖼️ Photo clicked:', photo.src.large2x);
+                                photoPreview.handlePhotoSelect(photo.src.large2x);
                                 onSetBackground(photo.src.large2x);
                                 handleClose(); // Close grid after selecting
                             }}
-                            title={photo.alt || 'Klik om als achtergrond te gebruiken'}
+                            onMouseEnter={() => {
+                                // Check if hover is frozen (e.g., after Alt+J navigation)
+                                if (hoverFreezeActive) {
+                                    console.log('🚫 Photo hover blocked - freeze active');
+                                    return;
+                                }
+                                console.log('🖼️ Photo hover start:', photo.src.large2x);
+                                photoPreview.handlePhotoHover(photo.src.large2x);
+                            }}
+                            title={photo.alt || 'Hover voor preview, klik om te selecteren'}
                         >
                             <img src={photo.src.tiny} alt={photo.alt}/>
                         </div>

@@ -1,7 +1,7 @@
 import {Application, extend} from "@pixi/react";
 import {Text, Container, Graphics} from "pixi.js";
 import {Viewport} from "pixi-viewport";
-import {useEffect} from "react";
+import {useEffect, useState, useCallback} from "react";
 import {useSearchParams} from "react-router-dom";
 import {getPoemById} from "../../data/testdata";
 
@@ -18,6 +18,8 @@ import ResponsiveLayout from "./components/ResponsiveLayout";
 import Navigation from "./components/Navigation";
 import FloatingPhotoGrid from "./components/FloatingPhotoGrid";
 import XYMoveSliders from "./components/XYMoveSliders";
+import ShortcutFeedback from "./components/ShortcutFeedback";
+import styles from "./CanvasPage.module.css";
 
 // Main component that manages state
 export default function CanvasPage() {
@@ -30,6 +32,46 @@ export default function CanvasPage() {
     const canvasState = useCanvasState();
     const handlers = useCanvasHandlers(canvasState);
 
+    // Photo preview state management
+    const [previewState, setPreviewState] = useState('normal'); // 'normal' | 'dimmed' | 'preview'
+    const [previewImage, setPreviewImage] = useState(null);
+
+    // NIEUW: State voor XY focus callback
+    const [onXyFocusRequest, setOnXyFocusRequest] = useState(null);
+
+    // NIEUW: Thumbnail hover freeze state voor 2 seconden na Alt+J
+    const [hoverFreezeActive, setHoverFreezeActive] = useState(false);
+    
+    // NEW: Active shortcut visualization state
+    const [activeShortcut, setActiveShortcut] = useState(null);
+
+    // NIEUW: Timer voor hover freeze
+    useEffect(() => {
+        if (hoverFreezeActive) {
+            console.log('🖱️ Alt+J: Thumbnail hover freeze activated for 2 seconds');
+            const timer = setTimeout(() => {
+                setHoverFreezeActive(false);
+                console.log('🖱️ Alt+J: Thumbnail hover freeze deactivated');
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [hoverFreezeActive]);
+
+    // Handle preview state changes from FloatingPhotoGrid
+    const handlePreviewChange = useCallback(({previewMode, previewImage, hasHovered}) => {
+        console.log('🖼️ CanvasPage preview change:', {previewMode, previewImage, hasHovered});
+
+        // Determine the correct preview state based on hasHovered
+        let finalPreviewState = previewMode;
+        if (previewMode === 'dimmed' && hasHovered) {
+            // If grid is open but user has hovered, show preview (not dimmed)
+            finalPreviewState = 'preview';
+        }
+
+        setPreviewState(finalPreviewState);
+        setPreviewImage(previewImage);
+    }, []);
+
     // Use keyboard shortcuts hook for mode cycling and selection management
     const keyboardShortcuts = useKeyboardShortcuts({
         moveMode: canvasState.moveMode,
@@ -39,7 +81,9 @@ export default function CanvasPage() {
         selectAll: canvasState.selectAll,
         currentPoem,
         xySlidersVisible: canvasState.xySlidersVisible,
-        setXySlidersVisible: canvasState.setXySlidersVisible
+        setXySlidersVisible: canvasState.setXySlidersVisible,
+        setHoverFreezeActive, // NIEUW: Hover freeze callback
+        setActiveShortcut, // NEW: Shortcut visualization callback
     });
 
     // Use responsive canvas hook
@@ -96,6 +140,7 @@ export default function CanvasPage() {
         <>
             <ResponsiveLayout
                 layout={layout}
+                previewState={previewState}
                 controls={
                     <Controls
                         fontSize={canvasState.fontSize}
@@ -166,6 +211,7 @@ export default function CanvasPage() {
                         onOpenPhotoGrid={handlers.handleOpenPhotoGrid}
                         poemOffset={canvasState.poemOffset}
                         setPoemOffset={canvasState.setPoemOffset}
+                        hoverFreezeActive={hoverFreezeActive}  // NEW: Pass hover freeze state for timer
                     />
                 }
                 canvas={
@@ -203,7 +249,7 @@ export default function CanvasPage() {
                             onLineSelect={handlers.handleLineSelect}
                             viewportDragEnabled={canvasState.viewportDragEnabled}
                             isColorPickerActive={canvasState.isColorPickerActive}
-                            backgroundImage={canvasState.backgroundImage}
+                            backgroundImage={previewImage || canvasState.backgroundImage}
                             onNextPage={handlers.handleNextPage}
                             onPrevPage={handlers.handlePrevPage}
                             hasNextPage={canvasState.hasNextPage}
@@ -226,9 +272,13 @@ export default function CanvasPage() {
                         setMoveMode={canvasState.setMoveMode}
                         selectedLines={canvasState.selectedLines}
                         clearSelection={canvasState.clearSelection}
+                        xySlidersVisible={canvasState.xySlidersVisible}  // NEW: Pass XY sliders visibility
                     />
                 }
             />
+
+            {/* Canvas Shortcut Feedback */}
+            <ShortcutFeedback activeShortcut={activeShortcut} />
 
             {/* Floating Photo Grid */}
             {canvasState.photoGridVisible && (
@@ -243,6 +293,9 @@ export default function CanvasPage() {
                     hasPrevPage={hasPrevPage}
                     onNextPage={handlers.handleNextPage}
                     onPrevPage={handlers.handlePrevPage}
+                    currentBackground={canvasState.backgroundImage}
+                    onPreviewChange={handlePreviewChange}
+                    hoverFreezeActive={hoverFreezeActive}  // NEW: Pass hover freeze state
                 />
             )}
 
@@ -260,6 +313,23 @@ export default function CanvasPage() {
                     canvasHeight={layout.canvasHeight}
                     isVisible={canvasState.xySlidersVisible}
                     setIsVisible={canvasState.setXySlidersVisible}
+                    onRequestFocus={onXyFocusRequest}
+                />
+            )}
+
+            {/* NIEUW: Globale thumbnail hover freeze overlay */}
+            {hoverFreezeActive && (
+                <div
+                    className={`${styles.thumbnailFreeze}`}
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        width: '100vw',
+                        height: '100vh',
+                        zIndex: 1,
+                        pointerEvents: 'none'
+                    }}
                 />
             )}
 

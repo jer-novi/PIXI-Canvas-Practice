@@ -2,7 +2,7 @@
 import React from "react";
 import styles from "./MoveControls.module.css";
 
-export default function MoveControls({ moveMode, setMoveMode, selectedLines, clearSelection }) {
+export default function MoveControls({ moveMode, setMoveMode, selectedLines, clearSelection, activeShortcut }) {
   const selectionCount = selectedLines.size;
 
   // Handle mode change met escape actie

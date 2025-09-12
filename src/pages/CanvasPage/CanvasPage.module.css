@@ -595,13 +595,14 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: transparent;  /* CHANGED: Remove dimming, let layout filter handle it */
     z-index: 1000;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;    /* CHANGED: Start from top */
+    justify-content: flex-start; /* CHANGED: Start from left */
     opacity: 0;
     transition: opacity 0.3s ease;
+    padding: 20px; /* Add padding for better positioning */
 }
 
 .photoGridOverlay.fadeIn {
@@ -613,7 +614,7 @@
 }
 
 .floatingPhotoGrid {
-    background-color: #2d3748;
+    background-color: rgba(45, 55, 72, 0.95);  /* Semi-transparent for glass effect */
     border-radius: 12px;
     padding: 1.5rem;
     max-width: 90vw;
@@ -621,10 +622,11 @@
     width: 600px;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);  /* Enhanced shadow for better visibility */
     border: 1px solid #4a5568;
     transform: scale(0.9) translateY(20px);
     transition: all 0.3s ease;
+    backdrop-filter: blur(10px);  /* Modern glass effect */
 }
 
 .floatingPhotoGrid.slideIn {
@@ -649,6 +651,35 @@
     color: #e2e8f0;
     font-size: 1.1rem;
     font-weight: 600;
+}
+
+.headerButtons {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.resetButton {
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    line-height: 1;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resetButton:hover {
+    background: rgba(255, 193, 7, 0.2);
+    border-color: rgba(255, 193, 7, 0.5);
+    transform: rotate(180deg);
 }
 
 .closeButton {
@@ -798,4 +829,28 @@
     margin-top: 1rem;
     padding-top: 1rem;
     border-top: 1px solid #4a5568;
+}
+
+/* Timer indicator and reset button container */
+.resetButtonContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.timerIndicator {
+    position: absolute;
+    right: -25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    animation: pulse 1s infinite;
+    z-index: 10;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; transform: translateY(-50%) scale(1); }
+    50% { opacity: 1; transform: translateY(-50%) scale(1.1); }
+    100% { opacity: 0.6; transform: translateY(-50%) scale(1); }
 }
